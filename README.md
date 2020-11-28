@@ -1,7 +1,16 @@
 
 # Named Tensor Notation
 
+TL;DR - 
+
+
 * Complete Specification
 * Examples
-* Macros
+* Latex Macros
+
+## Motivating Example
+
+Attention -> 
+
+
 
