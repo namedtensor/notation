@@ -1,6 +1,8 @@
 
 # Named Tensor Notation
 
-https://namedtensor.github.io/
+PDF: https://namedtensor.github.io/main.pdf
+
+Web: https://namedtensor.github.io/
 
 
