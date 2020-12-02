@@ -50,7 +50,7 @@ Back in the realm of mathematical notation, then, we need to improve notation in
 
 As a preview, the above equation becomes
 \begin{equation*}
-  \text{Attention}(Q,K,V) = \softmax_{\name{time}} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V.
+  \text{Attention}(Q,K,V) = \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V.
 \end{equation*}
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
@@ -105,10 +105,11 @@ Any function from scalars to scalars can be applied elementwise to a named tenso
 More elementwise unary operations:
 \[\begin{array}{cl}
 kA & \text{scalar multiplication by $k$} \\
--A & \text{elementwise negation} \\
-\exp A & \text{elementwise $\exp$} \\
-\sigma(A) & \text{elementwise logistic sigmoid} \\
-\tanh A & \text{elementwise $\tanh$}
+-A & \text{negation} \\
+\exp A & \text{elementwise exponential function} \\
+\tanh A & \text{hyperbolic tangent} \\
+\sigma(A) & \text{logistic sigmoid} \\
+\text{ReLU}(A) & \text{rectified linear unit}
 \end{array}\]
 
 Any function or operator that takes two scalar arguments can be applied elementwise to two named tensors with the same shape. If $A$ is as above and
@@ -143,8 +144,8 @@ Similarly, if $B$ has an index named $\name{i}$ and $A$ doesn't, then we effecti
 
 More elementwise binary operations:
 \[\begin{array}{cl}
-A+B & \text{elementwise addition} \\
-A-B & \text{elementwise subtraction} \\
+A+B & \text{addition} \\
+A-B & \text{subtraction} \\
 A\odot B & \text{elementwise (Hadamard) product} \\
 A / B & \text{elementwise division} \\
 \max \{A, B\} & \text{elementwise maximum} \\
@@ -172,7 +173,7 @@ More reductions: If $A$ has shape $\tuple{\name{i}:X, \ldots}$, then
   \nfun{i}{min} A &= \min_{x \in X} A_{\name{i}: x} \\
   \nfun{i}{max} A &= \max_{x \in X} A_{\name{i}: x} \\
   \nfun{i}{mean} A &= \frac{A}{\nsum{i} A} \\
-  \nfun{i}{var} A &= (A - \nfun{i}{mean} A)^2
+  \nfun{i}{var} A &= \nsum{i} (A - \nfun{i}{mean} A)^2
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
@@ -183,7 +184,7 @@ You can also write multiple names to perform the reduction over multiple indices
 
 A very common example of a function from vectors to vectors is the softmax:
 \begin{equation*}
-  \softmax_{\name{i}} A = \frac{\exp A}{\nsum{i} \exp A}
+  \nfun{i}{softmax} A = \frac{\exp A}{\nsum{i} \exp A}
 \end{equation*}
 
 And it's also very handy to have a function that renames an index:
@@ -340,7 +341,7 @@ A continuous bag-of-words model classifies by summing up the embeddings of a seq
 X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}, \nsum{v} X = 1\\
 E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
 W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
-\text{cbow}(X; E, W) &= \nfun{class}{\text{softmax}} (W \ndot{hidden} E \ndot{vocab} X)
+\text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 
 \subsection{Bayes' Rule}
@@ -628,7 +629,7 @@ X &\in \mathbb{R}^{\name{batch}:{b}, \name{d}:{k}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\tfrac{1}{2} [X - \mu]_{\name{d}}^\top \, \Sigma_{\name{d},\name{d'}}^{-1} \, [X - \mu]_{\name{d}} \right) }{\sqrt{(2 \pi)^k \, \mathop{\text{det}} \Sigma_{\name{d},\name{d'}}} }
 \end{align*}
 
-Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\softmax_{\name{i}}$.
+Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\nfun{i}{softmax}$.
 
 \bibliographystyle{acl_natbib}
 \bibliography{references}
