@@ -9,24 +9,26 @@
 \newcommand{\name}[1]{\mathsf{#1}}
 \newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
 \newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
+\newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
+\newcommand{\nfun}[2]{\mathop{\text{#2}}\displaylimits_{\name{#1}}}
 
 \DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}{\mathbb{R}}
 
 \newcommand{\tuple}[1]{\{ #1\}}
 \DeclareMathOperator{\tupledom}{dom}
 \DeclareMathOperator{\tupleshape}{ind}
 \newcommand{\tupleproj}[2]{#1.#2}
 \newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
-\newcommand{\reals}{\mathbb{R}}
-\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
+
 \newcommand{\dmodel}{d_{\text{model}}}
-\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}_{\name{#1}}}}
 \setcounter{tocdepth}{1}
 \usepackage{natbib}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 
-\newcommand{\namedmatrix}[3]{
- \stackrel{\large #2}{#1 \begin{bmatrix} #3 \end{bmatrix}} 
+\newcommand{\namedmatrix}[3]{%
+\ifx #1\end\end \else #1\ \fi
+\begin{array}[b]{@{}c@{}} \smash{#2} \\ \begin{bmatrix} #3 \end{bmatrix} \end{array}
 }
 
 \title{Named Tensor Notation}
@@ -68,7 +70,7 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}: 2, \name{bar}: 3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}: 2, \name{bar}: 3} = \tuple{\name{bar}: 3, \name{foo}: 2}.\] We use \textsf{sans-serif} for names.
+A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}: 2, \name{bar}: 3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}: 2, \name{bar}: 3} = \tuple{\name{bar}: 3, \name{foo}: 2}.\] We use \textsf{sans-serif} font for names.
 
 Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\name{foo}:2, \name{bar}:3}$.
 \begin{equation*}
@@ -109,6 +111,7 @@ More elementwise unary operations:
 kA & \text{scalar multiplication by $k$} \\
 -A & \text{elementwise negation} \\
 \exp A & \text{elementwise $\exp$} \\
+\sigma(A) & \text{elementwise logistic sigmoid} \\
 \tanh A & \text{elementwise $\tanh$}
 \end{array}\]
 
@@ -147,6 +150,7 @@ More elementwise binary operations:
 A+B & \text{elementwise addition} \\
 A-B & \text{elementwise subtraction} \\
 A\odot B & \text{elementwise (Hadamard) product} \\
+A / B & \text{elementwise division} \\
 \max \{A, B\} & \text{elementwise maximum} \\
 \min \{A, B\} & \text{elementwise minimum}
 \end{array}\]
@@ -154,25 +158,25 @@ A\odot B & \text{elementwise (Hadamard) product} \\
 \subsection{Reductions}
 \label{sec:reductions}
 
-The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which index these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument that most NumPy reductions take.)
+The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which index these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
 For example, using the same example tensor $A$ from above,
 \begin{align*}
-\sum_{\name{foo}} A &= \namedmatrix{}{\name{bar}}{
+\nsum_{foo} A &= \namedmatrix{}{\name{bar}}{
   3+1 & 1+5 & 4+9
 } \\
-\sum_{\name{bar}} A &= \namedmatrix{}{\name{foo}}{
+\nsum{bar} A &= \namedmatrix{}{\name{foo}}{
   3+1+4 & 1+5+9
 }.
 \end{align*}
 More reductions: If $A$ has shape $\tuple{\name{i}:X, \ldots}$, then
 \begin{align*}
-  \sum_{\name{i}} A &= \sum_{x \in X} A_{\name{i}: x} \\
-  \|A\|_{\name{i}} &= \sqrt{\sum_{\name{i}} A^2} \\
-  \min_{\name{i}} A &= \min_{x \in X} A_{\name{i}: x} \\
-  \max_{\name{i}} A &= \max_{x \in X} A_{\name{i}: x} \\
-  \mathop{\text{mean}}\displaylimits_{\name{i}}A &= \frac{A}{\sum_{\name{i}} A} \\
-  \mathop{\text{var}}\displaylimits_{\name{i}} A &= \|A - \mathop{\text{mean}}\displaylimits_{\name{i}}A \|_{\name{i}}^2
+  \nsum{i} A &= \sum_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{norm} A &= \sqrt{\nsum{i} A^2} \\
+  \nfun{i}{min} A &= \min_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{max} A &= \max_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{mean} A &= \frac{A}{\nsum{i} A} \\
+  \nfun{i}{var} A &= (A - \nfun{i}{mean} A)^2
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
@@ -287,13 +291,9 @@ h^{(t+1)} &= \left[ \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + 
 
 The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
 
+\subsection{Fully-Connected Layers}
 
-
-We now include some additional worked examples to test out the notation. 
-
-\subsection*{Neural Network Layer}
-
-Standard neural network layers are bit more verbose, but the reduction dimension is clear. 
+Fully-connected layers are bit more verbose, but the reduction dimension is clear.
 
 \begin{align*} 
 V &\in \reals^{\name{output}:o, \name{hidden}:h},\ c\in \reals^{\name{output}:o} \\
@@ -302,7 +302,7 @@ X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
 \text{MLP}(X; V, W,b, c) &= \sigma \left( V \ndot{hidden} \sigma \left( W \ndot{in} X + b \right) + c \right)  
 \end{align*}
 
-\subsection*{Deep Learning Norms}
+\subsection{Deep Learning Norms}
 
 These functions are often informally described with the same equation, but correspond to very different functions.
 
@@ -311,7 +311,7 @@ These functions are often informally described with the same equation, but corre
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{batch}:b}} \\
-\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{\text{mean}}(X)}{\sqrt{\nfun{batch}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 
@@ -320,7 +320,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{hidden}:h}} \\
-\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}[X]}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 \subsubsection*{Layer Norm}
@@ -328,11 +328,11 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 \gamma, \beta &\in \reals^{{\name{channel}:c, \name{hidden}:h}} \\
-\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}[X]}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
+\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
 \end{align*}
 
 
-\subsection*{Continuous Bag of Words}
+\subsection{Continuous Bag of Words}
 
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
 
@@ -343,7 +343,7 @@ W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{\text{softmax}} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 
-\subsection*{Bayes' Rule}
+\subsection{Bayes' Rule}
 
 Named dimensions are very helpful for working with discrete random
 variables. For instance, given $p(B \mid A)$ and $p(A)$ as
@@ -356,10 +356,7 @@ A \in [0, 1]^{\name{A}:a} \ s.t. \nsum{A} A =  \nsum{B} BA =  1 \\
 AB &= (BA \odot A)  / (BA \ndot{A} A)
 \end{align*}
 
-
-
-
-\subsection*{Sudoku ILP}
+\subsection{Sudoku ILP}
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
@@ -376,13 +373,13 @@ Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r*
 \end{align*} 
 
 
-\subsection*{Max Pooling}
+\subsection{Max Pooling}
 
 Max pooling used in image recognition takes a similar form as the Sudoku example.
 
 \begin{align*} 
 X &\in \reals^{\name{height}: h, \name{width}:w} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max}\  U \\
 U &\in \reals^{{\name{height}:h / kh,
 \name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
 U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i * kh + di -1, \name{width}:j * kw + dj -1}  
@@ -390,7 +387,7 @@ U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{h
 
 
 
-\subsection*{1D Convolution}
+\subsection{1D Convolution}
 
 1D Convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
@@ -404,9 +401,9 @@ U_{\name{time}:i, \name{kernel:j}} & = X_{\name{time}:i+j - 1}
 \end{align*} 
 
 
-\subsection*{K-Means Clustering}
+\subsection{K-Means Clustering}
 
-Runs one step of kmeans clustering. Bottom term computes cluster
+Runs one step of k-means clustering. Bottom term computes cluster
 alignments $Q$ top term recomputes cluster centers $C$. Top term
 reestimates cluster centers. Like softmax, argmin keeps the same
 dimensions but uses a 1-hot encoding.
@@ -416,10 +413,10 @@ X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
 C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
 \text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
 % Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
-Q &= \nfun{cluster}{\arg\min} \ \nfun{dim}{\text{norm}}(C-X
+Q &= \nfun{cluster}{arg~min} \ \nfun{dim}{norm}(C-X
 )\end{align*}
 
-\subsection*{Beam Search}
+\subsection{Beam Search}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 Beam step returns the new $H$ tensor. 
@@ -428,10 +425,10 @@ Beam step returns the new $H$ tensor.
 H &\in \reals^{{ \name{batch}:b, \name{beam}:k}} \\
 S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}} \ s.t. \ \nsum{state} X = 1\\
 f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\ 
-\text{beamstep}(H, S) &=  \nfun{beam, state'}{\text{maxk}} \left( \nfun{state'}{\text{softmax}}(f(S)) \odot H  \right)
+\text{beamstep}(H, S) &=  \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H  \right)
 \end{align*} 
 
-\subsection*{Multivariate Normal}
+\subsection{Multivariate Normal}
 
 Bilinear terms are more verbose with the named tensor notation. We
 also need to use explicit names for matrix operations.  However this
@@ -441,11 +438,11 @@ approach does not require using transposes and makes the relationships more expl
 X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
 \mu &\in \reals^{{\name{d}{k}}}  \\
 \Sigma & \in   \reals^{{\name{d1}{k}, \name{d2}{k}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{\text{inv}}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{\text{det}}(\Sigma)} }
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)} }
 \end{align*}
 
 
-\subsection*{Attention with Causal Masking}
+\subsection{Attention with Causal Masking}
 
 When the Transformer is used for generation, it is necessary to have
 an additional mask to unsure the model does not look at future words.
@@ -455,14 +452,14 @@ This can be included in the attention definition with clear names.
 Q &\in \reals^{\name{key}:d_v,\name{time'}:n}\\
 K &\in \reals^{\name{head}:h,\name{key}:d_k, \name{time}:n}\\
 V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
-\text{attention}(Q, K, V) &=  \nfun{time}{\softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
+\text{attention}(Q, K, V) &=  \nfun{time}{softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
 M & \in \reals^{\name{time}:n, \name{time'}:n} \\
 M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{o.w} \end{cases} \\
 \end{align*}
 
 
-\subsection*{Full Examples: Transformer and LeNet}
+\subsection{Full Examples: Transformer and LeNet}
 
 As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}). 
 
@@ -532,11 +529,11 @@ A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}:i} B_{\name{i}:i}.
 \section{Duality}
 \label{sec:duality}
 
-In applied linear algebra we distinguish between column and row vectors; in pure linear algebra, vector spaces and dual vector spaces; in tensor algebra, contravariant and covariant indices; in quantum mechanics, bras and kets. Do we need something like this?
+In applied linear algebra, we distinguish between column and row vectors; in pure linear algebra, vector spaces and dual vector spaces; in tensor algebra, contravariant and covariant indices; in quantum mechanics, bras and kets. Do we need something like this?
 
 In \S\ref{sec:rnn} we saw that defining an RNN requires renaming of indices, because a linear transformation must map one index to another index; if we want to map an index to itself, we need to use renaming.
 
-In this section, we describe three possible solutions to this problem.
+In this section, we describe three possible solutions to this problem, and welcome comments about which (if any) would be best.
 
 \subsection{Contracting two names}
 
