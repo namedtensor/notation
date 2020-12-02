@@ -4,30 +4,28 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{parskip}
-\usepackage{tikz}
 
 \newcommand{\name}[1]{\mathsf{#1}}
 \newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
 \newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
+\newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
+\newcommand{\nfun}[2]{\mathop{\text{#2}}\displaylimits_{\name{#1}}}
 
 \DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}{\mathbb{R}}
 
 \newcommand{\tuple}[1]{\{ #1\}}
 \DeclareMathOperator{\tupledom}{dom}
 \DeclareMathOperator{\tupleshape}{ind}
 \newcommand{\tupleproj}[2]{#1.#2}
 \newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
-\newcommand{\reals}{\mathbb{R}}
-\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
+
 \newcommand{\dmodel}{d_{\text{model}}}
-\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}_{\name{#1}}}}
 \setcounter{tocdepth}{1}
 \usepackage{natbib}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 
-\newcommand{\namedmatrix}[3]{
-#1 \begin{array}[b]{c} \smash{#2} \\ \begin{bmatrix} #3 \end{bmatrix} \end{array}
-}
+\newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \title{Named Tensor Notation}
 \author{David Chiang and Sasha Rush}
@@ -40,20 +38,19 @@
 
 \section{Introduction}
 
-Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation works very well when talking about vector spaces, linear transformations between vector spaces, and measuring distances in vector spaces, but when working with neural networks, we quickly run up against limitations of this notation.
-
-Consider the following equation \citep{vaswani+:2017}:
+Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
 \[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
-where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key vectors? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key vectors. Is the softmax taken over rows or columns? The standard notation does not even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
+where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
 
-Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. These libraries have limitations of their own, however, because they inherit from mathematical notation the convention of identifying indices by position. Quite a few libraries have been developed to identify indices by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. (Some of these libraries also add types to indices, but here we are only interested in adding names.)
+Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying indices by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify indices by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. (Some of these libraries also add types to indices, but here we are only interested in adding names.)
 
-Back in the realm of mathematical notation, then, we need to improve notation in two ways: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying indices by name instead of by position. This document describes our proposal to do both.
+Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying indices by name instead of by position. This document describes our proposal to do both.
 
 As a preview, the above equation becomes
 \begin{equation*}
-  \text{Attention}(Q,K,V) = \softmax_{\name{time}} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V.
+  \text{Attention}(Q,K,V) = \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V
 \end{equation*}
+making it unambiguous which index each operation applies to. The same equation works with multiple heads and with minibatching.
 
 More examples of the notation are given in \S~\ref{sec:examples}.
 
@@ -70,11 +67,11 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}: 2, \name{bar}: 3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}: 2, \name{bar}: 3} = \tuple{\name{bar}: 3, \name{foo}: 2}.\] We use \textsf{sans-serif} for names.
+A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}: 2, \name{bar}: 3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}: 2, \name{bar}: 3} = \tuple{\name{bar}: 3, \name{foo}: 2}.\] We use \textsf{sans-serif} font for names.
 
 Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\name{foo}:2, \name{bar}:3}$.
 \begin{equation*}
-A = \namedmatrix{\name{foo}}{\name{bar}}{
+A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
   1 & 5 & 9
 }.
@@ -88,20 +85,23 @@ Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the 
 We access elements of $A$ using subscripts: $A_{\name{foo}: 1, \name{bar}: 3} = A_{\name{bar}: 3, \name{foo}: 1} = 4$.
 We also allow partial indexing:
 \begin{align*}
-A_{\name{foo}:1} &= \namedmatrix{}{\name{bar}}{
+A_{\name{foo}:1} &= \nmatrix{}{bar}{
   3 & 1 & 4
 }
 \\
-A_{\name{bar}:3} &= \namedmatrix{}{\name{foo}}{
+A_{\name{bar}:3} &= \nmatrix{}{foo}{
   4 & 9
 }.
 \end{align*}
 
-\subsection{Elementwise operations}
+\subsection{Named tensor operations}
+\label{sec:operations}
+
+\subsubsection{Elementwise operations}
 
 Any function from scalars to scalars can be applied elementwise to a named tensor:
 \begin{equation*}
-\exp A = \namedmatrix{\name{foo}}{\name{bar}}{
+\exp A = \nmatrix{foo}{bar}{
   \exp 3 & \exp 1 & \exp 4 \\
   \exp 1 & \exp 5 & \exp 9
 }.
@@ -109,35 +109,39 @@ Any function from scalars to scalars can be applied elementwise to a named tenso
 More elementwise unary operations:
 \[\begin{array}{cl}
 kA & \text{scalar multiplication by $k$} \\
--A & \text{elementwise negation} \\
-\exp A & \text{elementwise $\exp$} \\
-\tanh A & \text{elementwise $\tanh$}
+-A & \text{negation} \\
+\exp A & \text{elementwise exponential function} \\
+\tanh A & \text{hyperbolic tangent} \\
+\sigma(A) & \text{logistic sigmoid} \\
+\text{ReLU}(A) & \text{rectified linear unit}
 \end{array}\]
 
 Any function or operator that takes two scalar arguments can be applied elementwise to two named tensors with the same shape. If $A$ is as above and
-\begin{align*}
-B &= \namedmatrix{\name{foo}}{\name{bar}}{
+\begin{equation*}
+B = \nmatrix{foo}{bar}{
   2 & 7 & 1 \\
   8 & 2 & 8
-} \\
-\intertext{then}
-A + B &= \namedmatrix{\name{foo}}{\name{bar}}{
+}
+\end{equation*}
+then
+\begin{equation*}
+A + B = \nmatrix{foo}{bar}{
   3+2 & 1+7 & 4+1 \\
   1+8 & 5+2 & 9+8
 }.
-\end{align*}
+\end{equation*}
 
 But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an index with the same name (and size), the two indices are \emph{aligned}, as above. But if $A$ has an index named $\name{i}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of index $\name{i}$.
 \begin{align*}
-A + 1 &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + 1 &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+1 & 5+1 & 9+1
 } \\
-A + B_{\name{foo:1}} &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + B_{\name{foo:1}} &= \nmatrix{foo}{bar}{
   3+2 & 1+7 & 4+1 \\
   1+2 & 5+7 & 9+1
 } \\
-A + B_{\name{bar:3}} &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + B_{\name{bar:3}} &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+8 & 5+8 & 9+8
 }.
@@ -146,66 +150,52 @@ Similarly, if $B$ has an index named $\name{i}$ and $A$ doesn't, then we effecti
 
 More elementwise binary operations:
 \[\begin{array}{cl}
-A+B & \text{elementwise addition} \\
-A-B & \text{elementwise subtraction} \\
+A+B & \text{addition} \\
+A-B & \text{subtraction} \\
 A\odot B & \text{elementwise (Hadamard) product} \\
+A / B & \text{elementwise division} \\
 \max \{A, B\} & \text{elementwise maximum} \\
 \min \{A, B\} & \text{elementwise minimum}
 \end{array}\]
 
-\subsection{Reductions}
-\label{sec:reductions}
+\subsubsection{Reductions}
 
-The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which index these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument that most NumPy reductions take.)
+The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which index these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
 For example, using the same example tensor $A$ from above,
 \begin{align*}
-\sum_{\name{foo}} A &= \namedmatrix{}{\name{bar}}{
+\nsum{foo} A &= \nmatrix{}{bar}{
   3+1 & 1+5 & 4+9
 } \\
-\sum_{\name{bar}} A &= \namedmatrix{}{\name{foo}}{
+\nsum{bar} A &= \nmatrix{}{foo}{
   3+1+4 & 1+5+9
 }.
 \end{align*}
 More reductions: If $A$ has shape $\tuple{\name{i}:X, \ldots}$, then
 \begin{align*}
-  \sum_{\name{i}} A &= \sum_{x \in X} A_{\name{i}: x} \\
-  \|A\|_{\name{i}} &= \sqrt{\sum_{\name{i}} A^2} \\
-  \min_{\name{i}} A &= \min_{x \in X} A_{\name{i}: x} \\
-  \max_{\name{i}} A &= \max_{x \in X} A_{\name{i}: x} \\
-  \mathop{\text{mean}}\displaylimits_{\name{i}}A &= \frac{A}{\sum_{\name{i}} A} \\
-  \mathop{\text{var}}\displaylimits_{\name{i}} A &= \|A - \mathop{\text{mean}}\displaylimits_{\name{i}}A \|_{\name{i}}^2
+  \nsum{i} A &= \sum_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{norm} A &= \sqrt{\nsum{i} A^2} \\
+  \nfun{i}{min} A &= \min_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{max} A &= \max_{x \in X} A_{\name{i}: x} \\
+  \nfun{i}{mean} A &= \frac{A}{\nsum{i} A} \\
+  \nfun{i}{var} A &= \nsum{i} (A - \nfun{i}{mean} A)^2
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
 You can also write multiple names to perform the reduction over multiple indices at once.
 
-\subsection{More functions}
-\label{sec:tensorvalued}
+\subsubsection{Contraction}
 
-A very common example of a function from vectors to vectors is the softmax:
-\begin{equation*}
-  \softmax_{\name{i}} A = \frac{\exp A}{\sum_{\name{i}} \exp A}
-\end{equation*}
-
-And it's also very handy to have a function that renames an index:
-\begin{equation*}
-[A]_{\name{bar}\rightarrow\name{baz}} = \namedmatrix{\name{foo}}{\name{baz}}{
-  3 & 1 & 4 \\
-  1 & 5 & 9
-}
-\end{equation*}
-
-The vector dot product (inner product) is a function from two vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator:
 \begin{align*}
-  A \ndot{i} B &= \sum_{\name{i}} A \odot B.
+  A \ndot{i} B &= \nsum{i} A \odot B.
 \end{align*}
 This operator can also be used for matrix-vector or matrix-matrix multiplication:
 \begin{align*}
-C &= \namedmatrix{\name{bar}}{\name{baz}}{
+C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
 } \\
-A \ndot{bar} C &= \namedmatrix{\name{foo}}{\name{baz}}{
+A \ndot{bar} C &= \nmatrix{foo}{baz}{
   17 & -17 \\
   53 & -53
 }
@@ -218,19 +208,51 @@ C &\in \mathbb{R}^{\name{i}:m,\name{j}:n}
 \end{align*}
 then $(A \ndot{i} B) \ndot{j} C$ and $A \ndot{i} (B \ndot{j} C)$ don't even have the same shape.
 
+\subsubsection{Vectors to vectors}
+
+A very common example of a function from vectors to vectors is the softmax:
+\begin{equation*}
+  \nfun{i}{softmax} A = \frac{\exp A}{\nsum{i} \exp A}
+\end{equation*}
+
+And it's also very handy to have a function that renames an index:
+\begin{equation*}
+% Don't delete this comment, which works around a bug in MathJax
+[A]_{\name{bar}\rightarrow\name{baz}} = \nmatrix{foo}{baz}{
+  3 & 1 & 4 \\
+  1 & 5 & 9
+}
+\end{equation*}
+
+Concatenation combines two vectors into one:
+\begin{align*}
+  A \nfun{foo}{$\oplus$} B &= \nmatrix{foo}{bar}{
+    3 & 1 & 4 \\
+    1 & 5 & 9 \\
+    2 & 7 & 1 \\
+    8 & 2 & 8
+  } \\
+  A \nfun{bar}{$\oplus$} B &= \nmatrix{foo}{bar}{
+    3 & 1 & 4 & 2 & 7 & 1 \\
+    1 & 5 & 9 & 8 & 2 & 8
+  }
+\end{align*}
+
+\subsubsection{Matrices}
+
 Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\name{i}:2,\name{j}:2,\name{k}:2\}$:
 \begin{align*}
-A_{\name{i}:1} &= \namedmatrix{\name{j}}{\name{k}}{
+A_{\name{i}:1} &= \nmatrix{j}{k}{
   1 & 2 \\
   3 & 4
 } \\
-A_{\name{i}:2} &= \namedmatrix{\name{j}}{\name{k}}{
+A_{\name{i}:2} &= \nmatrix{j}{k}{
   5 & 6 \\
   7 & 8
 } \\
-\det_{\name{j},\name{k}} A &= \namedmatrix{}{\name{i}}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
-\det_{\name{k},\name{j}} A &= \namedmatrix{}{\name{i}}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
-\det_{\name{i},\name{j}} A &= \namedmatrix{}{\name{k}}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
+\det_{\name{j},\name{k}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
+\det_{\name{k},\name{j}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
+\det_{\name{i},\name{j}} A &= \nmatrix{}{k}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
 \end{align*}
 For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\mathop{\text{inv}}\displaylimits_{\name{i},\name{j}}$.
 
@@ -250,11 +272,15 @@ In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  L
   W^Q &\in \mathbb{R}^{\name{emb}:\dmodel, \name{key}:d_k} \\
   W^K &\in \mathbb{R}^{\name{emb}:\dmodel, \name{key}:d_k} \\
   W^V &\in \mathbb{R}^{\name{emb}:\dmodel, \name{val}:d_v} \\
-  W^O &\in \mathbb{R}^{\name{val}:d_v, \name{emb}:\dmodel} \\
-\intertext{Then define}
+  W^O &\in \mathbb{R}^{\name{val}:d_v, \name{emb}:\dmodel}
+\end{align*}
+Then define
+\begin{align*}
   \text{SelfAtt} &\colon \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \rightarrow \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \left[\text{Att}(Q, K, V)\right]_{\name{time'}\rightarrow\name{time}} \\
-\intertext{where}
+  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \left[\text{Att}(Q, K, V)\right]_{\name{time'}\rightarrow\name{time}}
+\end{align*}
+where
+\begin{align*}
   Q &= W^Q \ndot{emb} \left[X\right]_{\name{time}\rightarrow\name{time'}} \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X.
@@ -270,7 +296,7 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 and define
 \begin{align*}
 \text{MultiSelfAtt} &\colon \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \rightarrow \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \\
-\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \sum_{\name{head}} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
+\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
 \subsection{RNN}
@@ -289,13 +315,9 @@ h^{(t+1)} &= \left[ \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + 
 
 The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
 
+\subsection{Fully-Connected Layers}
 
-
-We now include some additional worked examples to test out the notation. 
-
-\subsection*{Neural Network Layer}
-
-Standard neural network layers are bit more verbose, but the reduction dimension is clear. 
+Fully-connected layers are bit more verbose, but the reduction dimension is clear.
 
 \begin{align*} 
 V &\in \reals^{\name{output}:o, \name{hidden}:h},\ c\in \reals^{\name{output}:o} \\
@@ -304,7 +326,7 @@ X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
 \text{MLP}(X; V, W,b, c) &= \sigma \left( V \ndot{hidden} \sigma \left( W \ndot{in} X + b \right) + c \right)  
 \end{align*}
 
-\subsection*{Deep Learning Norms}
+\subsection{Deep Learning Norms}
 
 
 
@@ -317,7 +339,7 @@ by which axes are normalized.
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{batch}:b}} \\
-\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{\text{mean}}(X)}{\sqrt{\nfun{batch}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 
@@ -338,18 +360,18 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 \end{align*}
 
 
-\subsection*{Continuous Bag of Words}
+\subsection{Continuous Bag of Words}
 
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}, \nsum{v} X = 1\\
+X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}} & \nsum{v} X &= 1\\
 E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
 W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
-\text{cbow}(X; E, W) &= \nfun{class}{\text{softmax}} (W \ndot{hidden} E \ndot{vocab} X)
+\text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 
-\subsection*{Bayes' Rule}
+\subsection{Bayes' Rule}
 
 Named dimensions are very helpful for working with discrete random
 variables. For instance, given $p(B \mid A)$ and $p(A)$ as
@@ -357,15 +379,12 @@ tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain
 rule, computing the marginal, and broadcast dividing.
 
 \begin{align*} 
-BA &\in [0, 1]^{\name{A}:a, \name{B}:b}, 
-A \in [0, 1]^{\name{A}:a}, \nsum{A} A =  \nsum{B} BA =  1 \\
-AB &= (BA \odot A)  / (BA \ndot{A} A)
+BA &\in [0, 1]^{\name{A}:a, \name{B}:b} & \nsum{B} BA &= 1 \\
+A &\in [0, 1]^{\name{A}:a} & \nsum{A} A &= 1 \\
+AB &= \frac{BA \odot A}{BA \ndot{A} A}
 \end{align*}
 
-
-
-
-\subsection*{Sudoku ILP}
+\subsection{Sudoku ILP}
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
@@ -383,13 +402,13 @@ Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r\
 \end{align*} 
 
 
-\subsection*{Max Pooling}
+\subsection{Max Pooling}
 
 Max pooling used in image recognition takes a similar form as the Sudoku example.
 
 \begin{align*} 
 X &\in \reals^{\name{height}: h, \name{width}:w} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max}\  U \\
 U &\in \reals^{{\name{height}:h / kh,
 \name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
 U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i \times kh + di -1, \name{width}:j \times kw + dj -1}  
@@ -397,7 +416,7 @@ U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{h
 
 
 
-\subsection*{1D Convolution}
+\subsection{1D Convolution}
 
 1D Convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
@@ -411,9 +430,9 @@ U_{\name{time}:i, \name{kw:j}} & = X_{\name{time}:i+j - 1}
 \end{align*} 
 
 
-\subsection*{K-Means Clustering}
+\subsection{K-Means Clustering}
 
-Runs one step of kmeans clustering. Bottom term computes cluster
+Runs one step of k-means clustering. Bottom term computes cluster
 alignments $Q$ top term recomputes cluster centers $C$. Top term
 reestimates cluster centers. Like softmax, argmin keeps the same
 dimensions but uses a 1-hot encoding.
@@ -423,10 +442,10 @@ X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
 C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
 \text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
 % Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
-Q &= \nfun{cluster}{\arg\min} \ \nfun{dim}{\text{norm}}(C-X
+Q &= \nfun{cluster}{arg~min} \ \nfun{dim}{norm}(C-X
 )\end{align*}
 
-\subsection*{Beam Search}
+\subsection{Beam Search}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 Beam step returns the new $H$ tensor. 
@@ -435,14 +454,12 @@ Beam step returns the new $H$ tensor.
 H &\in \reals^{{ \name{batch}:b, \name{beam}:k}} \\
 S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}}, \nsum{state} X = 1\\
 f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\ 
-\text{beamstep}(H, S) &=  \nfun{beam, state'}{\text{maxk}} \left( \nfun{state'}{\text{softmax}}(f(S)) \odot H  \right)
+\text{beamstep}(H, S) &=  \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H  \right)
 \end{align*} 
 
-\subsection*{Multivariate Normal}
+\subsection{Multivariate Normal}
 
-Bilinear terms are more verbose with the named tensor notation. We
-also need to use explicit names for matrix operations.  However this
-approach does not require using transposes and makes the relationships more explicit.
+In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
 X &\in \reals^{\name{batch}:{b}, \name{d}:{k}}  \\
@@ -452,24 +469,24 @@ X &\in \reals^{\name{batch}:{b}, \name{d}:{k}}  \\
 \end{align*}
 
 
-\subsection*{Attention with Causal Masking}
+\subsection{Attention with Causal Masking}
 
 When the Transformer is used for generation, it is necessary to have
-an additional mask to unsure the model does not look at future words.
+an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
 Q &\in \reals^{\name{key}:d_v,\name{time'}:n}\\
 K &\in \reals^{\name{head}:h,\name{key}:d_k, \name{time}:n}\\
 V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
-\text{attention}(Q, K, V) &=  \nfun{time}{\softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
+\text{attention}(Q, K, V) &=  \nfun{time}{softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
 M & \in \reals^{\name{time}:n, \name{time'}:n} \\
 M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 & i \leq j\\
--\infty & \text{o.w} \end{cases} \\
+-\infty & \text{otherwise} \end{cases} \\
 \end{align*}
 
 
-\subsection*{Full Examples: Transformer and LeNet}
+\subsection{Full Examples: Transformer and LeNet}
 
 As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}). 
 
@@ -530,7 +547,7 @@ f &: F^{\mathcal{S} \sqcup \mathcal{S'}} \times G^{\mathcal{T} \sqcup \mathcal{T
   [f(A,B)]_u &= f\left(A_{\tuplerestrict{u}{\mathcal{S'}}},B_{\tuplerestrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \tupleshape\mathcal{U'}$.}
 \end{align*}
 
-All of the tensor operations described in \S\ref{sec:reductions}--\ref{sec:tensorvalued} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
+All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
 \begin{align*}
 \ndot{i} &: F^{\name{i}:n} \times F^{\name{i}:n} \rightarrow F \\
 A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}:i} B_{\name{i}:i}.
@@ -539,11 +556,11 @@ A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}:i} B_{\name{i}:i}.
 \section{Duality}
 \label{sec:duality}
 
-In applied linear algebra we distinguish between column and row vectors; in pure linear algebra, vector spaces and dual vector spaces; in tensor algebra, contravariant and covariant indices; in quantum mechanics, bras and kets. Do we need something like this?
+In applied linear algebra, we distinguish between column and row vectors; in pure linear algebra, vector spaces and dual vector spaces; in tensor algebra, contravariant and covariant indices; in quantum mechanics, bras and kets. Do we need something like this?
 
 In \S\ref{sec:rnn} we saw that defining an RNN requires renaming of indices, because a linear transformation must map one index to another index; if we want to map an index to itself, we need to use renaming.
 
-In this section, we describe three possible solutions to this problem.
+In this section, we describe three possible solutions to this problem, and welcome comments about which (if any) would be best.
 
 \subsection{Contracting two names}
 
@@ -618,10 +635,12 @@ h^{(t)} &\in \mathbb{R}^{\name{state}: d} \\
 A &\in \mathbb{R}^{\name{state}: d, \name{state'}: d} \\
 B &\in \mathbb{R}^{\name{state}: d, \name{emb}: d} \\
 c &\in \mathbb{R}^{\name{state}: d} \\
-h^{(t+1)}_{\name{state}} &= \tanh\left( A_{\name{state},\name{state'}} \, h^{(t)}_{\name{state}} + B_{\name{state},\name{emb}} \, x^{(t)}_{\name{emb}} + c_{\name{state}} \right) \\
-\intertext{or equivalently,}
-h^{(t+1)} &= \tanh\left( A_{\name{state'}} \cdot h^{(t)}_{\name{state}} + B_{\name{emb}} \cdot x^{(t)}_{\name{emb}} + c \right) \\
+h^{(t+1)}_{\name{state}} &= \tanh\left( A_{\name{state},\name{state'}} \, h^{(t)}_{\name{state}} + B_{\name{state},\name{emb}} \, x^{(t)}_{\name{emb}} + c_{\name{state}} \right)
 \end{align*}
+or equivalently,
+\begin{equation*}
+h^{(t+1)} = \tanh\left( A_{\name{state'}} \cdot h^{(t)}_{\name{state}} + B_{\name{emb}} \cdot x^{(t)}_{\name{emb}} + c \right)
+\end{equation*}
 
 Attention:
 \begin{align*}
@@ -637,7 +656,7 @@ X &\in \mathbb{R}^{\name{batch}:{b}, \name{d}:{k}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\tfrac{1}{2} [X - \mu]_{\name{d}}^\top \, \Sigma_{\name{d},\name{d'}}^{-1} \, [X - \mu]_{\name{d}} \right) }{\sqrt{(2 \pi)^k \, \mathop{\text{det}} \Sigma_{\name{d},\name{d'}}} }
 \end{align*}
 
-Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\softmax_{\name{i}}$.
+Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\nfun{i}{softmax}$.
 
 \section*{References}
 
