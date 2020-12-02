@@ -1,16 +1,8 @@
 
 # Named Tensor Notation
 
-TL;DR - 
+PDF: https://namedtensor.github.io/main.pdf
 
-
-* Complete Specification
-* Examples
-* Latex Macros
-
-## Motivating Example
-
-Attention -> 
-
+Web: https://namedtensor.github.io/
 
 
