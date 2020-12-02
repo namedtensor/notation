@@ -55,6 +55,8 @@ As a preview, the above equation becomes
   \text{Attention}(Q,K,V) = \softmax_{\name{time}} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V.
 \end{equation*}
 
+More examples of the notation are given in \S~\ref{sec:examples}.
+
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
 \section{Informal Overview}
@@ -324,7 +326,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{hidden}:h}} \\
-\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}[X]}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 \subsubsection*{Layer Norm}
@@ -332,7 +334,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 \gamma, \beta &\in \reals^{{\name{channel}:c, \name{hidden}:h}} \\
-\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}[X]}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
+\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
 \end{align*}
 
 
@@ -443,9 +445,9 @@ also need to use explicit names for matrix operations.  However this
 approach does not require using transposes and makes the relationships more explicit.
 
 \begin{align*} 
-X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
-\mu &\in \reals^{{\name{d}{k}}}  \\
-\Sigma & \in   \reals^{{\name{d1}{k}, \name{d2}{k}}}  \\
+X &\in \reals^{\name{batch}:{b}, \name{d}:{k}}  \\
+\mu &\in \reals^{{\name{d}:{k}}}  \\
+\Sigma & \in   \reals^{{\name{d1}:{k}, \name{d2}:{k}}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{\text{inv}}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{\text{det}}(\Sigma)} }
 \end{align*}
 
@@ -636,6 +638,8 @@ X &\in \mathbb{R}^{\name{batch}:{b}, \name{d}:{k}}  \\
 \end{align*}
 
 Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\softmax_{\name{i}}$.
+
+\section*{References}
 
 \bibliographystyle{acl_natbib}
 \bibliography{references}
