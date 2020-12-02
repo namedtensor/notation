@@ -23,6 +23,7 @@
   </style>
   <script src="/usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
 
+<div style="display:none">
 \(
   \require{ams}
 \DeclareMathOperator*{\softmax}{softmax}
@@ -33,7 +34,7 @@
 \newcommand{\ntup}[2]{\name{#1}:#2}
 \newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
 \newcommand{\displaylimits}{}
-\newcommand{\intertext}[1]{}
+\newcommand{\intertext}[1]{\text{#1}:\ \ }
 \newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
 
 \DeclareMathOperator*{\softmax}{softmax}
@@ -47,3 +48,4 @@
 \newcommand{\dmodel}{d_{\text{model}}}
 
 \)
+</div>

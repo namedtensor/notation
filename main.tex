@@ -288,9 +288,12 @@ h^{(t+1)} &= \left[ \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + 
 The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
 
 
-\subsection*{MLP}
 
 We now include some additional worked examples to test out the notation. 
+
+\subsection*{Neural Network Layer}
+
+Standard neural network layers are bit more verbose, but the reduction dimension is clear. 
 
 \begin{align*} 
 V &\in \reals^{\name{output}:o, \name{hidden}:h},\ c\in \reals^{\name{output}:o} \\
@@ -299,7 +302,7 @@ X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
 \text{MLP}(X; V, W,b, c) &= \sigma \left( V \ndot{hidden} \sigma \left( W \ndot{in} X + b \right) + c \right)  
 \end{align*}
 
-\subsection*{NN ``Norms''}
+\subsection*{Deep Learning Norms}
 
 These functions are often informally described with the same equation, but correspond to very different functions.
 
@@ -342,14 +345,79 @@ W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 
 \subsection*{Bayes' Rule}
 
-Given $p(B \mid A)$ and $p(A)$ as tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain rule, computing the marginal, and broadcast dividing. 
+Named dimensions are very helpful for working with discrete random
+variables. For instance, given $p(B \mid A)$ and $p(A)$ as
+tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain
+rule, computing the marginal, and broadcast dividing.
 
 \begin{align*} 
-BA &\in [0, 1]^{\name{A}{a}, \name{B}{b}}, 
-A \in [0, 1]^{\name{A}{a}} \ s.t. \nsum{A} A =  \nsum{B} BA =  1 \\
-AB &= (BA \ndot{} A)  / (BA \ndot{A} A)
+BA &\in [0, 1]^{\name{A}:a, \name{B}:b}, 
+A \in [0, 1]^{\name{A}:a} \ s.t. \nsum{A} A =  \nsum{B} BA =  1 \\
+AB &= (BA \odot A)  / (BA \ndot{A} A)
 \end{align*}
 
+
+
+
+\subsection*{Sudoku ILP}
+
+Sudoku puzzles can be represented as  binary tiled tensors.
+Given a grid we can check that it is valid by converting it to a grid of grids. 
+Constraints then ensure that there is one digit per row, per column and per sub-box. 
+
+\begin{align*} 
+X &\in \{0, 1\}^{\name{row}: 9, \name{col}:9, \name{assign}:9}  \\
+\nsum{assign} Y &= 
+\nsum{Row,row} Y = 
+\nsum{Col, col} Y =  
+\nsum{row, col} Y = 1\\
+Y &\in \{0, 1\}^{\name{Row}: 3, \name{Col}:3, \name{row}: 3, \name{col}:3, \name{assign}:9}  \\
+Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r*3 + r'-1, \name{cow}:c*3 + c'-1}, 
+\end{align*} 
+
+
+\subsection*{Max Pooling}
+
+Max pooling used in image recognition takes a similar form as the Sudoku example.
+
+\begin{align*} 
+X &\in \reals^{\name{height}: h, \name{width}:w} \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
+U &\in \reals^{{\name{height}:h / kh,
+\name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
+U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i * kh + di -1, \name{width}:j * kw + dj -1}  
+\end{align*}
+
+
+
+\subsection*{1D Convolution}
+
+1D Convolution can be easily written by unrolling a tensor and then
+applying a standard dot product.
+
+\begin{align*} 
+X &\in \reals^{{\name{channel}:c, \name{time}:t}}  \\
+W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kernel}:k}}  \\
+\text{conv1d}(X, W) &= W \ndot{channel, kernel} U \\
+U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kernel}:k}}  \\
+U_{\name{time}:i, \name{kernel:j}} & = X_{\name{time}:i+j - 1}  
+\end{align*} 
+
+
+\subsection*{K-Means Clustering}
+
+Runs one step of kmeans clustering. Bottom term computes cluster
+alignments $Q$ top term recomputes cluster centers $C$. Top term
+reestimates cluster centers. Like softmax, argmin keeps the same
+dimensions but uses a 1-hot encoding.
+
+\begin{align*} 
+X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
+C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
+\text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
+% Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
+Q &= \nfun{cluster}{\arg\min} \ \nfun{dim}{\text{norm}}(C-X
+)\end{align*}
 
 \subsection*{Beam Search}
 
@@ -363,63 +431,11 @@ f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\
 \text{beamstep}(H, S) &=  \nfun{beam, state'}{\text{maxk}} \left( \nfun{state'}{\text{softmax}}(f(S)) \odot H  \right)
 \end{align*} 
 
-
-\subsection*{Sudoku ILP}
-
-Gives a constraint set to ensure a valid Sudoku puzzle. Sudoku is a tensor binary tiled tensor. With Row / Col subgrids of size row / col. Each cell is has assign possible assignments. 
-Constraints need to ensure that there is one digit per row, per column and per sub-box. 
-
-\begin{align*} 
-X &\in \{0, 1\}^{\name{row}: 9, \name{col}:9, \name{assign}:9}  \\
-\nsum{assign} Y &= 
-\nsum{Row,row} Y = 
-\nsum{Col, col} Y =  
-\nsum{row, col} Y = 1\\
-Y &\in \{0, 1\}^{\name{Row}: 3, \name{Col}:3, \name{row}: 3, \name{col}:3, \name{assign}:9}  \\
-Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r*3 + r'-1, \name{cow}:c*3 + c'-1}, 
-\end{align*} 
-
-
-\subsection*{Image max pooling}
-
-Max pooling tasks a similar form as the Sudoku example.
-
-\begin{align*} 
-X &\in \reals^{\name{height}: h, \name{width}:w} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
-U &\in \reals^{{\name{height}:h / kh,
-\name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i * kh + di -1, \name{width}:j * kw + dj -1}  
-\end{align*}
-
-
-
-\subsection*{Explicit 1D Conv}
-
-\begin{align*} 
-X &\in \reals^{{\name{channel}:c, \name{time}:t}}  \\
-W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kernel}:k}}  \\
-\text{conv1d}(X, W) &= W \ndot{channel, kernel} U \\
-U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kernel}:k}}  \\
-U_{\name{time}:i, \name{kernel:j}} & = X_{\name{time}:i+j - 1}  
-\end{align*} 
-
-
-\subsection*{K-Means Clustering}
-
-\begin{align*} 
-X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
-C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
-\text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
-% Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
-Q &= \nfun{cluster}{\arg\min} \ \nfun{dim}{\text{norm}}(C-X
-)\end{align*}
-Runs one step of kmeans clustering. Bottom term computes cluster alignments $Q$ top term recomputes cluster centers $C$. Like softmax, argmin keeps the same dimensions but uses a 1-hot encoding.
-
-
 \subsection*{Multivariate Normal}
 
-Bilinear terms are an area that is more verbose with the named tensor notation. However it is also more explicit.
+Bilinear terms are more verbose with the named tensor notation. We
+also need to use explicit names for matrix operations.  However this
+approach does not require using transposes and makes the relationships more explicit.
 
 \begin{align*} 
 X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
@@ -429,8 +445,11 @@ X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
 \end{align*}
 
 
-\subsection*{Attention with Causal Masking (For Generation)}
+\subsection*{Attention with Causal Masking}
 
+When the Transformer is used for generation, it is necessary to have
+an additional mask to unsure the model does not look at future words.
+This can be included in the attention definition with clear names.
 
 \begin{align*} 
 Q &\in \reals^{\name{key}:d_v,\name{time'}:n}\\
@@ -442,6 +461,10 @@ M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{o.w} \end{cases} \\
 \end{align*}
 
+
+\subsection*{Full Examples: Transformer and LeNet}
+
+As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}). 
 
 \section{Formal Definitions}
 \label{sec:definitions}
