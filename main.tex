@@ -26,7 +26,7 @@
 \usepackage{hyperref}
 
 \newcommand{\namedmatrix}[3]{
- \stackrel{\large #2}{#1 \begin{bmatrix} #3 \end{bmatrix}} 
+#1 \begin{array}[b]{c} \smash{#2} \\ \begin{bmatrix} #3 \end{bmatrix} \end{array}
 }
 
 \title{Named Tensor Notation}
@@ -304,7 +304,11 @@ X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
 
 \subsection*{Deep Learning Norms}
 
-These functions are often informally described with the same equation, but correspond to very different functions.
+
+
+These three functions are often informally described using the same
+equation, but they each correspond to very different functions. They differ
+by which axes are normalized.
 
 \subsubsection*{Batch Norm}
 
@@ -337,7 +341,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}\ s.t. \ \nsum{v} X = 1\\
+X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}, \nsum{v} X = 1\\
 E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
 W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{\text{softmax}} (W \ndot{hidden} E \ndot{vocab} X)
@@ -352,7 +356,7 @@ rule, computing the marginal, and broadcast dividing.
 
 \begin{align*} 
 BA &\in [0, 1]^{\name{A}:a, \name{B}:b}, 
-A \in [0, 1]^{\name{A}:a} \ s.t. \nsum{A} A =  \nsum{B} BA =  1 \\
+A \in [0, 1]^{\name{A}:a}, \nsum{A} A =  \nsum{B} BA =  1 \\
 AB &= (BA \odot A)  / (BA \ndot{A} A)
 \end{align*}
 
@@ -367,12 +371,13 @@ Constraints then ensure that there is one digit per row, per column and per sub-
 
 \begin{align*} 
 X &\in \{0, 1\}^{\name{row}: 9, \name{col}:9, \name{assign}:9}  \\
-\nsum{assign} Y &= 
+\text{check}(X) &=
+\left(\nsum{assign} Y = 
 \nsum{Row,row} Y = 
 \nsum{Col, col} Y =  
-\nsum{row, col} Y = 1\\
+\nsum{row, col} Y = 1 \right) \\
 Y &\in \{0, 1\}^{\name{Row}: 3, \name{Col}:3, \name{row}: 3, \name{col}:3, \name{assign}:9}  \\
-Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r*3 + r'-1, \name{cow}:c*3 + c'-1}, 
+Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r\times 3 + r'-1, \name{col}:c\times3 + c'-1}, 
 \end{align*} 
 
 
@@ -385,7 +390,7 @@ X &\in \reals^{\name{height}: h, \name{width}:w} \\
 \text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
 U &\in \reals^{{\name{height}:h / kh,
 \name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i * kh + di -1, \name{width}:j * kw + dj -1}  
+U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i \times kh + di -1, \name{width}:j \times kw + dj -1}  
 \end{align*}
 
 
@@ -397,10 +402,10 @@ applying a standard dot product.
 
 \begin{align*} 
 X &\in \reals^{{\name{channel}:c, \name{time}:t}}  \\
-W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kernel}:k}}  \\
-\text{conv1d}(X, W) &= W \ndot{channel, kernel} U \\
-U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kernel}:k}}  \\
-U_{\name{time}:i, \name{kernel:j}} & = X_{\name{time}:i+j - 1}  
+W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kw}:k}}  \\
+\text{conv1d}(X, W) &= W \ndot{channel, kw} U \\
+U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kw}:k}}  \\
+U_{\name{time}:i, \name{kw:j}} & = X_{\name{time}:i+j - 1}  
 \end{align*} 
 
 
@@ -426,7 +431,7 @@ Beam step returns the new $H$ tensor.
 
 \begin{align*} 
 H &\in \reals^{{ \name{batch}:b, \name{beam}:k}} \\
-S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}} \ s.t. \ \nsum{state} X = 1\\
+S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}}, \nsum{state} X = 1\\
 f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\ 
 \text{beamstep}(H, S) &=  \nfun{beam, state'}{\text{maxk}} \left( \nfun{state'}{\text{softmax}}(f(S)) \odot H  \right)
 \end{align*} 
