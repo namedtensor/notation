@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{scalerel}
 
 % If you want to use named tensor notation in your papers,
 % these macros may be useful. Requires \usepackage{amssymb}.
@@ -27,13 +28,15 @@
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\dmodel}{d_{\text{model}}}
 
+\DeclareMathOperator*{\bigbowtie}{\scalerel*{\bowtie}{\textstyle\sum}}
+
 \usepackage{parskip}
 \setcounter{tocdepth}{1}
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
 
 \title{Named Tensor Notation}
-\author{David Chiang and Sasha Rush}
+\author{David Chiang \quad Sasha Rush \quad Tongfei Chen \quad Chu-Cheng Lin}
 
 \begin{document}
 
@@ -560,6 +563,67 @@ All of the tensor operations described in \S\ref{sec:operations} can be defined 
 A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}:i} B_{\name{i}:i}.
 \end{align*}
 
+\section{Broadcasting and Indexing}
+\label{broadcasting}
+
+Broadcasting is extremely common in array-based programming, despite its being implicit and prone to errors.\footnote{This is, in my opinion, a glaring negligence of the \emph{Zen of Python}: ``Explicit is better than implicit''.}  Under the named tensor notations, we can develop an alternative formulation of broadcasting and indexing.
+
+We say that named tensor shapes $\mathcal{S}$ is \emph{broadcastable} to $\mathcal{T}$ if  $\mathcal{S} \sqsubseteq \mathcal{T}$. This is compatible with the NumPy semantics except that they allow dimensions with size 1.
+
+Consider the following operations between tensors $A \in \mathbb{R}^{\name{i}: m}$ and $B \in \mathbb{R}^{\name{j}: n}$. Sometimes we desire the following computation:
+\begin{equation*}
+  C_{\name{i}:i, \name{j}:j} = A_{\name{i}:i} + B_{\name{j}:j} \ .
+\end{equation*}
+Normally, we need to expand the dimensionalities of both vectors by 1, and then add them. A question here is: can we broadcast a tuple of named tensors to the same shape? In fact we can.
+\begin{equation*}
+  \mathrm{broadcast} : X_1^{\mathcal{S}_1} \times \cdots \times X_n^{\mathcal{S}_n} \to X_1^{\mathcal{T}} \times \cdots \times X_n^{\mathcal{T}}, \quad \mathcal{T} = \bigsqcup_{i=1}^n \mathcal{S}_i
+\end{equation*}
+
+if all axes with shared names match. We'll use this to develop a formalism of advanced indexing under named tensor notations.
+
+\paragraph{Advanced indexing} A common operation in array-based programming is \emph{advanced indexing}, whose semantics is vague\footnote{~\url{https://numpy.org/doc/stable/reference/arrays.indexing.html}.} and cannot be easily reasoned over. Given a tensor $A \in X^{\name{i}_1:n_1, \cdots, \name{i}_D:n_D}$, in NumPy (or PyTorch), $A$ can be indexed in the form of $A[I^1, \cdots, I^D]$, where each \emph{indexer} $I^{d \in [D]}$ can be of the following three types:
+\begin{itemize}
+  \item An index $I^d \in [n_d]$;
+  \item A subset of indices $I^d \subseteq [n_d]$ (a special case is ``\texttt{:}'', i.e. $I^d = [n_d]$);
+  \item Another tensor with integer elements $I^d \in [n_d]^\mathcal{T}$ with shape $\mathcal{T}$.
+\end{itemize}
+
+We first start our discussion where all indexers $I^{d \in [D]}$ to the indexee $A \in X^{\mathcal{S}}$ are tensors in $[n_d]^{\mathcal{T}}$ with uniform shape $\mathcal{T} = \{\name{j}_1: m_1, \cdots, \name{j}_E : m_E\}$. The advanced indexing operation is defined as
+\begin{align*}
+  \mathrm{advIdx}&: X^{\mathcal{S}} \times ([n_1]^\mathcal{T} \times \cdots \times [n_D]^\mathcal{T}) \to X^{\mathcal{T}} \\
+  B = A[I^1, \cdots, I^d] &= \mathrm{advIdx}(A, (I^1, \cdots, I^d)) \in X^{\mathcal{T}} \\
+  B_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}  &= A_{\name{i}_1: I^1_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}, \cdots, \name{i}_D: I^D_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}} \\
+\end{align*}
+
+How do we fit the three types of indexers into this definition? We view each indexer $I^d$ as a named tensor with the following shape:
+\begin{itemize}
+  \item An index $I^d \in [n_d]$: We view $I^d \in [n_d]^\emptyset$;
+  \item A subset of indices $I^d \subseteq [n_d]$: We view this as a 1-dimensional tensor with name $\name{i}_d$, hence $I^d \in [n_d]^{\name{i}_d: |I^d|}$;
+  \item Another tensor with integer elements $I^d \in [n_d]^\mathcal{T}$ with shape $\mathcal{T}$.
+\end{itemize}
+
+Now the more lenient form of advanced indexing as in the semantics of NumPy can be described using the broadcast operator we elaborated above:
+\begin{align*}
+  \mathrm{advIdx}'&: X^{\mathcal{S}} \times ([n_1]^{\mathcal{T}_1} \times \cdots \times [n_D]^{\mathcal{T}_D}) \to X^{\bigsqcup_{i=1}^D \mathcal{T}_i} \\
+  B = A[I^1, \cdots, I^d] &= \mathrm{advIdx}(A, \mathrm{broadcast}(I^1, \cdots, I^d)) \in X^{\mathcal{T}} \\
+\end{align*}
+
+Let's see a concrete example in natural language processing. Given a batch of encoded sentences using a contextualizer like BERT, we get a tensor $X \in \mathbb{R}^{\name{batch}:B, \name{sentLen}: N, \name{emb}: E}$. For each sentence, we would like to take out the encodings of a specific span $[l_b, r_b)$ for each sentence $b \in [B]$ in the batch, resulting in a tensor $ Y \in \mathbb{R}^{\name{batch}:B, \name{spanLen}: M, \name{emb}: E}$.
+
+We create a indexer for the $\name{sentLen}$ axis: $I_{\name{sentLen}} \in [N]^{\name{batch}:B, \name{spanLen}: M}$ that selects the desired encodings of tokens. The advanced indexing expression $X[:, I, :]$ can be viewed under our formulation as
+\begin{equation*}
+  \mathrm{advIdx}'(X, (I_{\name{batch}}, I_{\name{sentLen}}, I_{\name{emb}})) \ .
+\end{equation*}
+
+where
+\begin{align*}
+  I_{\name{batch}} &\in [B]^{\name{batch}:B} \ ; \\
+  I_{\name{sentLen}} &\in [N]^{\name{batch}:B, \name{spanLen}: M} \ ; \\
+  I_{\name{emb}} &\in [E]^{\name{emb}:E} \ . \\
+\end{align*}
+
+Based on our broadcast function, the three indexers when broadcast together has shape $\{\name{batch}:B, \name{spanLen}: M, \name{emb}: E\}$ just as we desired.
+
 \section{Duality}
 \label{sec:duality}
 
@@ -608,6 +672,67 @@ There are a few variants of this idea that have been floated:
 \item $\ndot{i}$ contracts $\name{i}$ with $\name{i}$, and we need another notation like $\ndot{i(*)}$ or $\mathop\times\displaylimits_{\name{i}}$ for contracting $\name{i*}$ with $\name{i}$.
 \item $\ndot{i}$ always contracts $\name{i*}$ with $\name{i}$; there's no way to contract $\name{i}$ with $\name{i}$.
 \end{enumerate}
+
+
+\subsection{Natural contraction}
+Tensor contraction is variously termed as \texttt{einsum} (Einstein summation) in NumPy or \texttt{tensordot} in various integer-indexed tensor libraries. These notations require a list of index pairs to designate which axes to contract (e.g. \texttt{einsum([a, b], axes=[(1, 2), (2, 3)])}), which is pretty unreadable to a programmer. We consider a special case here.
+
+Consider two tensors $A \in \mathbb{R}^\mathcal{S}$ and $B \in \mathbb{R}^\mathcal{T}$. We define the \emph{symmetric difference} of two shapes as
+\begin{equation*}
+\mathcal{S} ~\triangle~ \mathcal{T} = \left\{ (\name{i}: x) \mid \name{i} \in \tupledom{\mathcal{S}} ~\triangle~ \tupledom{\mathcal{T}} \right\} \ ,
+\end{equation*}
+where $\tuplerestrict{\mathcal{S}}{\mathcal{S} \sqcap \mathcal{T}} = \tuplerestrict{\mathcal{T}}{\mathcal{S} \sqcap \mathcal{T}} $, i.e., axes with the same name matches. For example, the shape of matrix multiplication can be expressed using the symmetric difference operator:
+\begin{equation}
+  \{ \name{i}: m, \name{j}: n \} ~\triangle~ \{ \name{j}: n, \name{k}: p \} = \{ \name{i}: m, \name{k}: p \} \ .
+\end{equation}
+
+Now we can introduce the notion of \emph{natural contraction} \citep{chen2017typesafe}. We define an operator 
+\begin{equation*}
+  \bowtie ~ : \mathbb{R}^{\mathcal{S}} \times \mathbb{R}^{\mathcal{T}} \to \mathcal{R}^{\mathcal{S}\triangle\mathcal{T}},
+\end{equation*} 
+where 
+\begin{equation*}
+  A \bowtie B \triangleq \sum_{x_1 \in X_1} \cdots \sum_{x_D \in X_D} A_{\name{i}_1: x_1, \cdots, \name{i}_D : x_D} \cdot B_{\name{i}_1: x_1, \cdots, \name{i}_D : x_D} \quad \forall (\name{i}_d: X_d) \in \mathcal{S} \triangle \mathcal{T} \ .
+\end{equation*}
+This says, given two tensors $A$ and $B$, contract all axes where the names match, and retain all other axes. Clearly, this subsumes various operations in linear algebra:
+\begin{center}
+  \begin{tabular}{ccc}
+    Inner product & $\mathbf{a} \in \mathbb{R}^{\name{i}:n}$, $\mathbf{b} \in \mathbb{R}^{\name{i}:n} $ & $ \mathbf{a} \cdot \mathbf{b} =  \mathbf{a} \bowtie \mathbf{b} \in \mathbb{R}^\emptyset$ \\
+    Matrix product & $\mathbf{A} \in \mathbb{R}^{\name{i}:m, \name{j}:n} $, $\mathbf{B} \in \mathbb{R}^{\name{j}:n, \name{k}:p} $ & $ \mathbf{A} \mathbf{B} =  \mathbf{A} \bowtie \mathbf{B} \in \mathbb{R}^{\name{i}:m, \name{k}:p}$ \\
+    Tensor product & $\mathbf{A} \in \mathbb{R}^\mathcal{S} $, $\mathbf{B} \in \mathbb{R}^{\mathcal{T}} $ (if $\mathcal{S} \sqcap \mathcal{T} = \emptyset$) & $ \mathbf{A} \otimes \mathbf{B} =  \mathbf{A} \bowtie \mathbf{B} \in \mathbb{R}^{\mathcal{S} \sqcup \mathcal{T}}$  \\
+  \end{tabular}
+\end{center}
+
+\paragraph{Belief propagation under named tensor notation} The natural contraction operator is a natural fit for describing the belief propagation algorithm in graphical models. Consider a function $g$ over a set of variables $\mathcal{X} = \{x_1, \cdots, x_N\}$ where $x_i \in X_i$:
+\begin{equation*}
+  g(\mathcal{X}) = \prod_{j=1}^M f_j(S_j)
+\end{equation*}
+where $S_j \subseteq \mathcal{X}$ is a subset of variables in $\mathcal{X}$. The corresponding factor graph $G = (\mathcal{X}, F, E)$ is a bipartite graph where
+\begin{center}
+  \begin{tabular}{cl}
+    $\mathcal{X} = \{x_1, \cdots, x_N\}$ & Set of variables \\
+    $F = \{f_1, \cdots, f_M\}$ & Set of potential functions \\
+    $E = \{ (x_i, f_j) \mid x_i \in S_j \}$ & Set of undirected edges depending on factorization \\
+  \end{tabular}
+\end{center}
+
+We assign each variable $x_i$ with a distinct \emph{name} $\name{i}_i$. The potential function $f_j$ over variables $S_j$ can now be viewed as a \emph{named tensor} with the following shape:
+\begin{align*} 
+  \mathcal{S}_j &= \{ (\name{i}_i : X_i) \} \quad \forall x_i \in S_j \ ; \\
+  f_j &\in \mathbb{R}^{\mathcal{S}_j} \ .
+\end{align*}
+
+Additionally, messages being passed in the belief propagation algorithm, along with their computation in the sum-product algorithm, can also be described succinctly using named tensor notations:
+\begin{center}
+  \begin{tabular}{ccccc}
+    $M_{x_i \to f_j}$ & = & $\displaystyle\bigodot_{f_k \in \mathrm{Nb}(x_i) \setminus \{f_j\}}{M_{f_k \to x_i}}$ & $\in$ & $\mathbb{R}^{\name{i}_i : X_i}$ \\
+    \\
+    $M_{f_j \to x_i}$ & = & $f_j \bowtie \displaystyle\bigbowtie_{x_k \in \mathrm{Nb}(f_j) \setminus 
+    \{x_i\}}{M_{x_i \to f_j}}$ & $\in$ & $\mathbb{R}^{\name{i}_i : X_i}$ \\
+  \end{tabular}
+\end{center}
+
+where $\mathrm{Nb}(\cdot)$ is the set of neighboring nodes in the factor graph $G$.
 
 \subsection{Named and numbered indices}
 \label{sec:tensorsoftensors}
@@ -668,7 +793,6 @@ Because this notation can be a little more verbose (often requiring you to write
 
 Thanks to Ekin Aky\"{u}rek, Colin McDonald, Chung-chieh Shan, and Nishant Sinha for their input to this document (or the ideas in it).
 
-\section*{References}
 
 \bibliographystyle{acl_natbib}
 \bibliography{references}
