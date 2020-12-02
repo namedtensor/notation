@@ -26,26 +26,6 @@
 <div style="display:none">
 \(
   \require{ams}
-\DeclareMathOperator*{\softmax}{softmax}
-\newcommand{\reals}[0]{\mathbb{R}}
-\newcommand{\name}[1]{\mathsf{#1}}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\odot}_{\name{#1}}}}
-\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}_{\name{#1}}}}
-\newcommand{\ntup}[2]{\name{#1}:#2}
-\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
-\newcommand{\displaylimits}{}
-\newcommand{\intertext}[1]{\text{#1}:\ \ }
-\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
-
-\DeclareMathOperator*{\softmax}{softmax}
-
-\newcommand{\tuple}[1]{\{ #1\}}
-\DeclareMathOperator{\tupledom}{dom}
-\DeclareMathOperator{\tupleshape}{ind}
-\newcommand{\tupleproj}[2]{#1.#2}
-\newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
-
-\newcommand{\dmodel}{d_{\text{model}}}
-
+  \newcommand{\displaylimits}{}
 \)
 </div>
