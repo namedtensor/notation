@@ -52,6 +52,8 @@ As a preview, the above equation becomes
 \end{equation*}
 making it unambiguous which index each operation applies to. The same equation works with multiple heads and with minibatching.
 
+More examples of the notation are given in \S~\ref{sec:examples}.
+
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
 \section{Informal Overview}
@@ -463,10 +465,10 @@ f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
-X &\in \reals^{\name{batch}:b, \name{d}:k}  \\
-\mu &\in \reals^{{\name{d}:k}}  \\
-\Sigma & \in \reals^{{\name{d1}:k, \name{d2}:k}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)} }
+X &\in \reals^{\name{batch}:{b}, \name{d}:{k}}  \\
+\mu &\in \reals^{{\name{d}:{k}}}  \\
+\Sigma & \in   \reals^{{\name{d1}:{k}, \name{d2}:{k}}}  \\
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{\text{inv}}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{\text{det}}(\Sigma)} }
 \end{align*}
 
 
@@ -658,6 +660,8 @@ X &\in \mathbb{R}^{\name{batch}:{b}, \name{d}:{k}}  \\
 \end{align*}
 
 Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\nfun{i}{softmax}$.
+
+\section*{References}
 
 \bibliographystyle{acl_natbib}
 \bibliography{references}
