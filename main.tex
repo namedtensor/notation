@@ -3,29 +3,34 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
-\usepackage{parskip}
 
+% If you want to use named tensor notation in your papers,
+% these macros may be useful. Requires \usepackage{amssymb}.
 \newcommand{\name}[1]{\mathsf{#1}}
 \newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
-\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
 \newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
+\newcommand{\nconcat}[1]{\mathop{\oplus}_{\name{#1}}}
 \newcommand{\nfun}[2]{\mathop{\text{#2}}\displaylimits_{\name{#1}}}
 
-\DeclareMathOperator*{\softmax}{softmax}
-\newcommand{\reals}{\mathbb{R}}
+% "experimental" notation
+\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
 
+% for formal definitions
 \newcommand{\tuple}[1]{\{ #1\}}
 \DeclareMathOperator{\tupledom}{dom}
 \DeclareMathOperator{\tupleshape}{ind}
 \newcommand{\tupleproj}[2]{#1.#2}
 \newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
+\newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
+\DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}{\mathbb{R}}
 \newcommand{\dmodel}{d_{\text{model}}}
+
+\usepackage{parskip}
 \setcounter{tocdepth}{1}
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
-
-\newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \title{Named Tensor Notation}
 \author{David Chiang and Sasha Rush}
@@ -226,13 +231,13 @@ And it's also very handy to have a function that renames an index:
 
 Concatenation combines two vectors into one:
 \begin{align*}
-  A \nfun{foo}{$\oplus$} B &= \nmatrix{foo}{bar}{
+  A \nconcat{foo} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 \\
     1 & 5 & 9 \\
     2 & 7 & 1 \\
     8 & 2 & 8
   } \\
-  A \nfun{bar}{$\oplus$} B &= \nmatrix{foo}{bar}{
+  A \nconcat{bar} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 & 2 & 7 & 1 \\
     1 & 5 & 9 & 8 & 2 & 8
   }
@@ -467,7 +472,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 X &\in \reals^{\name{batch}:{b}, \name{d}:{k}}  \\
 \mu &\in \reals^{{\name{d}:{k}}}  \\
 \Sigma & \in   \reals^{{\name{d1}:{k}, \name{d2}:{k}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{\text{inv}}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{\text{det}}(\Sigma)} }
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)} }
 \end{align*}
 
 
