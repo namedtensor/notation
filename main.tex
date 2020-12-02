@@ -427,20 +427,23 @@ U_{\name{time}:i, \name{kw:j}} & = X_{\name{time}:i+j - 1}
 \end{align*} 
 
 
-\subsection{K-Means Clustering}
+\subsection{$K$-Means Clustering}
 
-Runs one step of k-means clustering. Bottom term computes cluster
-alignments $Q$ top term recomputes cluster centers $C$. Top term
-reestimates cluster centers. Like softmax, argmin keeps the same
-dimensions but uses a 1-hot encoding.
-
+The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*} 
-X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
-C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
-\text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
+X &\in \reals^{\name{batch}:b, \name{dim}:k} \\
+C &\in \reals^{\name{cluster}:c, \name{dim}:k}
+\end{align*}
+we compute cluster assignments
+\begin{align*}
 % Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
-Q &= \nfun{cluster}{arg~min} \ \nfun{dim}{norm}(C-X
-)\end{align*}
+Q &= \nfun{cluster}{argmin} \nfun{dim}{norm}(C-X) \\
+  &= \lim_{\alpha \rightarrow -\infty} \nfun{cluster}{softmax} \left(\alpha \nfun{dim}{norm}(C-X)\right)
+\end{align*}
+then we recompute the cluster centers:
+\begin{equation*}
+C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
+\end{equation*}
 
 \subsection{Beam Search}
 
@@ -449,8 +452,8 @@ Beam step returns the new $H$ tensor.
 
 \begin{align*} 
 H &\in \reals^{{ \name{batch}:b, \name{beam}:k}} \\
-S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}}, \nsum{state} X = 1\\
-f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\ 
+S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}} & \nsum{state} S &= 1\\
+f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\ 
 \text{beamstep}(H, S) &=  \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H  \right)
 \end{align*} 
 
