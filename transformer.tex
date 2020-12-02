@@ -1,0 +1,103 @@
+\documentclass{article}
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{parskip}
+\usepackage{fullpage}
+
+\DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}[0]{\mathbb{R}}
+
+% Named tensor prelude
+\newcommand{\name}[1]{\mathsf{#1}}
+\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
+\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
+
+
+\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}\displaylimits_{\name{#1}}}}
+\newcommand{\ntup}[2]{\name{#1}:#2}
+
+\newcommand{\dmodel}{d_{\text{model}}}
+\newcommand{\dff}{d_{\text{ff}}}
+
+\title{Named Tensor - Transformer}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-2cm}
+
+% \begin{multicols}{2}
+
+\paragraph{FFN}
+\begin{align*}
+X &\in \reals^{\name{emb}:\dmodel} \\
+W^1 &\in \reals^{\name{emb}:\dmodel, \name{hid}:\dff }, 
+b^1 \in \reals^{\name{hid}:\dff} \\
+W^2 & \in \reals^{ \name{hid}:\dff, \name{emb}:\dmodel}, b^2 \in \reals^{\name{hid}:\dff} \\
+\text{FFN}(X; W, b) &=  W^2 \ndot{hid} \text{ReLU}(W^1 \ndot{emb} X + b^1) + b^2
+\end{align*}
+
+\paragraph{Masked Attention}
+\begin{align*} 
+Q &\in \reals^{\name{key}, \name{time'}},  K \in \reals^{\name{key}, \name{time}}\\
+V &\in \reals^{\name{time}, \name{val}},
+M \in \reals^{\name{time}, \name{time'}}\\
+\text{att}(Q, K, V, M) &=  V \ndot{time} \nfun{time}{\softmax} \left( \frac{\displaystyle Q \ndot{key} K }{\sqrt{d_k}} + M\right) 
+\end{align*}
+
+\paragraph{Multiheaded Self Attention}
+\begin{align*}
+ W^Q &\in \mathbb{R}^{\name{head}:h, \name{emb}:\dmodel, \name{key}:d_k} \\
+  W^K &\in \mathbb{R}^{\name{head}:h, \name{emb}:\dmodel, \name{key}:d_k} \\
+   W^V &\in \mathbb{R}^{\name{head}:h, \name{emb}:\dmodel, \name{val}:d_k} \\
+  W^O &\in \mathbb{R}^{\name{head}:h, \name{val}:d_k, \name{emb}:\dmodel} \\
+  X &\in \mathbb{R}^{\name{time}:n, \name{emb}:\dmodel} \\
+  \text{MHA}(X; W) &= \left[W^O \ndot{head,val} \text{att}(Q, K, V, M) \right]_{\name{time'} \rightarrow \name{time}} \\
+  Q &= W^Q \ndot{emb} \left[X\right]_{\name{time}\rightarrow\name{time'}} \\
+  K &= W^K \ndot{emb} X \\
+  V &= W^V \ndot{emb} X \\
+ M_{\name{time'}:i, \name{time}:j} &= \begin{cases} 0 & j\leq i \\ -\infty & ow \end{cases}   
+\end{align*}
+
+\paragraph{Layer Norm}
+
+\begin{align*} 
+X &\in \reals^{{ \ntup{emb}{\dmodel}}} \ \  \gamma, \beta \in \reals^{{ \ntup{emb}{\dmodel}}} \\
+\text{lnorm}(X; \gamma, \beta) &= \frac{X - \nfun{emb}{\text{mean}}[X]}{\sqrt{\nfun{emb}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
+\end{align*}
+
+\paragraph{Position Encoding}
+\begin{align*} 
+X &\in \{0, 1\}^{{\ntup{time}{n}, \ntup{vocab}{b}}}, \nsum{vocab} X = 1\\
+E &\in \reals^{{\ntup{vocab*}{v}, \ntup{emb}{\dmodel}}} \\
+\text{embed}(X; E) &= (E \ndot{vocab} X)\sqrt{\dmodel} + P \\
+P &\in \reals^{{\ntup{time}{n}, \ntup{hidden}{\dmodel}}} \\
+P_{\name{hidden}:i, \name{time}:p} & = \begin{cases} \sin(p / 10000^{i / \dmodel}) & \text{$i$ even} \\ 
+                                                     \cos(p / 10000^{(i - 1) / \dmodel}) & \text{$i$ odd} \\                                        \end{cases} \\
+\end{align*}
+
+\paragraph{Transformer}
+
+\begin{align*} 
+I &\in \{0, 1\}^{{\ntup{time}{t}, \ntup{vocab}{b}}}, \nsum{vocab} X = 1\\
+X^0 &= \text{embed}(I)\\
+T^1 &= \text{lnorm}(\text{MHA}(X^0)) + X^0\\
+X^1 &= \text{lnorm}(\text{FFN}(T^1)) + T^1\\
+\ldots \\
+T^{L} &= \text{lnorm}(\text{MHA}(X^{L-1})) + X^{L-1}\\
+X^{L} &= \text{lnorm}(\text{FFN}(T^L)) + T^L\\
+O &= \nfun{vocab}{\text{softmax}}(W \ndot{emb} X^L)
+\end{align*}
+
+
+% \end{multicols}
+
+% \pagebreak
+
+
+% \begin{multicols}{2}
+
+
+% \end{multicols}
+\end{document}

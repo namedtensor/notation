@@ -1,0 +1,49 @@
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
+    <style>
+        body{margin:0 auto;max-width:50rem;}
+        @media(max-width:50rem) {
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="David Chiang and Sasha Rush" />
+  <title>Named Tensor Notation</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <script src="/usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+\(
+  \require{ams}
+\DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}[0]{\mathbb{R}}
+\newcommand{\name}[1]{\mathsf{#1}}
+\newcommand{\ndot}[1]{\mathbin{\mathop{\odot}_{\name{#1}}}}
+\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}_{\name{#1}}}}
+\newcommand{\ntup}[2]{\name{#1}:#2}
+\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
+\newcommand{\displaylimits}{}
+\newcommand{\intertext}[1]{}
+\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
+
+\DeclareMathOperator*{\softmax}{softmax}
+
+\newcommand{\tuple}[1]{\{ #1\}}
+\DeclareMathOperator{\tupledom}{dom}
+\DeclareMathOperator{\tupleshape}{ind}
+\newcommand{\tupleproj}[2]{#1.#2}
+\newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
+
+\newcommand{\dmodel}{d_{\text{model}}}
+
+\)
