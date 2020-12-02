@@ -363,7 +363,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}, \nsum{v} X = 1\\
+X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}} & \nsum{v} X &= 1\\
 E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
 W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
@@ -377,9 +377,9 @@ tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain
 rule, computing the marginal, and broadcast dividing.
 
 \begin{align*} 
-BA &\in [0, 1]^{\name{A}:a, \name{B}:b}, 
-A \in [0, 1]^{\name{A}:a}, \nsum{A} A =  \nsum{B} BA =  1 \\
-AB &= (BA \odot A)  / (BA \ndot{A} A)
+BA &\in [0, 1]^{\name{A}:a, \name{B}:b} & \nsum{B} BA &= 1 \\
+A &\in [0, 1]^{\name{A}:a} & \nsum{A} A &= 1 \\
+AB &= \frac{BA \odot A}{BA \ndot{A} A}
 \end{align*}
 
 \subsection{Sudoku ILP}
@@ -457,14 +457,12 @@ f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\
 
 \subsection{Multivariate Normal}
 
-Bilinear terms are more verbose with the named tensor notation. We
-also need to use explicit names for matrix operations.  However this
-approach does not require using transposes and makes the relationships more explicit.
+In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
-X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
-\mu &\in \reals^{{\name{d}{k}}}  \\
-\Sigma & \in   \reals^{{\name{d1}{k}, \name{d2}{k}}}  \\
+X &\in \reals^{\name{batch}:b, \name{d}:k}  \\
+\mu &\in \reals^{{\name{d}:k}}  \\
+\Sigma & \in \reals^{{\name{d1}:k, \name{d2}:k}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)} }
 \end{align*}
 
@@ -472,7 +470,7 @@ X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
 \subsection{Attention with Causal Masking}
 
 When the Transformer is used for generation, it is necessary to have
-an additional mask to unsure the model does not look at future words.
+an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
@@ -482,7 +480,7 @@ V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
 \text{attention}(Q, K, V) &=  \nfun{time}{softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
 M & \in \reals^{\name{time}:n, \name{time'}:n} \\
 M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 & i \leq j\\
--\infty & \text{o.w} \end{cases} \\
+-\infty & \text{otherwise} \end{cases} \\
 \end{align*}
 
 
