@@ -317,18 +317,17 @@ The renaming is necessary because our notation doesn't provide a one-step way to
 
 \subsection{Fully-Connected Layers}
 
-Fully-connected layers are bit more verbose, but the reduction dimension is clear.
+Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
 
 \begin{align*} 
-V &\in \reals^{\name{output}:o, \name{hidden}:h},\ c\in \reals^{\name{output}:o} \\
-W &\in \reals^{{\name{hidden}:h, \name{in}:i}}, \ b \in \reals^{\name{hidden}:h} \\
+V &\in \reals^{\name{output}:o, \name{hidden}:h} & c\in \reals^{\name{output}:o} \\
+W &\in \reals^{{\name{hidden}:h, \name{in}:i}} & b \in \reals^{\name{hidden}:h} \\
 X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
-\text{MLP}(X; V, W,b, c) &= \sigma \left( V \ndot{hidden} \sigma \left( W \ndot{in} X + b \right) + c \right)  
+Y &= \sigma \left( W \ndot{in} X + b \right) \\
+Z &= \sigma \left( V \ndot{hidden} Y + c \right)  
 \end{align*}
 
 \subsection{Deep Learning Norms}
-
-
 
 These three functions are often informally described using the same
 equation, but they each correspond to very different functions. They differ
