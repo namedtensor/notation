@@ -601,7 +601,6 @@ In general, if $\name{i*} \in \tupledom \mathcal{A}$ and $\name{i} \in \tupledom
 \begin{equation*}
 A \ndot{i} B = \sum_{x \in X} A_{\name{i*}: x} \, B_{\name{i}: x}
 \end{equation*}
-A plus of this notation is that $\ndot{i}$ is associative (but not commutative), like matrix multiplication (proof needed).
 
 There are a few variants of this idea that have been floated:
 \begin{enumerate}
@@ -664,6 +663,10 @@ X &\in \mathbb{R}^{\name{batch}:{b}, \name{d}:{k}}  \\
 \end{align*}
 
 Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\nfun{i}{softmax}$.
+
+\section*{Acknowledgements}
+
+Thanks to Ekin Aky\"{u}rek, Colin McDonald, Chung-chieh Shan, and Nishant Sinha for their input to this document (or the ideas in it).
 
 \section*{References}
 
