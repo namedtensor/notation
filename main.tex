@@ -25,7 +25,7 @@
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
 
-\newcommand{\namedmatrix}[3]{#1\begin{array}[b]{@{}c@{}}#2\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
+\newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \title{Named Tensor Notation}
 \author{David Chiang and Sasha Rush}
@@ -69,7 +69,7 @@ A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\
 
 Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\name{foo}:2, \name{bar}:3}$.
 \begin{equation*}
-A = \namedmatrix{\name{foo}}{\name{bar}}{
+A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
   1 & 5 & 9
 }.
@@ -83,11 +83,11 @@ Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the 
 We access elements of $A$ using subscripts: $A_{\name{foo}: 1, \name{bar}: 3} = A_{\name{bar}: 3, \name{foo}: 1} = 4$.
 We also allow partial indexing:
 \begin{align*}
-A_{\name{foo}:1} &= \namedmatrix{}{\name{bar}}{
+A_{\name{foo}:1} &= \nmatrix{}{bar}{
   3 & 1 & 4
 }
 \\
-A_{\name{bar}:3} &= \namedmatrix{}{\name{foo}}{
+A_{\name{bar}:3} &= \nmatrix{}{foo}{
   4 & 9
 }.
 \end{align*}
@@ -99,7 +99,7 @@ A_{\name{bar}:3} &= \namedmatrix{}{\name{foo}}{
 
 Any function from scalars to scalars can be applied elementwise to a named tensor:
 \begin{equation*}
-\exp A = \namedmatrix{\name{foo}}{\name{bar}}{
+\exp A = \nmatrix{foo}{bar}{
   \exp 3 & \exp 1 & \exp 4 \\
   \exp 1 & \exp 5 & \exp 9
 }.
@@ -116,14 +116,14 @@ kA & \text{scalar multiplication by $k$} \\
 
 Any function or operator that takes two scalar arguments can be applied elementwise to two named tensors with the same shape. If $A$ is as above and
 \begin{equation*}
-B = \namedmatrix{\name{foo}}{\name{bar}}{
+B = \nmatrix{foo}{bar}{
   2 & 7 & 1 \\
   8 & 2 & 8
 }
 \end{equation*}
 then
 \begin{equation*}
-A + B = \namedmatrix{\name{foo}}{\name{bar}}{
+A + B = \nmatrix{foo}{bar}{
   3+2 & 1+7 & 4+1 \\
   1+8 & 5+2 & 9+8
 }.
@@ -131,15 +131,15 @@ A + B = \namedmatrix{\name{foo}}{\name{bar}}{
 
 But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an index with the same name (and size), the two indices are \emph{aligned}, as above. But if $A$ has an index named $\name{i}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of index $\name{i}$.
 \begin{align*}
-A + 1 &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + 1 &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+1 & 5+1 & 9+1
 } \\
-A + B_{\name{foo:1}} &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + B_{\name{foo:1}} &= \nmatrix{foo}{bar}{
   3+2 & 1+7 & 4+1 \\
   1+2 & 5+7 & 9+1
 } \\
-A + B_{\name{bar:3}} &= \namedmatrix{\name{foo}}{\name{bar}}{
+A + B_{\name{bar:3}} &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+8 & 5+8 & 9+8
 }.
@@ -162,10 +162,10 @@ The same rules for alignment and broadcasting apply to functions that take tenso
 
 For example, using the same example tensor $A$ from above,
 \begin{align*}
-\nsum{foo} A &= \namedmatrix{}{\name{bar}}{
+\nsum{foo} A &= \nmatrix{}{bar}{
   3+1 & 1+5 & 4+9
 } \\
-\nsum{bar} A &= \namedmatrix{}{\name{foo}}{
+\nsum{bar} A &= \nmatrix{}{foo}{
   3+1+4 & 1+5+9
 }.
 \end{align*}
@@ -190,10 +190,10 @@ The vector dot product (inner product) is a function from \emph{two} vectors to 
 \end{align*}
 This operator can also be used for matrix-vector or matrix-matrix multiplication:
 \begin{align*}
-C &= \namedmatrix{\name{bar}}{\name{baz}}{
+C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
 } \\
-A \ndot{bar} C &= \namedmatrix{\name{foo}}{\name{baz}}{
+A \ndot{bar} C &= \nmatrix{foo}{baz}{
   17 & -17 \\
   53 & -53
 }
@@ -216,7 +216,7 @@ A very common example of a function from vectors to vectors is the softmax:
 And it's also very handy to have a function that renames an index:
 \begin{equation*}
 % Don't delete this comment, which works around a bug in MathJax
-[A]_{\name{bar}\rightarrow\name{baz}} = \namedmatrix{\name{foo}}{\name{baz}}{
+[A]_{\name{bar}\rightarrow\name{baz}} = \nmatrix{foo}{baz}{
   3 & 1 & 4 \\
   1 & 5 & 9
 }
@@ -224,13 +224,13 @@ And it's also very handy to have a function that renames an index:
 
 Concatenation combines two vectors into one:
 \begin{align*}
-  A \nfun{foo}{$\oplus$} B &= \namedmatrix{\name{foo}}{\name{bar}}{
+  A \nfun{foo}{$\oplus$} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 \\
     1 & 5 & 9 \\
     2 & 7 & 1 \\
     8 & 2 & 8
   } \\
-  A \nfun{bar}{$\oplus$} B &= \namedmatrix{\name{foo}}{\name{bar}}{
+  A \nfun{bar}{$\oplus$} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 & 2 & 7 & 1 \\
     1 & 5 & 9 & 8 & 2 & 8
   }
@@ -240,17 +240,17 @@ Concatenation combines two vectors into one:
 
 Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\name{i}:2,\name{j}:2,\name{k}:2\}$:
 \begin{align*}
-A_{\name{i}:1} &= \namedmatrix{\name{j}}{\name{k}}{
+A_{\name{i}:1} &= \nmatrix{j}{k}{
   1 & 2 \\
   3 & 4
 } \\
-A_{\name{i}:2} &= \namedmatrix{\name{j}}{\name{k}}{
+A_{\name{i}:2} &= \nmatrix{j}{k}{
   5 & 6 \\
   7 & 8
 } \\
-\det_{\name{j},\name{k}} A &= \namedmatrix{}{\name{i}}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
-\det_{\name{k},\name{j}} A &= \namedmatrix{}{\name{i}}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
-\det_{\name{i},\name{j}} A &= \namedmatrix{}{\name{k}}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
+\det_{\name{j},\name{k}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
+\det_{\name{k},\name{j}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
+\det_{\name{i},\name{j}} A &= \nmatrix{}{k}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
 \end{align*}
 For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\mathop{\text{inv}}\displaylimits_{\name{i},\name{j}}$.
 
