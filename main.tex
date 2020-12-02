@@ -360,14 +360,15 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 
 \subsection{Continuous Bag of Words}
 
-A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
+A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}} & \nsum{v} X &= 1\\
+X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}} & \nsum{vocab} X &= 1\\
 E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
 W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
+Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsection{Bayes' Rule}
 
