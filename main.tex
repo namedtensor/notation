@@ -371,15 +371,14 @@ W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
 
 \subsection{Bayes' Rule}
 
-Named dimensions are very helpful for working with discrete random
-variables. For instance, given $p(B \mid A)$ and $p(A)$ as
-tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain
-rule, computing the marginal, and broadcast dividing.
-
+Named indices are very helpful for working with discrete random variables, because each random variable can be represented by an index with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*} 
-BA &\in [0, 1]^{\name{A}:a, \name{B}:b} & \nsum{B} BA &= 1 \\
-A &\in [0, 1]^{\name{A}:a} & \nsum{A} A &= 1 \\
-AB &= \frac{BA \odot A}{BA \ndot{A} A}
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A}:a, \name{B}:b} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
+p(\name{A}) &\in [0, 1]^{\name{A}:a} & \nsum{A} p(\name{A}) &= 1
+\end{align*}
+Then Bayes' rule is just:
+\begin{align*}
+p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}.
 \end{align*}
 
 \subsection{Sudoku ILP}
