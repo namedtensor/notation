@@ -4,7 +4,6 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{parskip}
-\usepackage{tikz}
 
 \newcommand{\name}[1]{\mathsf{#1}}
 \newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
@@ -26,10 +25,7 @@
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
 
-\newcommand{\namedmatrix}[3]{%
-#1
-\begin{array}[b]{@{}c@{}} \smash{#2} \\ \begin{bmatrix} #3 \end{bmatrix} \end{array}
-}
+\newcommand{\namedmatrix}[3]{#1\begin{array}[b]{@{}c@{}}#2\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \title{Named Tensor Notation}
 \author{David Chiang and Sasha Rush}
