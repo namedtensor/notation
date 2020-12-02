@@ -162,7 +162,7 @@ The same rules for alignment and broadcasting apply to functions that take tenso
 
 For example, using the same example tensor $A$ from above,
 \begin{align*}
-\nsum_{foo} A &= \namedmatrix{}{\name{bar}}{
+\nsum{foo} A &= \namedmatrix{}{\name{bar}}{
   3+1 & 1+5 & 4+9
 } \\
 \nsum{bar} A &= \namedmatrix{}{\name{foo}}{
@@ -187,7 +187,7 @@ You can also write multiple names to perform the reduction over multiple indices
 
 A very common example of a function from vectors to vectors is the softmax:
 \begin{equation*}
-  \softmax_{\name{i}} A = \frac{\exp A}{\sum_{\name{i}} \exp A}
+  \softmax_{\name{i}} A = \frac{\exp A}{\nsum{i} \exp A}
 \end{equation*}
 
 And it's also very handy to have a function that renames an index:
@@ -200,7 +200,7 @@ And it's also very handy to have a function that renames an index:
 
 The vector dot product (inner product) is a function from two vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator:
 \begin{align*}
-  A \ndot{i} B &= \sum_{\name{i}} A \odot B.
+  A \ndot{i} B &= \nsum{i} A \odot B.
 \end{align*}
 This operator can also be used for matrix-vector or matrix-matrix multiplication:
 \begin{align*}
@@ -272,7 +272,7 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 and define
 \begin{align*}
 \text{MultiSelfAtt} &\colon \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \rightarrow \mathbb{R}^{\name{time}:n,\name{emb}:\dmodel} \\
-\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \sum_{\name{head}} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
+\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
 \subsection{RNN}
