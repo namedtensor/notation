@@ -72,9 +72,9 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}: 2, \name{bar}: 3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}: 2, \name{bar}: 3} = \tuple{\name{bar}: 3, \name{foo}: 2}.\] We use \textsf{sans-serif} font for names.
+A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\name{foo}=2, \name{bar}=3}.\] The order of the elements doesn't matter: \[\tuple{\name{foo}=2, \name{bar}=3} = \tuple{\name{bar}=3, \name{foo}=2}.\] We use \textsf{sans-serif} font for names.
 
-Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\name{foo}:2, \name{bar}:3}$.
+Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\name{foo}:2, \name{bar}:3}$. (Note the use of colons ($:$) instead of equals signs ($=$) when writing shapes.)
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -82,19 +82,19 @@ A = \nmatrix{foo}{bar}{
 }.
 \end{equation*}
 
-We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\name{foo}:2, \name{bar}:3}$ -- 
-not $A_{\name{foo}:2,\name{bar}:3}$ or $a_{\name{foo}:2,\name{bar}:3}$.
+We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\name{foo}=2, \name{bar}=3}$ -- 
+not $A_{\name{foo}=2,\name{bar}=3}$ or $a_{\name{foo}=2,\name{bar}=3}$.
 
 Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\name{foo}: 2, \name{bar}: 3}$ for the set of all tensors with shape $\tuple{\name{foo}:2, \name{bar}:3}$.
 
-We access elements of $A$ using subscripts: $A_{\name{foo}: 1, \name{bar}: 3} = A_{\name{bar}: 3, \name{foo}: 1} = 4$.
+We access elements of $A$ using subscripts: $A_{\name{foo}=1, \name{bar}=3} = A_{\name{bar}=3, \name{foo}=1} = 4$.
 We also allow partial indexing:
 \begin{align*}
-A_{\name{foo}:1} &= \nmatrix{}{bar}{
+A_{\name{foo}=1} &= \nmatrix{}{bar}{
   3 & 1 & 4
 }
 \\
-A_{\name{bar}:3} &= \nmatrix{}{foo}{
+A_{\name{bar}=3} &= \nmatrix{}{foo}{
   4 & 9
 }.
 \end{align*}
@@ -142,11 +142,11 @@ A + 1 &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+1 & 5+1 & 9+1
 } \\
-A + B_{\name{foo:1}} &= \nmatrix{foo}{bar}{
+A + B_{\name{foo=1}} &= \nmatrix{foo}{bar}{
   3+2 & 1+7 & 4+1 \\
   1+2 & 5+7 & 9+1
 } \\
-A + B_{\name{bar:3}} &= \nmatrix{foo}{bar}{
+A + B_{\name{bar=3}} &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
   1+8 & 5+8 & 9+8
 }.
@@ -178,10 +178,10 @@ For example, using the same example tensor $A$ from above,
 \end{align*}
 More reductions: If $A$ has shape $\tuple{\name{i}:X, \ldots}$, then
 \begin{align*}
-  \nsum{foo} A &= \sum_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nsum{foo} A &= \sum_{x \in X} A_{\name{foo}=x} = \nmatrix{}{bar}{4 & 6 & 13} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{min} A &= \min_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{3 & 5 & 9} \\
+  \nfun{foo}{min} A &= \min_{x \in X} A_{\name{foo}=x} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max_{x \in X} A_{\name{foo}=x} = \nmatrix{}{bar}{3 & 5 & 9} \\
   \nfun{foo}{mean} A &= \frac{1}{|X|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
   \nfun{foo}{var} A &= \frac1{|X|} \nsum{i} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
@@ -246,11 +246,11 @@ Concatenation combines two vectors into one:
 
 Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\name{foo}:2,\name{bar}:2,\name{baz}:2\}$:
 \begin{align*}
-A_{\name{foo}:1} &= \nmatrix{bar}{baz}{
+A_{\name{foo}=1} &= \nmatrix{bar}{baz}{
   1 & 2 \\
   3 & 4
 } \\
-A_{\name{foo}:2} &= \nmatrix{bar}{baz}{
+A_{\name{foo}=2} &= \nmatrix{bar}{baz}{
   5 & 6 \\
   7 & 8
 } \\
@@ -401,7 +401,7 @@ X &\in \{0, 1\}^{\name{row}: 9, \name{col}:9, \name{assign}:9}  \\
 \nsum{Col, col} Y =  
 \nsum{row, col} Y = 1 \right) \\
 Y &\in \{0, 1\}^{\name{Row}: 3, \name{Col}:3, \name{row}: 3, \name{col}:3, \name{assign}:9}  \\
-Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r\times 3 + r'-1, \name{col}:c\times3 + c'-1}, 
+Y_{\name{Row}=r, \name{row}=r', \name{Col}=c, \name{col}=c'} &= X_{\name{row}=r\times 3 + r'-1, \name{col}=c\times3 + c'-1}, 
 \end{align*} 
 
 
@@ -414,7 +414,7 @@ X &\in \reals^{\name{height}: h, \name{width}:w} \\
 \text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max}\  U \\
 U &\in \reals^{{\name{height}:h / kh,
 \name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i \times kh + di -1, \name{width}:j \times kw + dj -1}  
+U_{\name{height}=i, \name{width}=j, \name{kh}=di, \name{kw}=dj  } & = X_{\name{height}=i \times kh + di -1, \name{width}=j \times kw + dj -1}  
 \end{align*}
 
 
@@ -429,7 +429,7 @@ X &\in \reals^{{\name{channel}:c, \name{time}:t}}  \\
 W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kw}:k}}  \\
 \text{conv1d}(X, W) &= W \ndot{channel, kw} U \\
 U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kw}:k}}  \\
-U_{\name{time}:i, \name{kw:j}} & = X_{\name{time}:i+j - 1}  
+U_{\name{time}=i, \name{kw}=j} & = X_{\name{time}=i+j - 1}  
 \end{align*} 
 
 
@@ -487,7 +487,7 @@ K &\in \reals^{\name{head}:h,\name{key}:d_k, \name{time}:n}\\
 V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
 \text{attention}(Q, K, V) &=  \nfun{time}{softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
 M & \in \reals^{\name{time}:n, \name{time'}:n} \\
-M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 & i \leq j\\
+M_{\name{time}=i, \name{time'}=j} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise} \end{cases} \\
 \end{align*}
 
@@ -501,18 +501,19 @@ As further proof of concept, we have written the full models for Transformer (\u
 
 \subsection{Named tuples}
 
-A \emph{named tuple} is a set of pairs, written as $\tuple{\name{i}_1: x_1, \ldots, \name{i}_r: x_r}$, where $\name{i}_1, \ldots \name{i}_r$ are pairwise distinct \emph{names}. We write both names and variables ranging over names using sans-serif font.
+A \emph{named tuple} is a set of pairs, written as $\tuple{\name{i}_1=x_1, \ldots, \name{i}_r=x_r}$, where $\name{i}_1, \ldots \name{i}_r$ are pairwise distinct \emph{names}. We write both names and variables ranging over names using sans-serif font.
 
-If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{ \name{i} \mid \text{$(\name{i}:x) \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{\name{i}}$ for the unique $x$ such that $(\name{i}:x) \in t$. We write the empty named tuple as $\emptyset$.
+If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{ \name{i} \mid \text{$(\name{i}=x) \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{\name{i}}$ for the unique $x$ such that $(\name{i}=x) \in t$. We write the empty named tuple as $\emptyset$.
 
-We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $(\name{i}:x) \in t_1$ implies $(\name{i}:x) \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
+We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $(\name{i}=x) \in t_1$ implies $(\name{i}=x) \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
 
-A named tuple $\tuple{\name{i}_1: X_1, \ldots, \name{i}_r: X_r}$ where $X_1, \ldots, X_r$ are sets is called a \emph{shape}, which we will often use to yield a set of named tuples:
+A \emph{shape} is a set of pairs written as $\tuple{\name{i}_1: X_1, \ldots, \name{i}_r: X_r}$ where $X_1, \ldots, X_r$ are sets. We use shapes to define sets of named tuples:
 \begin{equation*}
-\tupleshape \tuple{\name{i}_1: X_1, \ldots, \name{i}_r: X_r} = \left\{\tuple{\name{i}_1: x_1, \ldots, \name{i}_r: x_r} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
+\tupleshape \tuple{\name{i}_1: X_1, \ldots, \name{i}_r: X_r} = \left\{\tuple{\name{i}_1=x_1, \ldots, \name{i}_r=x_r} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
 \end{equation*}
+We define $\sqsubseteq$, $\sqcup$, and $\sqcap$ on shapes just as with named tuples.
 
-If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \sqsubseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the named tuple $\{(\name{i}: x) \in t \mid \name{i} \in \tupledom{S}\}$.
+If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \sqsubseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the named tuple $\{(\name{i}=x) \in t \mid \name{i} \in \tupledom{S}\}$.
 
 \subsection{Named tensors}
 
@@ -522,7 +523,7 @@ Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor o
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a named tuple $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\name{i}_1: x_1, \ldots, \name{i}_r: x_r}}$, we usually write $A_{\name{i}_1: x_1, \ldots, \name{i}_r: x_r}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\name{i}_1: x_1, \ldots, \name{i}_r: x_r}$.
+If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a named tuple $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\name{i}_1=x_1, \ldots, \name{i}_r=x_r}}$, we usually write $A_{\name{i}_1=x_1, \ldots, \name{i}_r=x_r}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\name{i}_1=x_1, \ldots, \name{i}_r=x_r}$.
 
 We also allow partial indices. Let $\mathcal{U}$ be a shape such that $\mathcal{U} = \mathcal{S} \sqcup \mathcal{T}$ and $\mathcal{S} \sqcap \mathcal{T} = \emptyset$.
 If $A$ is a tensor with shape $\mathcal{S}$ and $s \in \tupleshape \mathcal{S}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T}$ such that, for any $t \in \tupleshape \mathcal{T}$,
@@ -556,7 +557,7 @@ f &: F^{\mathcal{S} \sqcup \mathcal{S'}} \times G^{\mathcal{T} \sqcup \mathcal{T
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
 \begin{align*}
 \ndot{i} &: F^{\name{i}:n} \times F^{\name{i}:n} \rightarrow F \\
-A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}:i} B_{\name{i}:i}.
+A \ndot{i} B &= \sum_{i=1}^n A_{\name{i}=i} B_{\name{i}=i}.
 \end{align*}
 
 \section{Duality}
@@ -572,7 +573,7 @@ In this section, we describe three possible solutions to this problem, and welco
 
 We define a version of the contraction operator that can contract two indices with different names. If $\name{i} \in \tupledom \mathcal{A}$ and $\name{j} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{\name{i}} = \tupleproj{\mathcal{B}}{\name{j}} = X$, then we define
 \begin{equation*}
-A \nndot{i}{j} B = \sum_{x \in X} A_{\name{i}: x} \, B_{\name{j}: x}
+A \nndot{i}{j} B = \sum_{x \in X} A_{\name{i}=x} \, B_{\name{j}=x}
 \end{equation*}
 
 For example, the RNN would look like this.
