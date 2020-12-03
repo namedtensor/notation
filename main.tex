@@ -4,17 +4,7 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 
-% If you want to use named tensor notation in your papers,
-% these macros may be useful. Requires \usepackage{amssymb}.
-\newcommand{\name}[1]{\mathsf{#1}}
-\newcommand{\nidx}[2]{\name{#1}=#2}
-\newcommand{\nset}[2]{\name{#1}:#2}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}}}}
-\newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
-\newcommand{\ncat}[1]{\mathop{\oplus}_{\name{#1}}}
-\newcommand{\nfun}[2]{\mathop{\text{#2}}\limits_{\name{#1}}}
-\newcommand{\nmov}[3]{\left[#3\right]_{\name{#1}\rightarrow\name{#2}}}
-
+\usepackage{namedtensor}
 % "experimental" notation
 \newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}|\name{#2}}}}
 
@@ -60,7 +50,7 @@ As a preview, the above equation becomes
 \end{equation*}
 making it unambiguous which index each operation applies to. The same equation works with multiple heads and with minibatching.
 
-More examples of the notation are given in \S~\ref{sec:examples}.
+More examples of the notation are given in \S\ref{sec:examples}.
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
