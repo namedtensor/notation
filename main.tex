@@ -178,12 +178,12 @@ For example, using the same example tensor $A$ from above,
 \end{align*}
 More reductions: If $A$ has shape $\tuple{\name{i}:X, \ldots}$, then
 \begin{align*}
-  \nsum{i} A &= \sum_{x \in X} A_{\name{i}: x} \\
-  \nfun{i}{norm} A &= \sqrt{\nsum{i} A^2} \\
-  \nfun{i}{min} A &= \min_{x \in X} A_{\name{i}: x} \\
-  \nfun{i}{max} A &= \max_{x \in X} A_{\name{i}: x} \\
-  \nfun{i}{mean} A &= \frac{A}{\nsum{i} A} \\
-  \nfun{i}{var} A &= \nsum{i} (A - \nfun{i}{mean} A)^2
+  \nsum{foo} A &= \sum_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
+  \nfun{foo}{min} A &= \min_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max_{x \in X} A_{\name{foo}: x} = \nmatrix{}{bar}{3 & 5 & 9} \\
+  \nfun{foo}{mean} A &= \frac{1}{|X|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
+  \nfun{foo}{var} A &= \frac1{|X|} \nsum{i} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
@@ -191,11 +191,7 @@ You can also write multiple names to perform the reduction over multiple indices
 
 \subsubsection{Contraction}
 
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator:
-\begin{align*}
-  A \ndot{i} B &= \nsum{i} A \odot B.
-\end{align*}
-This operator can also be used for matrix-vector or matrix-matrix multiplication:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator, which performs elementwise multiplication, then sums along an index. It can be used, for example, for matrix multiplication:
 \begin{align*}
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
@@ -205,19 +201,22 @@ A \ndot{bar} C &= \nmatrix{foo}{baz}{
   53 & -53
 }
 \end{align*}
-However, note that (like vector dot-product, but unlike matrix multiplication) $\ndot{i}$ is commutative, but not associative! Specifically, if
+However, note that (like vector dot-product, but unlike matrix multiplication) this operator is commutative, but not associative! Specifically, if
 \begin{align*}
-A &\in \mathbb{R}^{\name{i}:m} \\
-B &\in \mathbb{R}^{\name{i}:m,\name{j}:n} \\
-C &\in \mathbb{R}^{\name{i}:m,\name{j}:n}
+A &\in \mathbb{R}^{\name{foo}:m} \\
+B &\in \mathbb{R}^{\name{foo}:m,\name{bar}:n} \\
+C &\in \mathbb{R}^{\name{foo}:m,\name{bar}:n}
 \end{align*}
-then $(A \ndot{i} B) \ndot{j} C$ and $A \ndot{i} (B \ndot{j} C)$ don't even have the same shape.
+then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
 
 \subsubsection{Vectors to vectors}
 
 A very common example of a function from vectors to vectors is the softmax:
 \begin{equation*}
-  \nfun{i}{softmax} A = \frac{\exp A}{\nsum{i} \exp A}
+  \nfun{foo}{softmax} A = \frac{\exp A}{\nsum{foo} \exp A} \approx \nmatrix{foo}{bar}{
+    0.731 & 0.002 & 0.953 \\
+    0.269 & 0.998 & 0.047
+  }.
 \end{equation*}
 
 And it's also very handy to have a function that renames an index:
@@ -245,21 +244,21 @@ Concatenation combines two vectors into one:
 
 \subsubsection{Matrices}
 
-Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\name{i}:2,\name{j}:2,\name{k}:2\}$:
+Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\name{foo}:2,\name{bar}:2,\name{baz}:2\}$:
 \begin{align*}
-A_{\name{i}:1} &= \nmatrix{j}{k}{
+A_{\name{foo}:1} &= \nmatrix{bar}{baz}{
   1 & 2 \\
   3 & 4
 } \\
-A_{\name{i}:2} &= \nmatrix{j}{k}{
+A_{\name{foo}:2} &= \nmatrix{bar}{baz}{
   5 & 6 \\
   7 & 8
 } \\
-\det_{\name{j},\name{k}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
-\det_{\name{k},\name{j}} A &= \nmatrix{}{i}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
-\det_{\name{i},\name{j}} A &= \nmatrix{}{k}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
+\det_{\name{bar},\name{baz}} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
+\det_{\name{baz},\name{bar}} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
+\det_{\name{foo},\name{bar}} A &= \nmatrix{}{baz}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
 \end{align*}
-For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\mathop{\text{inv}}\displaylimits_{\name{i},\name{j}}$.
+For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\mathop{\text{inv}}\displaylimits_{\name{foo},\name{bar}}$.
 
 \section{Examples}
 \label{sec:examples}
