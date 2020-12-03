@@ -7,13 +7,13 @@
 % If you want to use named tensor notation in your papers,
 % these macros may be useful. Requires \usepackage{amssymb}.
 \newcommand{\name}[1]{\mathsf{#1}}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
+\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}}}}
 \newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
 \newcommand{\nconcat}[1]{\mathop{\oplus}_{\name{#1}}}
-\newcommand{\nfun}[2]{\mathop{\text{#2}}\displaylimits_{\name{#1}}}
+\newcommand{\nfun}[2]{\mathop{\text{#2}}\limits_{\name{#1}}}
 
 % "experimental" notation
-\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}|\name{#2}}}}
+\newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}|\name{#2}}}}
 
 % for formal definitions
 \newcommand{\tuple}[1]{\{ #1\}}
