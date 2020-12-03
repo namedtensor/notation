@@ -11,8 +11,9 @@
 \newcommand{\nset}[2]{\name{#1}:#2}
 \newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}}}}
 \newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
-\newcommand{\nconcat}[1]{\mathop{\oplus}_{\name{#1}}}
+\newcommand{\ncat}[1]{\mathop{\oplus}_{\name{#1}}}
 \newcommand{\nfun}[2]{\mathop{\text{#2}}\limits_{\name{#1}}}
+\newcommand{\nmov}[3]{\left[#3\right]_{\name{#1}\rightarrow\name{#2}}}
 
 % "experimental" notation
 \newcommand{\nndot}[2]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}|\name{#2}}}}
@@ -21,7 +22,7 @@
 \newcommand{\tuple}[1]{\{ #1\}}
 \DeclareMathOperator{\tupledom}{dom}
 \DeclareMathOperator{\tupleshape}{ind}
-\newcommand{\tupleproj}[2]{#1.#2}
+\newcommand{\tupleproj}[2]{#1.\name{#2}}
 \newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
@@ -76,7 +77,7 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}}.\] The order of the elements doesn't matter: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}} = \tuple{\nidx{bar}{3}, \nidx{foo}{2}}.\] We use \textsf{sans-serif} font for names.
 
-Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\nset{foo}{2}, \nset{bar}{3}}$. (Note the use of colons ($:$) instead of equals signs ($=$) when writing shapes.)
+Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\nset{foo}{2}, \nset{bar}{3}}$.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -223,8 +224,7 @@ A very common example of a function from vectors to vectors is the softmax:
 
 And it's also very handy to have a function that renames an index:
 \begin{equation*}
-% Don't delete this comment, which works around a bug in MathJax
-[A]_{\name{bar}\rightarrow\name{baz}} = \nmatrix{foo}{baz}{
+\nmov{bar}{baz}{A} = \nmatrix{foo}{baz}{
   3 & 1 & 4 \\
   1 & 5 & 9
 }
@@ -232,13 +232,13 @@ And it's also very handy to have a function that renames an index:
 
 Concatenation combines two vectors into one:
 \begin{align*}
-  A \nconcat{foo} B &= \nmatrix{foo}{bar}{
+  A \ncat{foo} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 \\
     1 & 5 & 9 \\
     2 & 7 & 1 \\
     8 & 2 & 8
   } \\
-  A \nconcat{bar} B &= \nmatrix{foo}{bar}{
+  A \ncat{bar} B &= \nmatrix{foo}{bar}{
     3 & 1 & 4 & 2 & 7 & 1 \\
     1 & 5 & 9 & 8 & 2 & 8
   }
@@ -256,11 +256,11 @@ A_{\nidx{foo}{2}} &= \nmatrix{bar}{baz}{
   5 & 6 \\
   7 & 8
 } \\
-\det_{\name{bar},\name{baz}} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
-\det_{\name{baz},\name{bar}} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
-\det_{\name{foo},\name{bar}} A &= \nmatrix{}{baz}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
+\nfun{bar,baz}{det} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
+\nfun{baz,bar}{det} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
+\nfun{foo,bar}{det} A &= \nmatrix{}{baz}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
 \end{align*}
-For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\mathop{\text{inv}}\displaylimits_{\name{foo},\name{bar}}$.
+For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\nfun{foo,bar}{inv}$.
 
 \section{Examples}
 \label{sec:examples}
@@ -270,7 +270,7 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
 \begin{align*}
   \text{Att} &\colon \mathbb{R}^{\nset{time'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{time}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{time}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{time'}{n'},\nset{val}{d_v}} \\
-  \text{Att}(Q,K,V) &= \softmax_{\name{time}} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V
+  \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{time} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
@@ -283,11 +283,11 @@ In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  L
 Then define
 \begin{align*}
   \text{SelfAtt} &\colon \mathbb{R}^{\nset{time}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{time}{n},\nset{emb}{\dmodel}} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \left[\text{Att}(Q, K, V)\right]_{\name{time'}\rightarrow\name{time}}
+  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{time'}{time}{\text{Att}(Q, K, V)}
 \end{align*}
 where
 \begin{align*}
-  Q &= W^Q \ndot{emb} \left[X\right]_{\name{time}\rightarrow\name{time'}} \\
+  Q &= W^Q \ndot{emb} \nmov{time}{time'}{X} \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X.
 \end{align*}
@@ -316,7 +316,7 @@ h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} & t &= 0, \ldots, n\\
 A &\in \mathbb{R}^{\nset{state}{d}, \nset{state'}{d}} \\
 B &\in \mathbb{R}^{\nset{emb}{d}, \nset{state'}{d}} \\
 c &\in \mathbb{R}^{\nset{state'}{d}} \\
-h^{(t+1)} &= \left[ \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right) \right]_{\name{state'} \rightarrow \name{state}}
+h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
 \end{align*}
 
 The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
@@ -413,9 +413,8 @@ Max pooling used in image recognition takes a similar form as the Sudoku example
 
 \begin{align*} 
 X &\in \reals^{\nset{height}{h}, \nset{width}{w}} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max}\  U \\
-U &\in \reals^{{\nset{height}{h / kh},
-\nset{width}{w / kw}, \nset{kh}{kh}, \nset{kw}{kw}}}  \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
+U &\in \reals^{{\nset{height}{h / kh}, \nset{width}{w / kw}, \nset{kh}{kh}, \nset{kw}{kw}}} \\
 U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
 \end{align*}
 
@@ -473,7 +472,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 X &\in \reals^{\nset{batch}{{b}}, \nset{d}{{k}}}  \\
 \mu &\in \reals^{{\nset{d}{{k}}}}  \\
 \Sigma & \in   \reals^{{\nset{d1}{{k}}, \nset{d2}{{k}}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
 \end{align*}
 
 
@@ -508,7 +507,7 @@ As further proof of concept, we have written the full models for Transformer (\u
 
 A \emph{named tuple} is a set of pairs, written as $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct \emph{names}. We write both names and variables ranging over names using sans-serif font.
 
-If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{\name{i} \mid \text{$(\nidx{i}{x}) \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{\name{i}}$ for the unique $x$ such that $(\nidx{i}{x}) \in t$. We write the empty named tuple as $\emptyset$.
+If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{\name{i} \mid \text{$(\nidx{i}{x}) \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{i}$ for the unique $x$ such that $(\nidx{i}{x}) \in t$. We write the empty named tuple as $\emptyset$.
 
 We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $(\nidx{i}{x}) \in t_1$ implies $(\nidx{i}{x}) \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
 
@@ -576,7 +575,7 @@ In this section, we describe three possible solutions to this problem, and welco
 
 \subsection{Contracting two names}
 
-We define a version of the contraction operator that can contract two indices with different names. If $\name{i} \in \tupledom \mathcal{A}$ and $\name{j} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{\name{i}} = \tupleproj{\mathcal{B}}{\name{j}} = X$, then we define
+We define a version of the contraction operator that can contract two indices with different names. If $\name{i} \in \tupledom \mathcal{A}$ and $\name{j} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{i} = \tupleproj{\mathcal{B}}{j} = X$, then we define
 \begin{equation*}
 A \nndot{i}{j} B = \sum_{x \in X} A_{\nidx{i}{x}} \, B_{\nidx{j}{x}}
 \end{equation*}
@@ -602,7 +601,7 @@ B &\in \mathbb{R}^{\nset{emb*}{d}, \nset{state}{d}} \\
 c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)} &= \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right) 
 \end{align*}
-In general, if $\name{i*} \in \tupledom \mathcal{A}$ and $\name{i} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{\name{i*}} = \tupleproj{\mathcal{B}}{\name{i}} = X$, then we define
+In general, if $\name{i*} \in \tupledom \mathcal{A}$ and $\name{i} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{i*} = \tupleproj{\mathcal{B}}{i} = X$, then we define
 \begin{equation*}
 A \ndot{i} B = \sum_{x \in X} A_{\nset{i*}{x}} \, B_{\nset{i}{x}}
 \end{equation*}
