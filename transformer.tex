@@ -32,11 +32,11 @@ W^2 & \in \reals^{\nset{hid}{\dff}, \nset{emb}{\dmodel}} & b^2 &\in \reals^{\nse
 
 \paragraph{Masked Attention}
 \begin{align*} 
-Q &\in \reals^{\nset{key}{d_k}, \nset{time'}{n}}, K \in \reals^{\nset{key}{d_k}, \nset{time}{n}}\\
-V &\in \reals^{\nset{time}{n}, \nset{val}{d_v}fg
+Q &\in \reals^{\nset{key}{d_k}, \nset{sent'}{n}}, K \in \reals^{\nset{key}{d_k}, \nset{sent}{n}}\\
+V &\in \reals^{\nset{sent}{n}, \nset{val}{d_v}fg
 },
-M \in \reals^{\name{time}, \name{time'}}\\
-\text{att}(Q, K, V, M) &=  V \ndot{time} \nfun{time}{softmax} \left( \frac{\displaystyle Q \ndot{key} K }{\sqrt{d_k}} + M \right) 
+M \in \reals^{\name{sent}, \name{sent'}}\\
+\text{att}(Q, K, V, M) &=  V \ndot{sent} \nfun{sent}{softmax} \left( \frac{\displaystyle Q \ndot{key} K }{\sqrt{d_k}} + M \right) 
 \end{align*}
 
 \paragraph{Multiheaded Self Attention}
@@ -45,12 +45,12 @@ M \in \reals^{\name{time}, \name{time'}}\\
   W^K &\in \mathbb{R}^{\nset{head}{h}, \nset{emb}{\dmodel}, \nset{key}{d_k}} \\
   W^V &\in \mathbb{R}^{\nset{head}{h}, \nset{emb}{\dmodel}, \nset{val}{d_k}} \\
   W^O &\in \mathbb{R}^{\nset{head}{h}, \nset{val}{d_k}, \nset{emb}{\dmodel}} \\
-  X &\in \mathbb{R}^{\nset{time}{n}, \nset{emb}{\dmodel}} \\
-  \text{MHA}(X; W) &= \nmov{time'}{time}{W^O \ndot{head,val} \text{att}(Q, K, V, M)} \\
-  Q &= W^Q \ndot{emb} \nmov{time}{time'}{X} \\
+  X &\in \mathbb{R}^{\nset{sent}{n}, \nset{emb}{\dmodel}} \\
+  \text{MHA}(X; W) &= \nmov{sent'}{sent}{W^O \ndot{head,val} \text{att}(Q, K, V, M)} \\
+  Q &= W^Q \ndot{emb} \nmov{sent}{sent'}{X} \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X \\
-  M_{\nidx{time'}{i}, \nset{time}{j}} &= \begin{cases} 0 & j\leq i \\ -\infty & \text{otherwise} \end{cases}   
+  M_{\nidx{sent'}{i}, \nset{sent}{j}} &= \begin{cases} 0 & j\leq i \\ -\infty & \text{otherwise} \end{cases}   
 \end{align*}
 
 \paragraph{Layer Norm}
@@ -62,11 +62,11 @@ X &\in \reals^{\nset{emb}{\dmodel}} & \gamma, \beta &\in \reals^{\nset{emb}{\dmo
 
 \paragraph{Position Encoding}
 \begin{align*} 
-X &\in \{0, 1\}^{\nset{time}{n}, \nset{vocab}{b}} & \nsum{vocab} X &= 1\\
+X &\in \{0, 1\}^{\nset{sent}{n}, \nset{vocab}{b}} & \nsum{vocab} X &= 1\\
 E &\in \reals^{\nset{vocab*}{v}, \nset{emb}{\dmodel}} \\
 \text{embed}(X; E) &= (E \ndot{vocab} X)\sqrt{\dmodel} + P \\
-P &\in \reals^{\nset{time}{n}, \nset{hidden}{\dmodel}} \\
-P_{\nidx{hidden}{i}, \nidx{time}{p}} &= \begin{cases}
+P &\in \reals^{\nset{sent}{n}, \nset{hidden}{\dmodel}} \\
+P_{\nidx{hidden}{i}, \nidx{sent}{p}} &= \begin{cases}
   \sin((p-1) / 10000^{(i-1) / \dmodel}) & \text{$i$ odd} \\ 
   \cos((p-1) / 10000^{(i-2) / \dmodel}) & \text{$i$ even} \\
 \end{cases} \\
@@ -75,7 +75,7 @@ P_{\nidx{hidden}{i}, \nidx{time}{p}} &= \begin{cases}
 \paragraph{Transformer}
 
 \begin{align*} 
-I &\in \{0, 1\}^{{\nset{time}{t}, \nset{vocab}{b}}} & \nsum{vocab} X &= 1\\
+I &\in \{0, 1\}^{{\nset{sent}{n}, \nset{vocab}{b}}} & \nsum{vocab} X &= 1\\
 X^0 &= \text{embed}(I)\\
 T^1 &= \text{lnorm}(\text{MHA}(X^0)) + X^0\\
 X^1 &= \text{lnorm}(\text{FFN}(T^1)) + T^1\\
