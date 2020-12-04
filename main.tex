@@ -92,7 +92,7 @@ A_{\nidx{bar}{3}} &= \nmatrix{}{foo}{
 }.
 \end{align*}
 
-What are good choices for index names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three indices, which we might name $\name{batch}$, $\name{sent}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
+What are good choices for index names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three indices, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -261,8 +261,8 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 
 Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{sent'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{sent}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{sent}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{sent'}{n'},\nset{val}{d_v}} \\
-  \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{sent} V
+  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'},\nset{val}{d_v}} \\
+  \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
@@ -274,12 +274,12 @@ In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  L
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt} &\colon \mathbb{R}^{\nset{sent}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{sent}{n},\nset{emb}{\dmodel}} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{sent'}{sent}{\text{Att}(Q, K, V)}
+  \text{SelfAtt} &\colon \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \\
+  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V)}
 \end{align*}
 where
 \begin{align*}
-  Q &= W^Q \ndot{emb} \nmov{sent}{sent'}{X} \\
+  Q &= W^Q \ndot{emb} \nmov{seq}{seq'}{X} \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X.
 \end{align*}
@@ -293,7 +293,7 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 \end{align*}
 and define
 \begin{align*}
-\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{sent}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{sent}{n},\nset{emb}{\dmodel}} \\
+\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \\
 \text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
@@ -362,7 +362,7 @@ X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\nset{sent}{n}, \nset{vocab}{v}}} & \nsum{vocab} X &= 1\\
+X &\in \{0, 1\}^{{\nset{seq}{n}, \nset{vocab}{v}}} & \nsum{vocab} X &= 1\\
 E &\in \reals^{{\nset{vocab}{v}, \nset{hidden}{h}}}\\
 W &\in \reals^{{\nset{class}{c}, \nset{hidden}{h}}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
@@ -418,11 +418,11 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx
 applying a standard dot product.
 
 \begin{align*} 
-X &\in \reals^{{\nset{channels}{c}, \nset{sent}{n}}}  \\
+X &\in \reals^{{\nset{channels}{c}, \nset{seq}{n}}}  \\
 W &\in \reals^{{\nset{out\_channels}{c'}, \nset{channels}{c}, \nset{kw}{k}}}  \\
 \text{conv1d}(X, W) &= W \ndot{channels, kw} U \\
-U &\in \reals^{{\nset{channels}{c}, \nset{sent}{n-k +1}, \nset{kw}{k}}}  \\
-U_{\nidx{sent}{i}, \nidx{kw}{j}} & = X_{\nidx{sent}{i+j - 1}}  
+U &\in \reals^{{\nset{channels}{c}, \nset{seq}{n-k +1}, \nset{kw}{k}}}  \\
+U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}  
 \end{align*} 
 
 
@@ -475,12 +475,12 @@ an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
-Q &\in \reals^{\nset{key}{d_v},\nset{sent'}{n}}\\
-K &\in \reals^{\nset{head}{h},\nset{key}{d_k}, \nset{sent}{n}}\\
-V &\in \reals^{\nset{head}{h}, \nset{val}{d_v}, \nset{sent}{n}}\\
-\text{attention}(Q, K, V) &=  \nfun{sent}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{sent} V \\
-M & \in \reals^{\nset{sent}{n}, \nset{sent'}{n}} \\
-M_{\nidx{sent}{i}, \nidx{sent'}{j}} & = \begin{cases}0 & i \leq j\\
+Q &\in \reals^{\nset{key}{d_v},\nset{seq'}{n}}\\
+K &\in \reals^{\nset{head}{h},\nset{key}{d_k}, \nset{seq}{n}}\\
+V &\in \reals^{\nset{head}{h}, \nset{val}{d_v}, \nset{seq}{n}}\\
+\text{attention}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
+M & \in \reals^{\nset{seq}{n}, \nset{seq'}{n}} \\
+M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise} \end{cases} \\
 \end{align*}
 
@@ -646,8 +646,8 @@ h^{(t+1)} = \tanh\left( A_{\name{state'}} \cdot h^{(t)}_{\name{state}} + B_{\nam
 
 Attention:
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{sent'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{sent}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{sent}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{sent'}{n'},\nset{val}{d_v}} \\
-  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_\name{key}}{\sqrt{d_k}} \right]_{\name{sent}} \cdot V_{\name{sent}}
+  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'},\nset{val}{d_v}} \\
+  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_\name{key}}{\sqrt{d_k}} \right]_{\name{seq}} \cdot V_{\name{seq}}
 \end{align*}
 
 Multivariate normal distribution:
