@@ -1,0 +1,17 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{namedtensor}[2020/12/03 v0.01 Named tensors]
+
+\RequirePackage{amssymb}
+
+\newcommand{\name}[1]{\mathsf{#1}}
+\newcommand{\nidx}[2]{\name{#1}:#2}
+\newcommand{\nset}[2]{\name{#1}:#2}
+\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\limits_{\name{#1}}}}
+\newcommand{\nsum}[1]{\mathop{\sum}_{\name{#1}}}
+\newcommand{\ncat}[1]{\mathop{\oplus}_{\name{#1}}}
+\newcommand{\nfun}[2]{\mathop{\text{#2}}\limits_{\name{#1}}}
+\newcommand{\nmov}[3]{\left[#3\right]_{\name{#1}\rightarrow\name{#2}}}
+
+\endinput
+%%
+%% End of file `namedtensor.sty'.
