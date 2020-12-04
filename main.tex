@@ -500,20 +500,13 @@ Many of the \LaTeX{} macros used in this document are available in the style fil
 in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article}| but before \verb|\begin{document}|).
 
 The style file contains a small number of macros:
-
-\begin{center}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{@{}lll@{}}
-  \verb|\name{foo}| & $\name{foo}$ & index name \\
-  \verb|A_{\nidx{foo}{1},\nidx{bar}{3}}| & $A_{\nidx{foo}{1},\nidx{bar}{3}}$ & tensor indexing \\
-  \verb|\mathbb{R}^{\nset{foo}{2},\nset{bar}{3}}| & $\mathbb{R}^{\nset{foo}{2},\nset{bar}{3}}$ & set of tensors \\
-  \verb|A \ndot{foo} B| & $A \ndot{foo} B$ & contraction \\
-  \verb|A \ncat{foo} B| & $A \ncat{foo} B$ & concatenation \\
-  \verb|\nsum{foo} A| & $\nsum{foo} A$ & summation \\
-  \verb|\nfun{foo}{qux} A| & $\nfun{foo}{qux} A$ & any function \\
-  \verb|\nmov{foo}{bar}{A}| & $\nmov{foo}{bar}{A}$ & index renaming
-\end{tabular}
-\end{center}
+\begin{itemize}
+\item Use \verb|\name{foo}| to write an index name: $\name{foo}$.
+\item Use \verb|A \ndot{foo} B| for contraction: $A \ndot{foo} B$. Similarly, use \verb|A \ncat{foo} B| for concatenation.
+\item Use \verb|\nsum{foo} A| for summation: $\nsum{foo} A$.
+\item Use \verb|\nfun{foo}{qux} A| for a function named qux with a name under it: $\nfun{foo}{qux} A$.
+\item Use \verb|\nmov{foo}{bar}{A}| for renaming: $\nmov{foo}{bar}{A}$.
+\end{itemize}
 
 \section{Formal Definitions}
 \label{sec:definitions}
