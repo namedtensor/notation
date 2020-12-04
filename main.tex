@@ -67,7 +67,11 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}}.\] The order of the elements doesn't matter: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}} = \tuple{\nidx{bar}{3}, \nidx{foo}{2}}.\] We use \textsf{sans-serif} font for names.
 
-Then, a real \emph{named tensor} is a function from named tuples to reals. Each of its indices has a name, and the ordering of the indices doesn't matter. For example, here is a tensor with an index named $\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$ ranging from 1 to 3. More succinctly, we say that the \emph{shape} of $A$ is $\tuple{\nset{foo}{2}, \nset{bar}{3}}$.
+Then, a real \emph{named tensor} is a function from named tuples to
+reals. Each of its indices has a name, and the ordering of the indices
+doesn't matter. For example, here is a tensor with an index named
+$\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$
+ranging from 1 to 3.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -75,10 +79,13 @@ A = \nmatrix{foo}{bar}{
 }.
 \end{equation*}
 
+More succinctly, we say that the \emph{shape} of
+$A$ is $\nset{foo}{2} \times \nset{bar}{3}$. (Although $\times$ is usually ordered, in shapes the order doesn't matter; $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.)
+
 We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{foo}{2}, \nidx{bar}{3}}$ -- 
 not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
 
-Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2}, \nset{bar}{3}}$ for the set of all tensors with shape $\tuple{\nset{foo}{2}, \nset{bar}{3}}$.
+Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 
 We access elements of $A$ using subscripts: $A_{\nidx{foo}{1}, \nidx{bar}{3}} = A_{\nidx{bar}{3}, \nidx{foo}{1}} = 4$.
 We also allow partial indexing:
@@ -171,7 +178,7 @@ For example, using the same example tensor $A$ from above,
   3+1+4 & 1+5+9
 }.
 \end{align*}
-More reductions: If $A$ has shape $\tuple{\nset{i}{X}, \ldots}$, then
+More reductions: If $A$ has shape $\tuple{\nset{i}{X} \times \ldots}$, then
 \begin{align*}
   \nsum{foo} A &= \sum_{x \in X} A_{\nidx{foo}{x}} = \nmatrix{}{bar}{4 & 6 & 13} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
@@ -199,8 +206,8 @@ A \ndot{bar} C &= \nmatrix{foo}{baz}{
 However, note that (like vector dot-product, but unlike matrix multiplication) this operator is commutative, but not associative! Specifically, if
 \begin{align*}
 A &\in \mathbb{R}^{\nset{foo}{m}} \\
-B &\in \mathbb{R}^{\nset{foo}{m},\nset{bar}{n}} \\
-C &\in \mathbb{R}^{\nset{foo}{m},\nset{bar}{n}}
+B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
+C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
 \end{align*}
 then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
 
@@ -238,7 +245,7 @@ Concatenation combines two vectors into one:
 
 \subsubsection{Matrices}
 
-Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\nset{foo}{2},\nset{bar}{2},\nset{baz}{2\}}$:
+Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2\}}$:
 \begin{align*}
 A_{\nidx{foo}{1}} &= \nmatrix{bar}{baz}{
   1 & 2 \\
@@ -261,20 +268,20 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 
 Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'},\nset{val}{d_v}} \\
+  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'} \times\nset{val}{d_v}} \\
   \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
 \begin{align*}
-  W^Q &\in \mathbb{R}^{\nset{emb}{\dmodel}, \nset{key}{d_k}} \\
-  W^K &\in \mathbb{R}^{\nset{emb}{\dmodel}, \nset{key}{d_k}} \\
-  W^V &\in \mathbb{R}^{\nset{emb}{\dmodel}, \nset{val}{d_v}} \\
-  W^O &\in \mathbb{R}^{\nset{val}{d_v}, \nset{emb}{\dmodel}}
+  W^Q &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
+  W^K &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
+  W^V &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{val}{d_v}} \\
+  W^O &\in \mathbb{R}^{\nset{val}{d_v} \times \nset{emb}{\dmodel}}
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt} &\colon \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \\
+  \text{SelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \\
   \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V)}
 \end{align*}
 where
@@ -286,14 +293,14 @@ where
 
 To change this to multi-head self-attention with $h$ attention heads, simply redefine 
 \begin{align*}
-  W^Q &\in \mathbb{R}^{\nset{head}{h}, \nset{emb}{\dmodel}, \nset{key}{d_k}} \\
-  W^K &\in \mathbb{R}^{\nset{head}{h}, \nset{emb}{\dmodel}, \nset{key}{d_k}} \\
-  W^V &\in \mathbb{R}^{\nset{head}{h}, \nset{emb}{\dmodel}, \nset{val}{d_v}} \\
-  W^O &\in \mathbb{R}^{\nset{head}{h}, \nset{val}{d_v}, \nset{emb}{\dmodel}}
+  W^Q &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
+  W^K &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
+  W^V &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{val}{d_v}} \\
+  W^O &\in \mathbb{R}^{\nset{head}{h} \times \nset{val}{d_v} \times \nset{emb}{\dmodel}}
 \end{align*}
 and define
 \begin{align*}
-\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n},\nset{emb}{\dmodel}} \\
+\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \\
 \text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
@@ -305,8 +312,8 @@ As a second example, let's define a simple (Elman) RNN. Let $d$ be a positive in
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} & t &= 1, \ldots, n \\
 h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} & t &= 0, \ldots, n\\
-A &\in \mathbb{R}^{\nset{state}{d}, \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{emb}{d}, \nset{state'}{d}} \\
+A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
+B &\in \mathbb{R}^{\nset{emb}{d} \times \nset{state'}{d}} \\
 c &\in \mathbb{R}^{\nset{state'}{d}} \\
 h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
 \end{align*}
@@ -318,9 +325,9 @@ The renaming is necessary because our notation doesn't provide a one-step way to
 Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
 
 \begin{align*} 
-V &\in \reals^{\nset{output}{o}, \nset{hidden}{h}} & c\in \reals^{\nset{output}{o}} \\
-W &\in \reals^{{\nset{hidden}{h}, \nset{in}{i}}} & b \in \reals^{\nset{hidden}{h}} \\
-X &\in \reals^{{\nset{batch}{b}, \nset{in}{i}}} \\
+V &\in \reals^{\nset{output}{o} \times \nset{hidden}{h}} & c\in \reals^{\nset{output}{o}} \\
+W &\in \reals^{{\nset{hidden}{h} \times \nset{in}{i}}} & b \in \reals^{\nset{hidden}{h}} \\
+X &\in \reals^{{\nset{batch}{b} \times \nset{in}{i}}} \\
 Y &= \sigma \left( W \ndot{in} X + b \right) \\
 Z &= \sigma \left( V \ndot{hidden} Y + c \right)  
 \end{align*}
@@ -334,7 +341,7 @@ by which axes are normalized.
 \subsubsection*{Batch Norm}
 
 \begin{align*} 
-X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}}\\
+X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
 \gamma, \beta &\in \reals^{{\nset{batch}{b}}} \\
 \text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
@@ -343,7 +350,7 @@ X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}}\\
 \subsubsection*{Instance Norm}
 
 \begin{align*} 
-X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}}\\
+X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
 \gamma, \beta &\in \reals^{{\nset{hidden}{h}}} \\
 \text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
@@ -351,8 +358,8 @@ X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}}\\
 \subsubsection*{Layer Norm}
 
 \begin{align*} 
-X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}} \\
-\gamma, \beta &\in \reals^{{\nset{channels}{c}, \nset{hidden}{h}}} \\
+X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}} \\
+\gamma, \beta &\in \reals^{{\nset{channels}{c} \times \nset{hidden}{h}}} \\
 \text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channels}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channels}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta 
 \end{align*}
 
@@ -362,9 +369,9 @@ X &\in \reals^{{\nset{batch}{b}, \nset{channels}{c}, \nset{hidden}{h}}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{{\nset{seq}{n}, \nset{vocab}{v}}} & \nsum{vocab} X &= 1\\
-E &\in \reals^{{\nset{vocab}{v}, \nset{hidden}{h}}}\\
-W &\in \reals^{{\nset{class}{c}, \nset{hidden}{h}}}\\
+X &\in \{0, 1\}^{{\nset{seq}{n} \times \nset{vocab}{v}}} & \nsum{vocab} X &= 1\\
+E &\in \reals^{{\nset{vocab}{v} \times \nset{hidden}{h}}}\\
+W &\in \reals^{{\nset{class}{c} \times \nset{hidden}{h}}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 Here, the two contractions can be done in either order, so we leave the parentheses off.
@@ -373,7 +380,7 @@ Here, the two contractions can be done in either order, so we leave the parenthe
 
 Named indices are very helpful for working with discrete random variables, because each random variable can be represented by an index with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*} 
-p(\name{B} \mid \name{A}) &\in [0, 1]^{\nset{A}{a}, \nset{B}{b}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\nset{A}{a} \times \nset{B}{b}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
 p(\name{A}) &\in [0, 1]^{\nset{A}{a}} & \nsum{A} p(\name{A}) &= 1
 \end{align*}
 Then Bayes' rule is just:
@@ -388,13 +395,13 @@ Given a grid we can check that it is valid by converting it to a grid of grids.
 Constraints then ensure that there is one digit per row, per column and per sub-box. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{\nset{row}{9}, \nset{col}{9}, \nset{assign}{9}}  \\
+X &\in \{0, 1\}^{\nset{row}{9} \times \nset{col}{9} \times \nset{assign}{9}}  \\
 \text{check}(X) &=
 \left(\nsum{assign} Y = 
 \nsum{Height, height} Y = 
 \nsum{Width, width} Y =  
 \nsum{height, width} Y = 1 \right) \\
-Y &\in \{0, 1\}^{\nset{Height}{3}, \nset{Width}{3}, \nset{height}{3}, \nset{width}{3}, \nset{assign}{9}}  \\
+Y &\in \{0, 1\}^{\nset{Height}{3} \times \nset{Width}{3} \times \nset{height}{3} \times \nset{width}{3} \times \nset{assign}{9}}  \\
 Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_{\nidx{height}{r\times 3 + r'-1}, \nidx{width}{c\times3 + c'-1}}, 
 \end{align*} 
 
@@ -404,9 +411,9 @@ Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_
 Max pooling used in image recognition takes a similar form as the Sudoku example.
 
 \begin{align*} 
-X &\in \reals^{\nset{height}{h}, \nset{width}{w}} \\
+X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
 \text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
-U &\in \reals^{{\nset{height}{h / kh}, \nset{width}{w / kw}, \nset{kh}{kh}, \nset{kw}{kw}}} \\
+U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
 U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
 \end{align*}
 
@@ -418,10 +425,10 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx
 applying a standard dot product.
 
 \begin{align*} 
-X &\in \reals^{{\nset{channels}{c}, \nset{seq}{n}}}  \\
-W &\in \reals^{{\nset{out\_channels}{c'}, \nset{channels}{c}, \nset{kw}{k}}}  \\
+X &\in \reals^{{\nset{channels}{c} \times \nset{seq}{n}}}  \\
+W &\in \reals^{{\nset{out\_channels}{c'} \times \nset{channels}{c} \times \nset{kw}{k}}}  \\
 \text{conv1d}(X, W) &= W \ndot{channels, kw} U \\
-U &\in \reals^{{\nset{channels}{c}, \nset{seq}{n-k +1}, \nset{kw}{k}}}  \\
+U &\in \reals^{{\nset{channels}{c} \times \nset{seq}{n-k +1} \times \nset{kw}{k}}}  \\
 U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}  
 \end{align*} 
 
@@ -430,12 +437,12 @@ U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}
 
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*} 
-X &\in \reals^{\nset{batch}{b}, \nset{space}{k}} \\
-C &\in \reals^{\nset{clusters}{c}, \nset{space}{k}}
+X &\in \reals^{\nset{batch}{b} \times \nset{space}{k}} \\
+C &\in \reals^{\nset{clusters}{c} \times \nset{space}{k}}
 \end{align*}
 we compute cluster assignments
 \begin{align*}
-% Q &\in \{0, 1\}^{\nset{batch}{b},\nset{clusters}{c}} \\
+% Q &\in \{0, 1\}^{\nset{batch}{b} \times\nset{clusters}{c}} \\
 Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X) \\
   &= \lim_{\alpha \rightarrow -\infty} \nfun{clusters}{softmax} \left(\alpha \nfun{space}{norm}(C-X)\right)
 \end{align*}
@@ -450,8 +457,8 @@ Beam search is a commonly used approach for approximate discrete search. Here $H
 Beam step returns the new $H$ tensor. 
 
 \begin{align*} 
-H &\in \reals^{{\nset{batch}{b}, \nset{beam}{k}}} \\
-S &\in \{0, 1\}^{{\nset{batch}{b}, \nset{beam}{k}, \nset{state}{s}}} & \nsum{state} S &= 1\\
+H &\in \reals^{{\nset{batch}{b} \times \nset{beam}{k}}} \\
+S &\in \{0, 1\}^{{\nset{batch}{b} \times \nset{beam}{k} \times \nset{state}{s}}} & \nsum{state} S &= 1\\
 f &\colon \{0, 1\}^{{\nset{state}{s}}} \rightarrow \reals^{{\nset{state'}{s}}} \\ 
 \text{beamstep}(H, S) &= \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H \right)
 \end{align*} 
@@ -461,9 +468,9 @@ f &\colon \{0, 1\}^{{\nset{state}{s}}} \rightarrow \reals^{{\nset{state'}{s}}} \
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
-X &\in \reals^{\nset{batch}{{b}}, \nset{d}{{k}}}  \\
+X &\in \reals^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
 \mu &\in \reals^{{\nset{d}{{k}}}}  \\
-\Sigma & \in   \reals^{{\nset{d1}{{k}}, \nset{d2}{{k}}}}  \\
+\Sigma & \in   \reals^{{\nset{d1}{{k}} \times \nset{d2}{{k}}}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
 \end{align*}
 
@@ -475,11 +482,11 @@ an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
-Q &\in \reals^{\nset{key}{d_v},\nset{seq'}{n}}\\
-K &\in \reals^{\nset{head}{h},\nset{key}{d_k}, \nset{seq}{n}}\\
-V &\in \reals^{\nset{head}{h}, \nset{val}{d_v}, \nset{seq}{n}}\\
+Q &\in \reals^{\nset{key}{d_v} \times\nset{seq'}{n}}\\
+K &\in \reals^{\nset{head}{h} \times\nset{key}{d_k} \times \nset{seq}{n}}\\
+V &\in \reals^{\nset{head}{h} \times \nset{val}{d_v} \times \nset{seq}{n}}\\
 \text{attention}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
-M & \in \reals^{\nset{seq}{n}, \nset{seq'}{n}} \\
+M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
 M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise} \end{cases} \\
 \end{align*}
@@ -518,23 +525,23 @@ The style file contains a small number of macros:
 
 A \emph{named tuple} is a set of pairs, written as $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct \emph{names}. We write both names and variables ranging over names using sans-serif font.
 
-If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{\name{i} \mid \text{$(\nidx{i}{x}) \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{i}$ for the unique $x$ such that $(\nidx{i}{x}) \in t$. We write the empty named tuple as $\emptyset$.
+If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{\name{i} \mid \text{$\nidx{i}{x} \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{i}$ for the unique $x$ such that $\nidx{i}{x} \in t$. We write the empty named tuple as $\emptyset$.
 
-We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $(\nidx{i}{x}) \in t_1$ implies $(\nidx{i}{x}) \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
+We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $\nidx{i}{x} \in t_1$ implies $\nidx{i}{x} \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
 
-A \emph{shape} is a set of pairs written as $\tuple{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}}$ where $X_1, \ldots, X_r$ are sets. We use shapes to define sets of named tuples:
+A \emph{shape} is a set of pairs written as $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$ where $X_1, \ldots, X_r$ are sets. We use shapes to define sets of named tuples:
 \begin{equation*}
-\tupleshape \tuple{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}} = \left\{\tuple{\nidx{i}{1}=x_1, \ldots, \nidx{i}{r}=x_r} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
+\tupleshape \tuple{\nset{i\sub{1}}{X_1} \times \ldots, \nset{i\sub{r}}{X_r}} = \left\{\tuple{\nidx{i}{1}=x_1, \ldots, \nidx{i}{r}=x_r} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
 \end{equation*}
 We define $\sqsubseteq$, $\sqcup$, and $\sqcap$ on shapes just as with named tuples.
 
-If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \sqsubseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the named tuple $\{(\nidx{i}{x}) \in t \mid \name{i} \in \tupledom{S}\}$.
+If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \sqsubseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the named tuple $\{\nidx{i}{x} \in t \mid \name{i} \in \tupledom{S}\}$.
 
 \subsection{Named tensors}
 
-Let $[n] = \{1, \ldots, n\}$. We deal with shapes of the form $\tuple{\nset{i}{1}: [n_1], \ldots, \nset{i}{r}: [n_r]}$ so frequently that we define the shorthand $\tuple{\nset{i}{1}: n_1, \ldots, \nset{i}{r}: n_r}$.
+Let $[n] = \{1, \ldots, n\}$. We deal with shapes of the form $\nset{i\sub1}{[n_1]} \times \cdots \times \nset{i\sub{r}}{[n_r]}$ so frequently that we define the shorthand $\nset{i\sub1}{n_1} \times \cdots \times \nset{i\sub{r}}{n_r}$.
 
-Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\tupleshape \mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$. To avoid clutter, in place of $F^{\tuple{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}}}$, we usually write $F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}}$.
+Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\tupleshape \mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
@@ -595,8 +602,8 @@ For example, the RNN would look like this.
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
 h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state}{d}, \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{emb}{d}, \nset{state}{d}} \\
+A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
+B &\in \mathbb{R}^{\nset{emb}{d} \times \nset{state}{d}} \\
 c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)} &= \tanh\left( A \nndot{state'}{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)
 \end{align*}
@@ -607,8 +614,8 @@ If $\name{i}$ is a name, we also allow a tensor to have an index $\name{i*}$ (al
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
 h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state*}{d}, \nset{state}{d}} \\
-B &\in \mathbb{R}^{\nset{emb*}{d}, \nset{state}{d}} \\
+A &\in \mathbb{R}^{\nset{state*}{d} \times \nset{state}{d}} \\
+B &\in \mathbb{R}^{\nset{emb*}{d} \times \nset{state}{d}} \\
 c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)} &= \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right) 
 \end{align*}
@@ -653,8 +660,8 @@ Finally, this notation alleviates the duality problem, as can be seen in the def
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
 h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state}{d}, \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{state}{d}, \nset{emb}{d}} \\
+A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
+B &\in \mathbb{R}^{\nset{state}{d} \times \nset{emb}{d}} \\
 c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)}_{\name{state}} &= \tanh\left( A_{\name{state},\name{state'}} \, h^{(t)}_{\name{state}} + B_{\name{state},\name{emb}} \, x^{(t)}_{\name{emb}} + c_{\name{state}} \right)
 \end{align*}
@@ -665,15 +672,15 @@ h^{(t+1)} = \tanh\left( A_{\name{state'}} \cdot h^{(t)}_{\name{state}} + B_{\nam
 
 Attention:
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n},\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'},\nset{val}{d_v}} \\
+  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'} \times\nset{val}{d_v}} \\
   \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_\name{key}}{\sqrt{d_k}} \right]_{\name{seq}} \cdot V_{\name{seq}}
 \end{align*}
 
 Multivariate normal distribution:
 \begin{align*} 
-X &\in \mathbb{R}^{\nset{batch}{{b}}, \nset{d}{{k}}}  \\
+X &\in \mathbb{R}^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
 \mu &\in \mathbb{R}^{{\nset{d}{{k}}}}  \\
-\Sigma & \in   \mathbb{R}^{{\nset{d}{k}, \nset{d'}{k}}}  \\
+\Sigma & \in   \mathbb{R}^{{\nset{d}{k} \times \nset{d'}{k}}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\tfrac{1}{2} [X - \mu]_{\name{d}}^\top \, \Sigma_{\name{d},\name{d'}}^{-1} \, [X - \mu]_{\name{d}} \right)}{\sqrt{(2 \pi)^k \, \mathop{\text{det}} \Sigma_{\name{d},\name{d'}}}}
 \end{align*}
 
