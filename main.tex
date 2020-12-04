@@ -487,7 +487,33 @@ M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 
 \subsection{Full Examples: Transformer and LeNet}
 
-As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}). 
+As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}).
+
+\section{\LaTeX{} Macros}
+
+Many of the \LaTeX{} macros used in this document are available in the style file \url{https://namedtensor.github.io/namedtensor.sty}. To use it, put
+\begin{quote}
+\begin{verbatim}
+\usepackage{namedtensor}
+\end{verbatim}
+\end{quote}
+in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article}| but before \verb|\begin{document}|).
+
+The style file contains a small number of macros:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lll@{}}
+  \verb|\name{foo}| & $\name{foo}$ & index name \\
+  \verb|A_{\nidx{foo}{1},\nidx{bar}{3}}| & $A_{\nidx{foo}{1},\nidx{bar}{3}}$ & tensor indexing \\
+  \verb|\mathbb{R}^{\nset{foo}{2},\nset{bar}{3}}| & $\mathbb{R}^{\nset{foo}{2},\nset{bar}{3}}$ & set of tensors \\
+  \verb|A \ndot{foo} B| & $A \ndot{foo} B$ & contraction \\
+  \verb|A \ncat{foo} B| & $A \ncat{foo} B$ & concatenation \\
+  \verb|\nsum{foo} A| & $\nsum{foo} A$ & summation \\
+  \verb|\nfun{foo}{qux} A| & $\nfun{foo}{qux} A$ & any function \\
+  \verb|\nmov{foo}{bar}{A}| & $\nmov{foo}{bar}{A}$ & index renaming
+\end{tabular}
+\end{center}
 
 \section{Formal Definitions}
 \label{sec:definitions}
