@@ -579,19 +579,26 @@ Normally, we need to expand the dimensionalities of both vectors by 1, and then 
   \mathrm{broadcast} : X_1^{\mathcal{S}_1} \times \cdots \times X_n^{\mathcal{S}_n} \to X_1^{\mathcal{T}} \times \cdots \times X_n^{\mathcal{T}}, \quad \mathcal{T} = \bigsqcup_{i=1}^n \mathcal{S}_i
 \end{equation*}
 
-if all axes with shared names match. We'll use this to develop a formalism of advanced indexing under named tensor notations.
+if all axes with shared names match. Obviously, we can also extend this to operate on a \emph{named} tuple of named tensors:
+\begin{equation*}
+  \mathrm{broadcast} : \{ \name{i}_1: X_1^{\mathcal{S}_1}, \cdots, \name{i}_n: X_n^{\mathcal{S}_n} \} \to \{ \name{i}_1: X_1^{\mathcal{T}}, \cdots, \name{i}_n: X_n^{\mathcal{T}}\}. \quad \mathcal{T} = \bigsqcup_{i=1}^n \mathcal{S}_i
+\end{equation*}
 
-\paragraph{Advanced indexing} A common operation in array-based programming is \emph{advanced indexing}, whose semantics is vague\footnote{~\url{https://numpy.org/doc/stable/reference/arrays.indexing.html}.} and cannot be easily reasoned over. Given a tensor $A \in X^{\name{i}_1:n_1, \cdots, \name{i}_D:n_D}$, in NumPy (or PyTorch), $A$ can be indexed in the form of $A[I^1, \cdots, I^D]$, where each \emph{indexer} $I^{d \in [D]}$ can be of the following three types:
+We'll use this to develop a formalism of advanced indexing under named tensor notations.
+
+\paragraph{Advanced indexing} A common operation in array-based programming is \emph{advanced indexing}, whose semantics is vague\footnote{~\url{https://numpy.org/doc/stable/reference/arrays.indexing.html}.} and cannot be easily reasoned over. Given an \emph{unnamed} tensor $A \in X^{n_1 \times \cdots \times n_D}$ in NumPy (or PyTorch), $A$ can be indexed in the form of $A_{I^1, \cdots, I^D}$, where each \emph{indexer} $I^{d \in [D]}$ can be of the following three types:
 \begin{itemize}
   \item An index $I^d \in [n_d]$;
   \item A subset of indices $I^d \subseteq [n_d]$ (a special case is ``\texttt{:}'', i.e. $I^d = [n_d]$);
   \item Another tensor with integer elements $I^d \in [n_d]^\mathcal{T}$ with shape $\mathcal{T}$.
 \end{itemize}
 
+What if $A$ is a named tensor of type $X^{\name{i}_1: n_1, \cdots, \name{i}_D: n_D}$? How can we extend the notion of advanced indexing to named version, i.e. $A_{\name{i}_1: I^1, \cdots, \name{i}_D: I^D}$?
+
 We first start our discussion where all indexers $I^{d \in [D]}$ to the indexee $A \in X^{\mathcal{S}}$ are tensors in $[n_d]^{\mathcal{T}}$ with uniform shape $\mathcal{T} = \{\name{j}_1: m_1, \cdots, \name{j}_E : m_E\}$. The advanced indexing operation is defined as
 \begin{align*}
-  \mathrm{advIdx}&: X^{\mathcal{S}} \times ([n_1]^\mathcal{T} \times \cdots \times [n_D]^\mathcal{T}) \to X^{\mathcal{T}} \\
-  B = A[I^1, \cdots, I^d] &= \mathrm{advIdx}(A, (I^1, \cdots, I^d)) \in X^{\mathcal{T}} \\
+  \mathrm{advIdx}&: X^{\mathcal{S}} \times \{ \name{i}_1: [n_1]^\mathcal{T} , \cdots, \name{i}_D: [n_D]^\mathcal{T}\} \to X^{\mathcal{T}} \\
+  B  &= \mathrm{advIdx}(A, \{\name{i}_1: I^1, \cdots, \name{i}_D: I^D\}) \in X^{\mathcal{T}} \\
   B_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}  &= A_{\name{i}_1: I^1_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}, \cdots, \name{i}_D: I^D_{\name{j}_1:y_1, \cdots, \name{j}_E:y_E}} \\
 \end{align*}
 
@@ -604,11 +611,11 @@ How do we fit the three types of indexers into this definition? We view each ind
 
 Now the more lenient form of advanced indexing as in the semantics of NumPy can be described using the broadcast operator we elaborated above:
 \begin{align*}
-  \mathrm{advIdx}'&: X^{\mathcal{S}} \times ([n_1]^{\mathcal{T}_1} \times \cdots \times [n_D]^{\mathcal{T}_D}) \to X^{\bigsqcup_{i=1}^D \mathcal{T}_i} \\
-  B = A[I^1, \cdots, I^d] &= \mathrm{advIdx}(A, \mathrm{broadcast}(I^1, \cdots, I^d)) \in X^{\mathcal{T}} \\
+  \mathrm{advIdx}'&: X^{\mathcal{S}} \times \{ \name{i}_1: [n_1]^{\mathcal{T}_1} , \cdots , \name{i}_D: [n_D]^{\mathcal{T}_D} \} \to X^{\bigsqcup_{i=1}^D \mathcal{T}_i} \\
+  B = A_{\name{i}_1: I^1, \cdots, \name{i}_D: I^D} &= \mathrm{advIdx}(A, \mathrm{broadcast}(\{ \name{i}_1: [n_1]^{\mathcal{T}_1} , \cdots , \name{i}_D: [n_D]^{\mathcal{T}_D} \}) \in X^{\mathcal{T}} \\
 \end{align*}
 
-Let's see a concrete example in natural language processing. Given a batch of encoded sentences using a contextualizer like BERT, we get a tensor $X \in \mathbb{R}^{\name{batch}:B, \name{sentLen}: N, \name{emb}: E}$. For each sentence, we would like to take out the encodings of a specific span $[l_b, r_b)$ for each sentence $b \in [B]$ in the batch, resulting in a tensor $ Y \in \mathbb{R}^{\name{batch}:B, \name{spanLen}: M, \name{emb}: E}$.
+Let's consider a concrete example in natural language processing. Given a batch of encoded sentences using a contextualizer like BERT, we get a tensor $X \in \mathbb{R}^{\name{batch}:B, \name{sentLen}: N, \name{emb}: E}$. For each sentence, we would like to take out the encodings of a specific span $[l_b, r_b)$ for each sentence $b \in [B]$ in the batch, resulting in a tensor $ Y \in \mathbb{R}^{\name{batch}:B, \name{spanLen}: M, \name{emb}: E}$.
 
 We create a indexer for the $\name{sentLen}$ axis: $I_{\name{sentLen}} \in [N]^{\name{batch}:B, \name{spanLen}: M}$ that selects the desired encodings of tokens. The advanced indexing expression $X[:, I, :]$ can be viewed under our formulation as
 \begin{equation*}
