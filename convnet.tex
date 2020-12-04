@@ -53,17 +53,17 @@ W^2 \in \reals^{ \nset{hidden}{h}} \\
 
 \begin{align*} 
 \textit{Params}: \\
-W^1 & \in \reals^{\nset{channel'}{c_2}, \nset{channel}{c_1}, \nset{kh}{kh_1}, \nset{kw}{kw_1}} \\ 
-W^2 & \in \reals^{\nset{channel'}{c_3}, \nset{channel}{c_2}, \nset{kh}{kh_2}, \nset{kw}{kw_2}} \\ 
+W^1 & \in \reals^{\nset{channels'}{c_2}, \nset{channels}{c_1}, \nset{kh}{kh_1}, \nset{kw}{kw_1}} \\ 
+W^2 & \in \reals^{\nset{channels'}{c_3}, \nset{channels}{c_2}, \nset{kh}{kh_2}, \nset{kw}{kw_2}} \\ 
 U & \in \reals^{\nset{in}{h_1}, \nset{hidden}{h_2}},  V \in \reals^{\nset{hidden}{h_2}, \nset{out}{h_3}} \\ \\
 \textit{Model}: \\
-X^0 &\in \reals^{\nset{batch}{b}, \nset{channel}{1}, \nset{height}{h}, \nset{width}{w}}\\
-X^1 &= \nmov{channel'}{channel}{\text{ReLU}(\text{conv2d}(X^0; W^1))} \\
+X^0 &\in \reals^{\nset{batch}{b}, \nset{channels}{1}, \nset{height}{h}, \nset{width}{w}}\\
+X^1 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^0; W^1))} \\
 X^2 &= \text{maxpool2d}(X^1, ph_1, ph_2) \\
-X^3 &= \nmov{channel'}{channel}{\text{ReLU}(\text{conv2d}(X^2; W^2))} \\
+X^3 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^2; W^2))} \\
 X^4 &= \text{maxpool2d}(X^3, ph_2, ph_2) \\
 X^5 &\in \reals^{\nset{batch}{b}, \nset{inp}{h_1}}\\ 
-X^5_{\name{inp}} &= X^2_{\name{height}, \name{width}, \name{channel}}\\ 
+X^5_{\name{inp}} &= X^2_{\name{height}, \name{width}, \name{channels}}\\ 
 O &= \nfun{class}{softmax} \nmov{out}{class}{\text{MLP}(X^3; U, V)}
 \end{align*} 
 
