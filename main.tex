@@ -10,9 +10,7 @@
 
 % for formal definitions
 \newcommand{\tuple}[1]{\{#1\}}
-\DeclareMathOperator{\tupledom}{dom}
 \DeclareMathOperator{\tupleshape}{ind}
-\newcommand{\tupleproj}[2]{#1.\name{#2}}
 \newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
@@ -523,34 +521,33 @@ The style file contains a small number of macros:
 
 \subsection{Named tuples}
 
-A \emph{named tuple} is a set of pairs, written as $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct \emph{names}. We write both names and variables ranging over names using sans-serif font.
+A \emph{named index} is a pair, written $\nidx{i}{x}$, where $\name{i}$ is a \emph{name} and $x$ is usually a positive integer. We write both names and variables ranging over names using sans-serif font.
 
-If $t$ is a named tuple, we write $\tupledom{t}$ for the set $\{\name{i} \mid \text{$\nidx{i}{x} \in t$ for some $x$} \}$. If $\name{i} \in \tupledom{t}$, we write $\tupleproj{t}{i}$ for the unique $x$ such that $\nidx{i}{x} \in t$. We write the empty named tuple as $\emptyset$.
+A \emph{named tuple} is a set of named indices $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
 
-We define a partial ordering $\sqsubseteq$ on named tuples: $t_1 \sqsubseteq t_2$ iff for all $\name{i}$, $x$, $\nidx{i}{x} \in t_1$ implies $\nidx{i}{x} \in t_2$. Then $t_1 \sqcap t_2$ is the greatest lower bound of $t_1$ and $t_2$, and $t_1 \sqcup t_2$ is their least upper bound.
+If $\name{i}$ is a name and $X$ is a set, define the \emph{named index set} $\nset{i}{X}$ to be the set $\{\nidx{i}{x} \mid x \in X\}$. We deal with named index sets of the form $\nset{i}{[n]}$ (${}=\nset{i}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as $\nset{i}{n}$.
 
-A \emph{shape} is a set of pairs written as $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$ where $X_1, \ldots, X_r$ are sets. We use shapes to define sets of named tuples:
+A \emph{named shape} is a set of named index sets $\{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A named shape defines a set of named tuples:
 \begin{equation*}
-\tupleshape \tuple{\nset{i\sub{1}}{X_1} \times \ldots, \nset{i\sub{r}}{X_r}} = \left\{\tuple{\nidx{i}{1}=x_1, \ldots, \nidx{i}{r}=x_r} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
+\tupleshape \{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\} = \left\{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\},
 \end{equation*}
-We define $\sqsubseteq$, $\sqcup$, and $\sqcap$ on shapes just as with named tuples.
+and for this reason we often write a shape with the alternative notation $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$, because it's like an ``unordered Cartesian product'' of the index sets.
 
-If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \sqsubseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the named tuple $\{\nidx{i}{x} \in t \mid \name{i} \in \tupledom{S}\}$.
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$, then $X = Y$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{i}$ such that $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$ for any $X$, $Y$.
+
+If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the unique tuple in $\tupleshape{\mathcal{S}}$ such that $\tuplerestrict{t}{\mathcal{S}} \subseteq t$.
 
 \subsection{Named tensors}
 
-Let $[n] = \{1, \ldots, n\}$. We deal with shapes of the form $\nset{i\sub1}{[n_1]} \times \cdots \times \nset{i\sub{r}}{[n_r]}$ so frequently that we define the shorthand $\nset{i\sub1}{n_1} \times \cdots \times \nset{i\sub{r}}{n_r}$.
-
-Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\tupleshape \mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
+Let $F$ be a field and let $\mathcal{T}$ be a set of named tuples. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
 If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a named tuple $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
 
-We also allow partial indices. Let $\mathcal{U}$ be a shape such that $\mathcal{U} = \mathcal{S} \sqcup \mathcal{T}$ and $\mathcal{S} \sqcap \mathcal{T} = \emptyset$.
-If $A$ is a tensor with shape $\mathcal{S}$ and $s \in \tupleshape \mathcal{S}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T}$ such that, for any $t \in \tupleshape \mathcal{T}$,
+We also allow partial indices. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \tupleshape \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \tupleshape (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
-\left[A_s\right]_t &= A_{s \sqcup t}.
+\left[A_s\right]_t &= A_{s \cup t}.
 \end{align*}
 (For the edge case $\mathcal{S} = \mathcal{U}$ and $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
 
@@ -559,20 +556,15 @@ If $A$ is a tensor with shape $\mathcal{S}$ and $s \in \tupleshape \mathcal{S}$,
 
 In \S\ref{sec:intro}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
 
-Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ such that $\mathcal{S} \sqcap \mathcal{U} = \emptyset$ and $\mathcal{T} \sqcap \mathcal{U} = \emptyset$, we can extend $f$ to:
+Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
-f &: F^{\mathcal{S} \sqcup \mathcal{U}} \rightarrow G^{\mathcal{T} \sqcup \mathcal{U}} \\
+f &: F^{\mathcal{S} \cup \mathcal{U}} \rightarrow G^{\mathcal{T} \cup \mathcal{U}} \\
 [f(A)]_u &= f(A_u) \qquad \text{for all $u \in \tupleshape\mathcal{U}$.}
 \end{align*}
 
-If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shape $\mathcal{S'}$, $\mathcal{T'}$ such that $\mathcal{U'} = \mathcal{S'} \sqcup \mathcal{T'}$ exists, and 
+If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{U'} = \mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
 \begin{align*}
-\mathcal{S} \sqcap \mathcal{S'} &= \emptyset \\
-\mathcal{T} \sqcap \mathcal{T'} &= \emptyset \\
-\mathcal{U} \sqcap \mathcal{U'} &= \emptyset \end{align*}
-we can extend $f$ to:
-\begin{align*}
-f &: F^{\mathcal{S} \sqcup \mathcal{S'}} \times G^{\mathcal{T} \sqcup \mathcal{T'}} \rightarrow H^{\mathcal{U} \sqcup \mathcal{U'}} \\
+f &: F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} \rightarrow H^{\mathcal{U} \cup \mathcal{U'}} \\
   [f(A,B)]_u &= f\left(A_{\tuplerestrict{u}{\mathcal{S'}}},B_{\tuplerestrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \tupleshape\mathcal{U'}$.}
 \end{align*}
 
@@ -593,10 +585,11 @@ In this section, we describe three possible solutions to this problem, and welco
 
 \subsection{Contracting two names}
 
-We define a version of the contraction operator that can contract two indices with different names. If $\name{i} \in \tupledom \mathcal{A}$ and $\name{j} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{i} = \tupleproj{\mathcal{B}}{j} = X$, then we define
-\begin{equation*}
-A \nndot{i}{j} B = \sum_{x \in X} A_{\nidx{i}{x}} \, B_{\nidx{j}{x}}
-\end{equation*}
+We define a version of the contraction operator that can contract two indices with different names (and the same size):
+\begin{align*}
+\nndot{i}{j} &: F^{\nset{i}{n}} \times F^{\nset{j}{n}} \rightarrow F \\
+A \nndot{i}{j} B &= \sum_{k=1}^n A_{\nidx{i}{k}} B_{\nidx{j}{k}}.
+\end{align*}
 
 For example, the RNN would look like this.
 \begin{align*}
@@ -619,10 +612,11 @@ B &\in \mathbb{R}^{\nset{emb*}{d} \times \nset{state}{d}} \\
 c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)} &= \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right) 
 \end{align*}
-In general, if $\name{i*} \in \tupledom \mathcal{A}$ and $\name{i} \in \tupledom \mathcal{B}$ and $\tupleproj{\mathcal{A}}{i*} = \tupleproj{\mathcal{B}}{i} = X$, then we define
-\begin{equation*}
-A \ndot{i} B = \sum_{x \in X} A_{\nset{i*}{x}} \, B_{\nset{i}{x}}
-\end{equation*}
+The contraction operator can be defined as:
+\begin{align*}
+\ndot{i} &: F^{\nset{i*}{n}} \times F^{\nset{i}{n}} \rightarrow F \\
+A \ndot{i} B &= \sum_{i=1}^n A_{\nidx{i*}{i}} B_{\nidx{i}{i}}.
+\end{align*}
 
 There are a few variants of this idea that have been floated:
 \begin{enumerate}
