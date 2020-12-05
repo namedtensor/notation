@@ -339,7 +339,7 @@ by which axes are normalized.
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{batch}:b}} \\
-\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon } \odot \gamma + \beta
+\text{batchnorm}(X; \gamma, \beta) &= \frac{\displaystyle  X - \nfun{batch}{mean}(X)}{\displaystyle \sqrt{\nfun{batch}{var}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 
@@ -348,7 +348,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \gamma, \beta &\in \reals^{{\name{hidden}:h}} \\
-\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\text{instancenorm}(X; \gamma, \beta) &= \frac{\displaystyle  X - \nfun{hidden}{mean}(X)}{\displaystyle  \sqrt{\nfun{hidden}{var}(X)} + \epsilon } \odot \gamma + \beta
 \end{align*}
 
 \subsubsection*{Layer Norm}
@@ -356,7 +356,7 @@ X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
 \begin{align*} 
 X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
 \gamma, \beta &\in \reals^{{\name{channel}:c, \name{hidden}:h}} \\
-\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
+\text{layernorm}(X; \gamma, \beta) &= \frac{\displaystyle X - \nfun{hidden,channel}{mean}(X)}{ \displaystyle  \sqrt{\nfun{hidden, channel}{var}(X)} + \epsilon } \odot \gamma + \beta 
 \end{align*}
 
 
