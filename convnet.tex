@@ -7,54 +7,45 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{multicol}
 
-\DeclareMathOperator*{\softmax}{softmax}
+\usepackage{namedtensor}
+
 \newcommand{\reals}[0]{\mathbb{R}}
 
-% Named tensor prelude
-\newcommand{\name}[1]{\mathsf{#1}}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\odot}\displaylimits_{\name{#1}}}}
-\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
-
-
-\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}\displaylimits_{\name{#1}}}}
-\newcommand{\ntup}[2]{\name{#1}:#2}
-\title{Named Tensor - CNN / LeNet}
+\title{Named Tensors: CNN / LeNet}
 \date{}
 
 \begin{document}
 \maketitle
-\date{}
+
 % \begin{multicols}{2}
 
 \subsection*{Conv 2D}
 
 \begin{align*} 
-W &\in \reals^{\name{channel}:c,\name{kh}:kh, \name{kw}:kw} \\
-h' &= h-kh +1,  w' = w-kw +1 \\
-b &\in \reals^{\name{height}: h', \name{width}:w'}  \\
+W &\in \reals^{\nset{channel}{c},\nset{kh}{kh}, \nset{kw}{kw}} \\
+h' &= h-kh +1, w' = w-kw +1 \\
+b &\in \reals^{\nset{height}{h'}, \nset{width}{w'}}  \\
 \text{conv2d}(X; W, b) &=  W \ndot{channel, kh, kw} U + b \\
-U &\in \reals^{{\name{channel}:c, \name{height}:h',
-\name{width}:w', \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j,  \name{kh}:i', \name{kw}:j'  } &= X_{\name{height}:i+i' - 1, \name{width}:j+j' - 1}  
+U &\in \reals^{{\nset{channel}{c}, \nset{height}{h'},
+\nset{width}{w'}, \nset{kh}{kh}, \nset{kw}{kw}}}  \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{i'}, \nidx{kw}{j'}} &= X_{\nidx{height}{i+i' - 1}, \nidx{width}{j+j' - 1}}  
 \end{align*}
 
 \subsection*{Max Pooling}
 
 \begin{align*} 
-X &\in \reals^{\name{height}: h, \name{width}:w} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
-U &\in \reals^{{\name{height}:h / kh,
-\name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i \times kh + di -1, \name{width}:j \times kw + dj -1}  
+X &\in \reals^{\nset{height}{h}, \nset{width}{w}} \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max}  U \\
+U &\in \reals^{{\nset{height}{h / kh},
+\nset{width}{w / kw}, \nset{kh}{kh}, \nset{kw}{kw}}}  \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj - 1}}  
 \end{align*}
 
 \subsection*{MLP}
 
-
-
 \begin{align*} 
-W^1 &\in \reals^{\name{inp}:i, \name{hidden}:h }, 
-W^2 \in \reals^{ \name{hidden}:h } \\
+W^1 &\in \reals^{\nset{inp}{i}, \nset{hidden}{h}}, 
+W^2 \in \reals^{ \nset{hidden}{h}} \\
 \text{MLP}(X; W, b) &=  W^1 \ndot{hidden} \text{ReLU}(W^1 \ndot{inp} X + b^1) + b^2 
 \end{align*}
 
@@ -62,18 +53,18 @@ W^2 \in \reals^{ \name{hidden}:h } \\
 
 \begin{align*} 
 \textit{Params}: \\
-W^1 & \in \reals^{\name{channel'}: c_2, \name{channel}:c_1, \name{kh}: kh_1, \name{kw}:kw_1} \\ 
-W^2 & \in \reals^{\name{channel'}: c_3, \name{channel}:c_2, \name{kh}:kh_2, \name{kw}:kw_2} \\ 
-U & \in \reals^{\name{in}: h_1 , \name{hidden}:h_2},  V \in \reals^{\name{hidden}:h_2, \name{out}:h_3} \\ \\
+W^1 & \in \reals^{\nset{channels'}{c_2}, \nset{channels}{c_1}, \nset{kh}{kh_1}, \nset{kw}{kw_1}} \\ 
+W^2 & \in \reals^{\nset{channels'}{c_3}, \nset{channels}{c_2}, \nset{kh}{kh_2}, \nset{kw}{kw_2}} \\ 
+U & \in \reals^{\nset{in}{h_1}, \nset{hidden}{h_2}},  V \in \reals^{\nset{hidden}{h_2}, \nset{out}{h_3}} \\ \\
 \textit{Model}: \\
-X^0 &\in \reals^{\name{batch}:b, \name{channel}:1, \name{height}:h, \name{width}:w}\\
-X^1 &= \left[\text{ReLU}(\text{conv2d}(X^0; W^1))\right]_{\name{channel'}\rightarrow\name{channel}}\\ 
+X^0 &\in \reals^{\nset{batch}{b}, \nset{channels}{1}, \nset{height}{h}, \nset{width}{w}}\\
+X^1 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^0; W^1))} \\
 X^2 &= \text{maxpool2d}(X^1, ph_1, ph_2) \\
-X^3 &= \left[\text{ReLU}(\text{conv2d}(X^2; W^2)) \right]_{\name{channel'}\rightarrow\name{channel}} \\
+X^3 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^2; W^2))} \\
 X^4 &= \text{maxpool2d}(X^3, ph_2, ph_2) \\
-X^5 &\in \reals^{\name{batch}:b, \name{inp}:h_1 }\\ 
-X^5_{\name{inp}} &= X^2_{\name{height}, \name{width}, \name{channel}}\\ 
-O &= \nfun{class}{\text{softmax}}\left[\text{MLP}(X^3; U, V)\right]_{\name{out}\rightarrow \name{class}} \\ 
+X^5 &\in \reals^{\nset{batch}{b}, \nset{inp}{h_1}}\\ 
+X^5_{\name{inp}} &= X^4_{\name{height}, \name{width}, \name{channels}}\\ 
+O &= \nfun{class}{softmax} \nmov{out}{class}{\text{MLP}(X^5; U, V)}
 \end{align*} 
 
 
