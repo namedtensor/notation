@@ -63,22 +63,17 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-A \emph{named tuple} (also known as a \emph{record}) looks like this: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}}.\] The order of the elements doesn't matter: \[\tuple{\nidx{foo}{2}, \nidx{bar}{3}} = \tuple{\nidx{bar}{3}, \nidx{foo}{2}}.\] We use \textsf{sans-serif} font for names.
+A \emph{named tuple} looks like this: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}}.\] The order of the elements, called \emph{named indices}, doesn't matter: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}} = \tuple{\nidx{bar}{3}, \nidx{foo}{1}}.\] We use \textsf{sans-serif} font for names.
 
-Then, a real \emph{named tensor} is a function from named tuples to
-reals. Each of its indices has a name, and the ordering of the indices
-doesn't matter. For example, here is a tensor with an index named
-$\name{foo}$ ranging from 1 to 2 and an index named $\name{bar}$
-ranging from 1 to 3.
+A \emph{named shape} looks like this: \[\nset{foo}{2} \times \nset{bar}{3}.\] Again, the order of the elements, called \emph{named index sets}, doesn't matter: \[\nset{foo}{2} \times \nset{bar}{3} = \nset{bar}{3} \times \nset{foo}{2}.\] A named shape defines a set of possible named tuples: in this example, an index named $\name{foo}$ ranges from 1 to 2, and an index named $\name{bar}$ ranges from 1 to 3.
+
+Then, a real \emph{named tensor} is a function from a named shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
   1 & 5 & 9
 }.
 \end{equation*}
-
-More succinctly, we say that the \emph{shape} of
-$A$ is $\nset{foo}{2} \times \nset{bar}{3}$. (Although $\times$ is usually ordered, in shapes the order doesn't matter; $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.)
 
 We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{foo}{2}, \nidx{bar}{3}}$ -- 
 not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
