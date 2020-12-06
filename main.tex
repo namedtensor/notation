@@ -171,14 +171,14 @@ For example, using the same example tensor $A$ from above,
   3+1+4 & 1+5+9
 }.
 \end{align*}
-More reductions: If $A$ has shape $\tuple{\nset{i}{X} \times \ldots}$, then
+More reductions: If $A$ has shape $\nset{foo}{I} \times \ldots$, then
 \begin{align*}
-  \nsum{foo} A &= \sum_{x \in X} A_{\nidx{foo}{x}} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nsum{foo} A &= \sum_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{min} A &= \min_{x \in X} A_{\nidx{foo}{x}} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max_{x \in X} A_{\nidx{foo}{x}} = \nmatrix{}{bar}{3 & 5 & 9} \\
-  \nfun{foo}{mean} A &= \frac{1}{|X|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
-  \nfun{foo}{var} A &= \frac1{|X|} \nsum{i} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
+  \nfun{foo}{min} A &= \min_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
+  \nfun{foo}{mean} A &= \frac{1}{|I|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
+  \nfun{foo}{var} A &= \frac1{|I|} \nsum{i} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
