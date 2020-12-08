@@ -192,14 +192,23 @@ Maybe something like
 g = named(X=[width,height], output = [layer] ,f)
 \end{python}
 when \pyth{f} is such a function that takes \pyth{X} as a tensor input. In this case width will be mapped to the first axis and height to the second one. 
-
-Should also have such way to automatically transform pytorch modules of the form `nn.Module` to ones that use named tensors as their weights, inputs, and outputs.
-
 As usual, the signature of an operator does not specify all the information about the relation of its input and output relation. For example, we can have the "halving" operator $HALVE$ that drops the bottom half of an image.
 
 $HALVE:\mathbb{R}^{\name{width},\name{height}} \rightarrow \mathbb{R}^{\name{width},\name{height}}$
 
 The abstract types of the input and output tensors are the same but we can add the constraint that $|width(HALVE(X))|=\lfloor |width(X)/2| \rfloor$ separately.
+
+
+Should also have such way to automatically transform pytorch modules of the form `nn.Module` to ones that use named tensors as their weights, inputs, and outputs.
+For example, something like 
+
+\begin{python}
+namedtensors.nn.Linear([ [width[:32],height[:32],channel[:3]], layer[:70] ])
+\end{python}
+
+will create a linear transformation with weights and inputs of shape $\{ \name{width}[..32], \name{height}[..32],\name{channel}[..3] \}$ and output of shape $\{ \name{layer}[..70] \}$. 
+
+
 
 
 
@@ -232,7 +241,7 @@ Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the 
 We write $\mathbb{R}^{\name{foo},\name{bar}}$ for the set of all tensors whose shape has the form $\{ \name{foo}[S], \name{bar}[T] \}$ for some subsets $S,T$ of the natural numbers.
 
 
-We also allow \emph{partial axising}:
+We also allow \emph{partial indexing}:
 \begin{align*}
 A_{\nidx{foo}{1}} &= \nmatrix{}{bar}{
   3 & 1 & 4
@@ -389,7 +398,26 @@ A \ndot{bar} C &= \nmatrix{foo}{baz}{
   53 & -53
 }
 \end{align*}
-However, note that (like vector dot-product, but unlike matrix multiplication) this operator is commutative, but not associative! Specifically, if
+
+In python we might write the product of $A$ and $B$ with shared axis $\name{bar}$ as \pyth{dot(A,B,axis=bar)} or \pyth{dot(A[bar],B[bar])}.
+
+If two tensors $A$ and $B$ have only a single shared axis, then we don't have to specify the axis, but it can still help for clarity.
+If we want to align together two different axes (using implicit) casting.
+
+For example if $A$ and $B$ are matrices of  type $\{ \name{state}^{in} , \name{state}^{out} \}$ corresponding to transition matrices, we may want to multiply them by matching the $\name{state}^{out}$ of $A$ with the $\name{state}^{in}$ layer of $B$. We will write this as 
+
+\[
+  C = B \ndot{\name{state}^{in}|\name{state}^{out}} A
+\]
+
+we will also use the shorthand 
+\[
+  B_{in}  \prescript{}{out}A
+\]
+
+for this. In Python we can use \pyth{dot(B,A,left_axis=state_in, right_axis=state_out)} or \pyth{dot(B[state_in],A[state_out]}.
+
+Note that (like vector dot-product, but unlike matrix multiplication) the generalized dot product operator is commutative, but not associative! Specifically, if
 \begin{align*}
 A &\in \mathbb{R}^{\nset{foo}{..m}} \\
 B &\in \mathbb{R}^{\nset{foo}{..m},\nset{bar}{..n}} \\
@@ -458,6 +486,32 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 
 \section{Examples}
 \label{sec:examples}
+
+\subsection{Multi layer perceptron}
+
+If we want to express a depth $d$ fully connected network, we can do so as follows.
+Assume for example the input has type $\{ \name{width}, \name{height} , \name{channel} \}$.
+We can use annotated types $\name{layer}^1,\ldots,\name{layer}^d$. 
+The weight vectors will be a tuple $(W^0,\ldots,W^{d-1})$ where $W^i$ has type $\{ \name{layer}^{i},\name{layer}^{i+1} \}$.
+The value is computed as follows:
+
+\begin{enumerate}
+
+\item Set $X^0 = X_{\{ \name{width}, \name{height} , \name{channel} \} \rightarrow \name{layer}^0 }$ (casting the three indices into a single index - flattening)
+
+\item For $i \in \{0,1,\ldots, d-1\}$ do:
+
+
+\begin{itemize}
+    \item $X^{i+1} = ReLU(W^i \cdot X^i)$. Since they share the axis $\name{layer}^i$ the dot product is done along this axis. The type of $X^{i+1}$ is $\{ \name{layer}^{i+1} \}$.
+\end{itemize}
+
+\item Output $X^d$
+\end{enumerate}
+
+If $X$ has an extra $\name{batch}$ dimension then it will automatically be carried out to the output.
+
+
 
 \subsection{Attention}
 
