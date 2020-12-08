@@ -1,0 +1,256 @@
+PWD c:\DBOX\WORK\Code\notation
+INPUT C:\Users\boazb\AppData\Local\MiKTeX\2.9\miktex\data\le\pdftex\pdflatex.fmt
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.tex
+OUTPUT c:\DBOX\WORK\Code\notation\main_boaz.log
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\article.cls
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\article.cls
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\size10.clo
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\size10.clo
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amstext.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amstext.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amssymb.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amssymb.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amsfonts.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amsfonts.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\mathtools\mathtools.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\mathtools\mathtools.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\keyval.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\keyval.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\tools\calc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\tools\calc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\mathtools\mhsetup.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\mathtools\mhsetup.sty
+INPUT c:\DBOX\WORK\Code\notation\namedtensor.sty
+INPUT c:\DBOX\WORK\Code\notation\namedtensor.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\parskip\parskip.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\parskip\parskip.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\kvoptions\kvoptions.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\kvoptions\kvoptions.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\ltxcmds\ltxcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\ltxcmds\ltxcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\kvsetkeys\kvsetkeys.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\kvsetkeys\kvsetkeys.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\etoolbox\etoolbox.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\etoolbox\etoolbox.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\natbib\natbib.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\natbib\natbib.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\hyperref.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\iftex\iftex.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\iftex\iftex.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\pdftexcmds\pdftexcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\pdftexcmds\pdftexcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\infwarerr\infwarerr.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\infwarerr\infwarerr.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\kvdefinekeys\kvdefinekeys.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\kvdefinekeys\kvdefinekeys.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\pdfescape\pdfescape.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\pdfescape\pdfescape.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hycolor\hycolor.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hycolor\hycolor.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\letltxmacro\letltxmacro.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\letltxmacro\letltxmacro.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\auxhook\auxhook.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\auxhook\auxhook.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\pd1enc.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\pd1enc.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\intcalc\intcalc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\intcalc\intcalc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\etexcmds\etexcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\etexcmds\etexcmds.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\url\url.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\url\url.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\bitset\bitset.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\bitset\bitset.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\bigintcalc\bigintcalc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\bigintcalc\bigintcalc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\atbegshi\atbegshi.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\atbegshi\atbegshi.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\hpdftex.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\hpdftex.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\atveryend\atveryend.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\atveryend\atveryend.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\rerunfilecheck\rerunfilecheck.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\rerunfilecheck\rerunfilecheck.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\uniquecounter\uniquecounter.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\uniquecounter\uniquecounter.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\pythonhighlight\pythonhighlight.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\pythonhighlight\pythonhighlight.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\listings.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\listings.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\lstmisc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\lstmisc.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\listings.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\listings.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\xcolor\xcolor.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\xcolor\xcolor.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\color.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\color.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-def\pdftex.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-def\pdftex.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\l3backend\l3backend-pdfmode.def
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\l3backend\l3backend-pdfmode.def
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.aux
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.aux
+OUTPUT c:\DBOX\WORK\Code\notation\main_boaz.aux
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\graphicx.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\graphicx.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\graphics.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\graphics.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\trig.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics\trig.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\graphics.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphics-cfg\graphics.cfg
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\nameref.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\hyperref\nameref.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\refcount\refcount.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\refcount\refcount.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\gettitlestring\gettitlestring.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\generic\gettitlestring\gettitlestring.sty
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+OUTPUT c:\DBOX\WORK\Code\notation\main_boaz.pdf
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+OUTPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\context\base\mkii\supp-pdf.mkii
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\context\base\mkii\supp-pdf.mkii
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\epstopdf-pkg\epstopdf-base.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\epstopdf-pkg\epstopdf-base.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr17.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr6.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmmi12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmmi8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmmi6.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmsy10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmsy8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmsy6.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmex10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmex8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmr12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx12.tfm
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.toc
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.toc
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmex7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam5.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx7.tfm
+OUTPUT c:\DBOX\WORK\Code\notation\main_boaz.toc
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmti10.tfm
+INPUT C:\Users\boazb\AppData\Local\MiKTeX\2.9\pdftex\config\pdftex.map
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx5.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmmib10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmmib7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmmib5.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbsy10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmbsy7.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\cmextra\cmbsy5.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\jknappen\ec\tcrm1000.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmtt10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\lstlang1.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\tex\latex\listings\lstlang1.sty
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmtt8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmsltt10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx8.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmbx6.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmmi12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmsy10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmex10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\cm\cmss12.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msam10.tfm
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.bbl
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.bbl
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.aux
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT c:\DBOX\WORK\Code\notation\main_boaz.out
+INPUT C:\Users\boazb\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\boazb\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbsy10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbsy10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmbx7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmex10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmex10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmmi7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr12.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr17.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr17.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr6.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr6.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmr8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsltt10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsltt10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmss10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmss10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmss8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmss8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy5.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmsy7.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmti10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmti10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmtt10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmtt10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmtt8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\cm\cmtt8.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\symbols\msbm10.pfb
+INPUT C:\Users\boazb\AppData\Local\Programs\MiKTeX 2.9\fonts\type1\public\amsfonts\symbols\msbm10.pfb

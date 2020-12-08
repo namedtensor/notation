@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Named Tensors: CNN / LeNet</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
+      <style>
+          body{margin:0 auto;max-width:50rem;}
+          @media(max-width:50rem) {
+              body {
+                  padding: 10px;
+              }
+          }
+      </style>
+
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="author" content="David Chiang and Sasha Rush" />
+    <title>Named Tensor Notation</title>
+    <style type="text/css">
+        code{white-space: pre-wrap;}
+        span.smallcaps{font-variant: small-caps;}
+        span.underline{text-decoration: underline;}
+        div.column{display: inline-block; vertical-align: top; width: 50%;}
+    </style>
+    <script src="/usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+  <div style="display:none">
+  \(
+    \require{ams}
+    \newcommand{\displaylimits}{}
+    \DeclareMathOperator*{\softmax}{softmax}
+    \DeclareMathOperator{\tupledom}{dom}
+    \DeclareMathOperator{\tupleshape}{ind}
+  \)
+  </div>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Named Tensors: CNN / LeNet</h1>
+</header>
+<h2 class="unnumbered" id="conv-2d">Conv 2D</h2>
+<p><span class="math display">\[\begin{aligned}
+W &amp;\in \mathbb{R}^{\mathsf{channel}:c,\mathsf{kh}:kh, \mathsf{kw}:kw} \\
+h&#39; &amp;= h-kh +1, w&#39; = w-kw +1 \\
+b &amp;\in \mathbb{R}^{\mathsf{height}:h&#39;, \mathsf{width}:w&#39;}  \\
+\text{conv2d}(X; W, b) &amp;=  W \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{channel, kh, kw}}} U + b \\
+U &amp;\in \mathbb{R}^{{\mathsf{channel}:c, \mathsf{height}:h&#39;,
+\mathsf{width}:w&#39;, \mathsf{kh}:kh, \mathsf{kw}:kw}}  \\
+U_{\mathsf{height}:i, \mathsf{width}:j, \mathsf{kh}:i&#39;, \mathsf{kw}:j&#39;} &amp;= X_{\mathsf{height}:i+i&#39; - 1, \mathsf{width}:j+j&#39; - 1}  \end{aligned}\]</span></p>
+<h2 class="unnumbered" id="max-pooling">Max Pooling</h2>
+<p><span class="math display">\[\begin{aligned}
+X &amp;\in \mathbb{R}^{\mathsf{height}:h, \mathsf{width}:w} \\
+\text{maxpool2d}(X, kh, kw) &amp;=  \mathop{\text{max}}\limits_{\mathsf{kh, kw}}  U \\
+U &amp;\in \mathbb{R}^{{\mathsf{height}:h / kh,
+\mathsf{width}:w / kw, \mathsf{kh}:kh, \mathsf{kw}:kw}}  \\
+U_{\mathsf{height}:i, \mathsf{width}:j, \mathsf{kh}:di, \mathsf{kw}:dj} &amp; = X_{\mathsf{height}:i \times kh + di -1, \mathsf{width}:j \times kw + dj - 1}  \end{aligned}\]</span></p>
+<h2 class="unnumbered" id="mlp">MLP</h2>
+<p><span class="math display">\[\begin{aligned}
+W^1 &amp;\in \mathbb{R}^{\mathsf{inp}:i, \mathsf{hidden}:h}, 
+W^2 \in \mathbb{R}^{ \mathsf{hidden}:h} \\
+\text{MLP}(X; W, b) &amp;=  W^1 \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{hidden}}} \text{ReLU}(W^1 \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{inp}}} X + b^1) + b^2 \end{aligned}\]</span></p>
+<h2 class="unnumbered" id="model">Model</h2>
+<p><span class="math display">\[\begin{aligned}
+\textit{Params}: \\
+W^1 &amp; \in \mathbb{R}^{\mathsf{channels&#39;}:c_2, \mathsf{channels}:c_1, \mathsf{kh}:kh_1, \mathsf{kw}:kw_1} \\ 
+W^2 &amp; \in \mathbb{R}^{\mathsf{channels&#39;}:c_3, \mathsf{channels}:c_2, \mathsf{kh}:kh_2, \mathsf{kw}:kw_2} \\ 
+U &amp; \in \mathbb{R}^{\mathsf{in}:h_1, \mathsf{hidden}:h_2},  V \in \mathbb{R}^{\mathsf{hidden}:h_2, \mathsf{out}:h_3} \\ \\
+\textit{Model}: \\
+X^0 &amp;\in \mathbb{R}^{\mathsf{batch}:b, \mathsf{channels}:1, \mathsf{height}:h, \mathsf{width}:w}\\
+X^1 &amp;= \left[\text{ReLU}(\text{conv2d}(X^0; W^1))\right]_{\mathsf{channels&#39;}\rightarrow\mathsf{channels}} \\
+X^2 &amp;= \text{maxpool2d}(X^1, ph_1, ph_2) \\
+X^3 &amp;= \left[\text{ReLU}(\text{conv2d}(X^2; W^2))\right]_{\mathsf{channels&#39;}\rightarrow\mathsf{channels}} \\
+X^4 &amp;= \text{maxpool2d}(X^3, ph_2, ph_2) \\
+X^5 &amp;\in \mathbb{R}^{\mathsf{batch}:b, \mathsf{inp}:h_1}\\ 
+X^5_{\mathsf{inp}} &amp;= X^4_{\mathsf{height}, \mathsf{width}, \mathsf{channels}}\\ 
+O &amp;= \mathop{\text{softmax}}\limits_{\mathsf{class}} \left[\text{MLP}(X^5; U, V)\right]_{\mathsf{out}\rightarrow\mathsf{class}}\end{aligned}\]</span></p>
+</body>
+</html>

@@ -1,0 +1,76 @@
+\begin{thebibliography}{8}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{Chen(2017)}]{chen2017typesafe}
+Tongfei Chen. 2017.
+\newblock \href {https://doi.org/10.1145/3136000.3136001} {Typesafe
+  abstractions for tensor operations}.
+\newblock In \emph{Proceedings of the 8th ACM SIGPLAN International Symposium
+  on Scala}, SCALA 2017, pages 45--50.
+
+\bibitem[{Harris et~al.(2020)Harris, Millman, van~der Walt, Gommers, Virtanen,
+  Cournapeau, Wieser, Taylor, Berg, Smith, Kern, Picus, Hoyer, van Kerkwijk,
+  Brett, Haldane, del R{'{\i}}o, Wiebe, Peterson, G{'{e}}rard-Marchant,
+  Sheppard, Reddy, Weckesser, Abbasi, Gohlke, and Oliphant}]{numpy}
+Charles~R. Harris, K.~Jarrod Millman, St{'{e}}fan~J. van~der Walt, Ralf
+  Gommers, Pauli Virtanen, David Cournapeau, Eric Wieser, Julian Taylor,
+  Sebastian Berg, Nathaniel~J. Smith, Robert Kern, Matti Picus, Stephan Hoyer,
+  Marten~H. van Kerkwijk, Matthew Brett, Allan Haldane, Jaime~Fern{'{a}}ndez
+  del R{'{\i}}o, Mark Wiebe, Pearu Peterson, Pierre G{'{e}}rard-Marchant, Kevin
+  Sheppard, Tyler Reddy, Warren Weckesser, Hameer Abbasi, Christoph Gohlke, and
+  Travis~E. Oliphant. 2020.
+\newblock \href {https://doi.org/10.1038/s41586-020-2649-2} {Array programming
+  with {N}um{P}y}.
+\newblock \emph{Nature}, 585(7825):357--362.
+
+\bibitem[{Maclaurin et~al.(2019)Maclaurin, Radul, Johnson, and
+  Vytiniotis}]{maclaurin+:2019}
+Dougal Maclaurin, Alexey Radul, Matthew~J. Johnson, and Dimitrios Vytiniotis.
+  2019.
+\newblock \href {https://openreview.net/forum?id=rJxd7vsWPS} {{D}ex: array
+  programming with typed indices}.
+\newblock In \emph{NeurIPS Workshop on Program Transformations for ML}.
+
+\bibitem[{Paszke et~al.(2019)Paszke, Gross, Massa, Lerer, Bradbury, Chanan,
+  Killeen, Lin, Gimelshein, Antiga, Desmaison, Kopf, Yang, DeVito, Raison,
+  Tejani, Chilamkurthy, Steiner, Fang, Bai, and Chintala}]{pytorch}
+Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory
+  Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban
+  Desmaison, Andreas Kopf, Edward Yang, Zachary DeVito, Martin Raison, Alykhan
+  Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu~Fang, Junjie Bai, and Soumith
+  Chintala. 2019.
+\newblock \href
+  {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
+  {{P}y{T}orch: An imperative style, high-performance deep learning library}.
+\newblock In H.~Wallach, H.~Larochelle, A.~Beygelzimer, F.~d'Alch\'{e} Buc,
+  E.~Fox, and R.~Garnett, editors, \emph{Advances in Neural Information
+  Processing Systems 32}, pages 8024--8035. Curran Associates, Inc.
+
+\bibitem[{Rush(2019)}]{namedtensor}
+Alexander Rush. 2019.
+\newblock \href {https://github.com/harvardnlp/NamedTensor} {Named tensors}.
+\newblock Open-source software.
+
+\bibitem[{Sinha(2018)}]{tsalib}
+Nishant Sinha. 2018.
+\newblock \href {https://github.com/ofnote/tsalib} {Tensor shape (annotation)
+  library}.
+\newblock Open-source software.
+
+\bibitem[{{Torch Contributors}(2019)}]{named-tensors}
+{Torch Contributors}. 2019.
+\newblock \href {https://pytorch.org/docs/stable/named_tensor.html} {Named
+  tensors}.
+\newblock PyTorch documentation.
+
+\bibitem[{Vaswani et~al.(2017)Vaswani, Shazeer, Parmar, Uszkoreit, Jones,
+  Gomez, Kaiser, and Polosukhin}]{vaswani+:2017}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N Gomez, \L{}ukasz Kaiser, and Illia Polosukhin. 2017.
+\newblock \href
+  {https://proceedings.neurips.cc/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf}
+  {Attention is all you need}.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~30, pages 5998--6008. Curran Associates, Inc.
+
+\end{thebibliography}

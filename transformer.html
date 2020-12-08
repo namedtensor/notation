@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Named Tensors: Transformer</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://vanillacss.com/vanilla.css">
+      <style>
+          body{margin:0 auto;max-width:50rem;}
+          @media(max-width:50rem) {
+              body {
+                  padding: 10px;
+              }
+          }
+      </style>
+
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="author" content="David Chiang and Sasha Rush" />
+    <title>Named Tensor Notation</title>
+    <style type="text/css">
+        code{white-space: pre-wrap;}
+        span.smallcaps{font-variant: small-caps;}
+        span.underline{text-decoration: underline;}
+        div.column{display: inline-block; vertical-align: top; width: 50%;}
+    </style>
+    <script src="/usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+
+  <div style="display:none">
+  \(
+    \require{ams}
+    \newcommand{\displaylimits}{}
+    \DeclareMathOperator*{\softmax}{softmax}
+    \DeclareMathOperator{\tupledom}{dom}
+    \DeclareMathOperator{\tupleshape}{ind}
+  \)
+  </div>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Named Tensors: Transformer</h1>
+</header>
+<h4 id="ffn">FFN</h4>
+<p><span class="math display">\[\begin{aligned}
+X &amp;\in \mathbb{R}^{\mathsf{emb}:d_{\text{model}}} \\
+W^1 &amp;\in \mathbb{R}^{\mathsf{emb}:d_{\text{model}}, \mathsf{hid}:d_{\text{ff}}} &amp; 
+b^1 &amp;\in \mathbb{R}^{\mathsf{hid}:d_{\text{ff}}} \\
+W^2 &amp; \in \mathbb{R}^{\mathsf{hid}:d_{\text{ff}}, \mathsf{emb}:d_{\text{model}}} &amp; b^2 &amp;\in \mathbb{R}^{\mathsf{hid}:d_{\text{ff}}} \\
+\text{FFN}(X; W, b) &amp;=  W^2 \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{hid}}} \text{ReLU}(W^1 \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{emb}}} X + b^1) + b^2\end{aligned}\]</span></p>
+<h4 id="masked-attention">Masked Attention</h4>
+<p><span class="math display">\[\begin{aligned}
+Q &amp;\in \mathbb{R}^{\mathsf{key}:d_k, \mathsf{seq&#39;}:n}, K \in \mathbb{R}^{\mathsf{key}:d_k, \mathsf{seq}:n}\\
+V &amp;\in \mathbb{R}^{\mathsf{seq}:n, \mathsf{val}:d_vfg
+},
+M \in \mathbb{R}^{\mathsf{seq}, \mathsf{seq&#39;}}\\
+\text{att}(Q, K, V, M) &amp;=  V \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{seq}}} \mathop{\text{softmax}}\limits_{\mathsf{seq}} \left( \frac{\displaystyle Q \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{key}}} K }{\sqrt{d_k}} + M \right) \end{aligned}\]</span></p>
+<h4 id="multiheaded-self-attention">Multiheaded Self Attention</h4>
+<p><span class="math display">\[\begin{aligned}
+  W^Q &amp;\in \mathbb{R}^{\mathsf{head}:h, \mathsf{emb}:d_{\text{model}}, \mathsf{key}:d_k} \\
+  W^K &amp;\in \mathbb{R}^{\mathsf{head}:h, \mathsf{emb}:d_{\text{model}}, \mathsf{key}:d_k} \\
+  W^V &amp;\in \mathbb{R}^{\mathsf{head}:h, \mathsf{emb}:d_{\text{model}}, \mathsf{val}:d_k} \\
+  W^O &amp;\in \mathbb{R}^{\mathsf{head}:h, \mathsf{val}:d_k, \mathsf{emb}:d_{\text{model}}} \\
+  X &amp;\in \mathbb{R}^{\mathsf{seq}:n, \mathsf{emb}:d_{\text{model}}} \\
+  \text{MHA}(X; W) &amp;= \left[W^O \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{head,val}}} \text{att}(Q, K, V, M)\right]_{\mathsf{seq&#39;}\rightarrow\mathsf{seq}} \\
+  Q &amp;= W^Q \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{emb}}} \left[X\right]_{\mathsf{seq}\rightarrow\mathsf{seq&#39;}} \\
+  K &amp;= W^K \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{emb}}} X \\
+  V &amp;= W^V \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{emb}}} X \\
+  M_{\mathsf{seq&#39;}:i, \mathsf{seq}:j} &amp;= \begin{cases} 0 &amp; j\leq i \\ -\infty &amp; \text{otherwise} \end{cases}   \end{aligned}\]</span></p>
+<h4 id="layer-norm">Layer Norm</h4>
+<p><span class="math display">\[\begin{aligned}
+X &amp;\in \mathbb{R}^{\mathsf{emb}:d_{\text{model}}} &amp; \gamma, \beta &amp;\in \mathbb{R}^{\mathsf{emb}:d_{\text{model}}} \\
+\text{lnorm}(X; \gamma, \beta) &amp;= \frac{X - \mathop{\text{\text{mean}}}\limits_{\mathsf{emb}}(X)}{\sqrt{\mathop{\text{\text{var}}}\limits_{\mathsf{emb}}(X)} + \epsilon} \odot \gamma + \beta \end{aligned}\]</span></p>
+<h4 id="position-encoding">Position Encoding</h4>
+<p><span class="math display">\[\begin{aligned}
+X &amp;\in \{0, 1\}^{\mathsf{seq}:n, \mathsf{vocab}:b} &amp; \sum\limits_{\mathsf{vocab}} X &amp;= 1\\
+E &amp;\in \mathbb{R}^{\mathsf{vocab*}:v, \mathsf{emb}:d_{\text{model}}} \\
+\text{embed}(X; E) &amp;= (E \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{vocab}}} X)\sqrt{d_{\text{model}}} + P \\
+P &amp;\in \mathbb{R}^{\mathsf{seq}:n, \mathsf{hidden}:d_{\text{model}}} \\
+P_{\mathsf{hidden}:i, \mathsf{seq}:p} &amp;= \begin{cases}
+  \sin((p-1) / 10000^{(i-1) / d_{\text{model}}}) &amp; \text{$i$ odd} \\ 
+  \cos((p-1) / 10000^{(i-2) / d_{\text{model}}}) &amp; \text{$i$ even} \\
+\end{cases} \\\end{aligned}\]</span></p>
+<h4 id="transformer">Transformer</h4>
+<p><span class="math display">\[\begin{aligned}
+I &amp;\in \{0, 1\}^{{\mathsf{seq}:n, \mathsf{vocab}:b}} &amp; \sum\limits_{\mathsf{vocab}} X &amp;= 1\\
+X^0 &amp;= \text{embed}(I)\\
+T^1 &amp;= \text{lnorm}(\text{MHA}(X^0)) + X^0\\
+X^1 &amp;= \text{lnorm}(\text{FFN}(T^1)) + T^1\\
+&amp;\vdotswithin{=} \\
+T^{L} &amp;= \text{lnorm}(\text{MHA}(X^{L-1})) + X^{L-1}\\
+X^{L} &amp;= \text{lnorm}(\text{FFN}(T^L)) + T^L\\
+O &amp;= \mathop{\text{softmax}}\limits_{\mathsf{vocab}}(W \mathbin{\mathop{\boldsymbol\cdot}\limits_{\mathsf{emb}}} X^L)\end{aligned}\]</span></p>
+</body>
+</html>
