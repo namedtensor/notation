@@ -24,7 +24,7 @@
 \paragraph{FFN}
 \begin{align*}
 X &\in \reals^{\nset{emb}{\dmodel}} \\
-W^1 &\in \reals^{\nset{emb}{\dmodel, \nset{hid}}{\dff}} & 
+W^1 &\in \reals^{\nset{emb}{\dmodel}, \nset{hid}{\dff}} & 
 b^1 &\in \reals^{\nset{hid}{\dff}} \\
 W^2 & \in \reals^{\nset{hid}{\dff} \times \nset{emb}{\dmodel}} & b^2 &\in \reals^{\nset{hid}{\dff}} \\
 \text{FFN}(X; W, b) &=  W^2 \ndot{hid} \text{ReLU}(W^1 \ndot{emb} X + b^1) + b^2
