@@ -257,6 +257,10 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 \section{Examples}
 \label{sec:examples}
 
+In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning.
+
+As further proof of concept, in separate pages we have written out the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}).
+
 \subsection{Attention}
 
 Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
@@ -297,7 +301,19 @@ and define
 \text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
-\subsection{RNN}
+Finally, when the Transformer is used for generation, it is necessary to have
+an additional mask to ensure the model does not look at future words.
+This can be included in the attention definition with clear names.
+
+\begin{align*} 
+\text{Attention}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
+M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
+M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
+-\infty & \text{otherwise.} \end{cases}
+\end{align*}
+
+
+\subsection{Recurrent neural networks}
 \label{sec:rnn}
 
 As a second example, let's define a simple (Elman) RNN. Let $d$ be a positive integer.
@@ -313,7 +329,7 @@ h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{e
 
 The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
 
-\subsection{Fully-Connected Layers}
+\subsection{Fully-connected layers}
 
 Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
 
@@ -325,13 +341,13 @@ Y &= \sigma \left( W \ndot{in} X + b \right) \\
 Z &= \sigma \left( V \ndot{hidden} Y + c \right)  
 \end{align*}
 
-\subsection{Deep Learning Norms}
+\subsection{Normalization layers}
 
 These three functions are often informally described using the same
 equation, but they each correspond to very different functions. They differ
 by which axes are normalized.
 
-\subsubsection*{Batch Norm}
+\subsubsection*{Batch normalization}
 
 \begin{align*} 
 X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
@@ -340,7 +356,7 @@ X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h
 \end{align*}
 
 
-\subsubsection*{Instance Norm}
+\subsubsection*{Instance normalization}
 
 \begin{align*} 
 X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
@@ -348,7 +364,7 @@ X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h
 \text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 
-\subsubsection*{Layer Norm}
+\subsubsection*{Layer normalization}
 
 \begin{align*} 
 X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}} \\
@@ -357,7 +373,7 @@ X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h
 \end{align*}
 
 
-\subsection{Continuous Bag of Words}
+\subsection{Continuous bag of words}
 
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
@@ -369,7 +385,7 @@ W &\in \reals^{{\nset{class}{c} \times \nset{hidden}{h}}}\\
 \end{align*}
 Here, the two contractions can be done in either order, so we leave the parentheses off.
 
-\subsection{Bayes' Rule}
+\subsection{Discrete random variables}
 
 Named indices are very helpful for working with discrete random variables, because each random variable can be represented by an index with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*} 
@@ -388,7 +404,7 @@ Given a grid we can check that it is valid by converting it to a grid of grids.
 Constraints then ensure that there is one digit per row, per column and per sub-box. 
 
 \begin{align*} 
-X &\in \{0, 1\}^{\nset{row}{9} \times \nset{col}{9} \times \nset{assign}{9}}  \\
+X &\in \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}}  \\
 \text{check}(X) &=
 \left(\nsum{assign} Y = 
 \nsum{Height, height} Y = 
@@ -399,7 +415,7 @@ Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_
 \end{align*} 
 
 
-\subsection{Max Pooling}
+\subsection{Max pooling}
 
 Max pooling used in image recognition takes a similar form as the Sudoku example.
 
@@ -412,9 +428,9 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx
 
 
 
-\subsection{1D Convolution}
+\subsection{1D convolution}
 
-1D Convolution can be easily written by unrolling a tensor and then
+1D convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 
 \begin{align*} 
@@ -426,7 +442,7 @@ U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}
 \end{align*} 
 
 
-\subsection{$K$-Means Clustering}
+\subsection{$K$-means clustering}
 
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*} 
@@ -444,7 +460,7 @@ then we recompute the cluster centers:
 C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
 \end{equation*}
 
-\subsection{Beam Search}
+\subsection{Beam search}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 Beam step returns the new $H$ tensor. 
@@ -456,7 +472,7 @@ f &\colon \{0, 1\}^{{\nset{state}{s}}} \rightarrow \reals^{{\nset{state'}{s}}} \
 \text{beamstep}(H, S) &= \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H \right)
 \end{align*} 
 
-\subsection{Multivariate Normal}
+\subsection{Multivariate normal distribution}
 
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
@@ -466,28 +482,6 @@ X &\in \reals^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
 \Sigma & \in   \reals^{{\nset{d1}{{k}} \times \nset{d2}{{k}}}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
 \end{align*}
-
-
-\subsection{Attention with Causal Masking}
-
-When the Transformer is used for generation, it is necessary to have
-an additional mask to ensure the model does not look at future words.
-This can be included in the attention definition with clear names.
-
-\begin{align*} 
-Q &\in \reals^{\nset{key}{d_v} \times\nset{seq'}{n}}\\
-K &\in \reals^{\nset{head}{h} \times\nset{key}{d_k} \times \nset{seq}{n}}\\
-V &\in \reals^{\nset{head}{h} \times \nset{val}{d_v} \times \nset{seq}{n}}\\
-\text{attention}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
-M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
-M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
--\infty & \text{otherwise} \end{cases} \\
-\end{align*}
-
-
-\subsection{Full Examples: Transformer and LeNet}
-
-As further proof of concept, we have written the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}).
 
 \section{\LaTeX{} Macros}
 
