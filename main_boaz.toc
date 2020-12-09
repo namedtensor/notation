@@ -17,7 +17,7 @@
 \contentsline {subsection}{\numberline {3.1}Multi layer perceptron}{13}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Attention}{14}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3.3}RNN}{15}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Fully-Connected Layers}{15}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.4}Fully-Connected Layers}{16}{subsection.3.4}%
 \contentsline {subsection}{\numberline {3.5}Deep Learning Norms}{16}{subsection.3.5}%
 \contentsline {subsection}{\numberline {3.6}Continuous Bag of Words}{17}{subsection.3.6}%
 \contentsline {subsection}{\numberline {3.7}Bayes' Rule}{17}{subsection.3.7}%

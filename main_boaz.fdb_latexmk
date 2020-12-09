@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex main_boaz"] 1607534173 "main_boaz.aux" "main_boaz.bbl" "main_boaz" 1607534581
+["bibtex main_boaz"] 1607534696 "main_boaz.aux" "main_boaz.bbl" "main_boaz" 1607534698
   "./acl_natbib.bst" 1607366693 49689 bac5bee2f0a7f9d17cd75f07df5df4dc ""
-  "main_boaz.aux" 1607534580 7423 b84cbe1000a1b887913e50dbde1fd6d0 "pdflatex"
+  "main_boaz.aux" 1607534698 7423 f3d4ecf9c380e8c95aaf7ad3f5e48b17 "pdflatex"
   "references.bib" 1607366693 3921 2418fab3e70b5c7eee38b41ffcf78467 ""
   (generated)
   "main_boaz.bbl"
   "main_boaz.blg"
-["pdflatex"] 1607534577 "c:/DBOX/WORK/Code/notation/main_boaz.tex" "c:/DBOX/WORK/Code/notation/main_boaz.pdf" "main_boaz" 1607534581
+["pdflatex"] 1607534696 "c:/DBOX/WORK/Code/notation/main_boaz.tex" "c:/DBOX/WORK/Code/notation/main_boaz.pdf" "main_boaz" 1607534698
   "C:/Users/boazb/AppData/Local/MiKTeX/2.9/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1000.pk" 1607384006 11548 87de5218459aff8fc80cb454e10fcd44 ""
   "C:/Users/boazb/AppData/Local/MiKTeX/2.9/miktex/data/le/pdftex/pdflatex.fmt" 1592338125 10020706 c70fcf6108fd70395645d6b5523ea7bc ""
   "C:/Users/boazb/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map" 1607384128 136546 d3c694e685c42d9007b2778ae9d812ed ""
@@ -134,19 +134,19 @@
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/tools/calc.sty" 1580644886 10216 5efd55f2010055e7b7875afd6a75be82 ""
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/xcolor/xcolor.sty" 1463131981 57049 34128738f682d033422ca125f82e5d62 ""
-  "c:/DBOX/WORK/Code/notation/main_boaz.aux" 1607534580 7423 b84cbe1000a1b887913e50dbde1fd6d0 ""
-  "c:/DBOX/WORK/Code/notation/main_boaz.tex" 1607534575 58359 c8d7d4d93dbd651bf32066399059d816 ""
-  "main_boaz.aux" 1607534580 7423 b84cbe1000a1b887913e50dbde1fd6d0 "pdflatex"
-  "main_boaz.bbl" 1607534173 3822 40144c3535920049ae206de122755c22 "bibtex main_boaz"
-  "main_boaz.out" 1607534580 284 9a9de063237d930ee7922b778ea547ba "pdflatex"
-  "main_boaz.tex" 1607534575 58359 c8d7d4d93dbd651bf32066399059d816 ""
-  "main_boaz.toc" 1607534580 3260 8173d12c8099a8cc3af9687691017bc4 "pdflatex"
+  "c:/DBOX/WORK/Code/notation/main_boaz.aux" 1607534698 7423 f3d4ecf9c380e8c95aaf7ad3f5e48b17 ""
+  "c:/DBOX/WORK/Code/notation/main_boaz.tex" 1607534686 58477 805ac5fcabc38db7b33df8edad01f530 ""
+  "main_boaz.aux" 1607534698 7423 f3d4ecf9c380e8c95aaf7ad3f5e48b17 "pdflatex"
+  "main_boaz.bbl" 1607534696 3822 40144c3535920049ae206de122755c22 "bibtex main_boaz"
+  "main_boaz.out" 1607534698 284 9a9de063237d930ee7922b778ea547ba "pdflatex"
+  "main_boaz.tex" 1607534686 58477 805ac5fcabc38db7b33df8edad01f530 ""
+  "main_boaz.toc" 1607534698 3260 8368602d47e01532f314eee0876bc8bd "pdflatex"
   "namedtensor.sty" 1607438869 659 9aee7afa57f81d81aa7788149a615d43 ""
   (generated)
-  "main_boaz.aux"
   "main_boaz.toc"
+  "main_boaz.out"
+  "main_boaz.pdf"
+  "c:/DBOX/WORK/Code/notation/main_boaz.pdf"
   "main_boaz.log"
   "c:/DBOX/WORK/Code/notation/main_boaz.log"
-  "c:/DBOX/WORK/Code/notation/main_boaz.pdf"
-  "main_boaz.pdf"
-  "main_boaz.out"
+  "main_boaz.aux"
