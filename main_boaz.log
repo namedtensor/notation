@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  8 DEC 2020 18:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  8 DEC 2020 19:13
 entering extended mode
 **./main_boaz.tex
 (main_boaz.tex
@@ -495,7 +495,17 @@ n/10 32]\OML/cmm/m/it/10 ; []\OT1/cmr/m/n/10 [\OML/cmm/m/it/10 ::\OT1/cmr/m/n/1
 0 3]\OMS/cmsy/m/n/10 g$
  []
 
-[7] [8] [9] [10] [11] [12] [13] [14] [15] [16]
+[7] [8] [9] [10] [11] [12] [13]
+Overfull \hbox (2.45628pt too wide) in paragraph at lines 527--529
+[]\OT1/cmr/m/n/10 The func-tion re-quires the pre-con-di-tion that $\OMS/cmsy/m
+/n/10 j[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 Q\OT1/cmr/m/n/10 )\OMS/cmsy/m/n/10 j
+ \OT1/cmr/m/n/10 = \OMS/cmsy/m/n/10 j[]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 K\OT1/
+cmr/m/n/10 )\OMS/cmsy/m/n/10 j$ \OT1/cmr/m/n/10 and $\OMS/cmsy/m/n/10 j[][]\OT1
+/cmr/m/n/10 (\OML/cmm/m/it/10 K\OT1/cmr/m/n/10 )\OMS/cmsy/m/n/10 j \OT1/cmr/m/n
+/10 =
+ []
+
+[14] [15] [16]
 Overfull \hbox (49.27039pt too wide) detected at line 673
 []
  []
@@ -562,7 +572,7 @@ Data/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Us
 ers/boazb/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt
 8.pfb><C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsf
 onts/symbols/msbm10.pfb>
-Output written on main_boaz.pdf (26 pages, 429599 bytes).
+Output written on main_boaz.pdf (26 pages, 429509 bytes).
 PDF statistics:
  405 PDF objects out of 1000 (max. 8388607)
  115 named destinations out of 1000 (max. 500000)

@@ -524,8 +524,8 @@ If $X$ has an extra $\name{batch}$ dimension then it will automatically be carri
   \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}(Q)|}} \right) \nadot{\name{seq}^{in}} V
 \end{align*}
 
-The function will require the precondition that $|\name{key}(Q)|=|\name{key}(K)|$ (denoted as $d_k$) and $|\name{seq}^{in}(K)|=|\name{seq}^{in}(V)|$ (denoted as $d_v$).
-If $Y$ is the output tensor, then tt will satisfy the postcondition that $|\name{seq}^{out}(Y)|=|\name{seq}^{out}(Q)|$ and $|\name{val}(Y)|=|\name{val}(Y)|$. 
+The function requires the precondition that $|\name{key}(Q)|=|\name{key}(K)|$ and $|\name{seq}^{in}(K)|=|\name{seq}^{in}(V)|$.
+It satisfies the  postcondition that $|\name{seq}^{out}(Y)|=|\name{seq}^{out}(Q)|$ and $|\name{val}(Y)|=|\name{val}(Y)|$ where $Y$ is the output tensor.
 
 
 
