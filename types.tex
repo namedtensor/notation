@@ -4,25 +4,30 @@ We have defined a named index set as a pair $\nset{i}{X}$, where $\name{i}$ is a
 
 \subsubsection{Non-integral types}
 
-The sets $X$ don't have to contain integers. For example, if $V$ is the vocabulary of a natural language ($V = \{ \text{cat}, \text{dog}, \ldots \}$), we could define a matrix of word embeddings:
+The sets $X$ don't have to contain integers. For example, if $V$ is the vocabulary of a natural language ($V = \{ \name{cat}, \name{dog}, \ldots \}$), we could define a matrix of word embeddings:
 \begin{align*}
-  E &\in \mathbb{R}^{\nidx{vocab}{V} \times \nidx{emb}{d}}.
+  E &\in \mathbb{R}^{\nset{vocab}{V} \times \nset{emb}{d}}.
 \end{align*}
 
 \subsubsection{Integers with units}
 
-If $\name{u}$ is a symbol and $n > 0$, define $[n]\name{u} = \{1\name{u}, 2\name{u}, \ldots, n\name{u}\}$. You could think of $\name{u}$ as analogous to a physical unit like kilograms. The set $[n]\name{u}$ could be used as an index set, which would prevent the index from being aligned with another index that uses different units. For example, if we want to define a tensor representing an image, we might write
-\[ A \in \mathbb{R}^{\nidx{height}{[h]\name{px} \times \nidx{width}{[w]\name{px}}}}. \]
+If $\name{u}$ is a symbol and $n > 0$, define $[n]\name{u} = \{1\name{u}, 2\name{u}, \ldots, n\name{u}\}$. You could think of $\name{u}$ as analogous to a physical unit, like kilograms. The elements of $[n]\name{u}$ can be added and subtracted like integers ($a\name{u} + b\name{u} = (a+b)\name{u}$) or multiplied by unitless integers ($c \cdot a\name{u} = (c \cdot a) \name{u}$), but numbers with different units are different ($a \name{u} \neq a \name{v}$).
+
+Then the set $[n]\name{u}$ could be used as an index set, which would prevent the index from being aligned with another index that uses different units. For example, if we want to define a tensor representing an image, we might write
+\[ A \in \mathbb{R}^{\nset{height}{[h]\name{pixels}} \times \nset{width}{[w]\name{pixels}}}. \]
+If we have another tensor representing a go board, we might write
+\[ B \in \mathbb{R}^{\nset{height}{[n]\name{points}} \times \nset{width}{[n]\name{points}}}, \]
+and even if it happens that $h = w = n$, it would be incorrect to write $A+B$ because the units do not match.
 
 \subsubsection{Tuples of integers}
 
 An index set could also be $[m] \times [n]$, which would be a way of sneaking ordered indices into named tensors, useful for matrix operations. For example, instead of defining an $\text{inv}$ operator that takes two subscripts, we could write
 \begin{align*}
-  A &\in \mathbb{R}^{\nidx{d}{{m\times n}}} = \mathbb{R}^{\nidx{d}{{[m]\times [n]}}} \\
+  A &\in \mathbb{R}^{\nset{d}{{m\times n}}} = \mathbb{R}^{\nset{d}{{[m]\times [n]}}} \\
   B &= \nfun{d}{inv} A.
 \end{align*}
 We could also define an operator $\circ$ for matrix-matrix and matrix-vector multiplication:
 \begin{align*}
-  c &\in \mathbb{R}^{\nidx{d}{n}} \\
+  c &\in \mathbb{R}^{\nset{d}{n}} \\
   D &= A \nbin{d}{\circ} B \nbin{d}{\circ} c.
 \end{align*}

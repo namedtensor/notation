@@ -6,7 +6,7 @@ NumPy defines two kinds of \emph{advanced} (also known as \emph{fancy}) indexing
 
 We first consider the case where all the indexers have the same shape $\mathcal{S}$:
 \begin{align*}
-  A &\in F^{\nidx{i\sub{1}}{X_1}, \ldots, \nidx{i\sub{D}}{X_D}} \\
+  A &\in F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{D}}{X_D}} \\
   I^d &\in X_D^{\mathcal{S}} & d &= 1, \ldots, D.
 \end{align*}
 Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S}$ such that for any $s \in \tupleshape{\mathcal{S}}$,
@@ -15,7 +15,7 @@ Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S}$ such th
 \end{align*}
 More generally, suppose the indexers have different but compatible shapes:
 \begin{align*}
-  A &\in F^{\nidx{i\sub{1}}{X_1}, \ldots, \nidx{i\sub{D}}{X_D}} \\
+  A &\in F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{D}}{X_D}} \\
   I^d &\in X_D^{\mathcal{S}_d} & d &= 1, \ldots, D,
 \end{align*}
 where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S} = \bigcup_d \mathcal{S}_d$ such that for any $s \in \tupleshape{\mathcal{S}}$,
@@ -27,14 +27,14 @@ Let's consider a concrete example in natural language processing. Consider a bat
 
 We create a indexer for the $\name{sent}$ axis: $I_{\name{sent}} \in [N]^{\name{batch}:B \times \name{span}: M}$ that selects the desired tokens. Then we can write
 \begin{equation*}
-  Y = X_{\nidx{batch}{I}, \nidx{sent}{I}, \nidx{emb}{I}}
+  Y = X_{\nset{batch}{I}, \nset{sent}{I}, \nset{emb}{I}}
 \end{equation*}
 where the other two indexers
 \begin{align*}
   I_{\name{batch}} &\in [B]^{\nset{batch}{B}} \\
-  [I_{\name{batch}}]_{\nidx{batch}{b}} &= b \\
+  [I_{\name{batch}}]_{\nset{batch}{b}} &= b \\
   I_{\name{emb}} &\in [E]^{\nset{emb}{E}} \\
-  [I_{\name{sent}}]_{\nidx{sent}{n}} &= n
+  [I_{\name{sent}}]_{\nset{sent}{n}} &= n
 \end{align*}
 select all values of their respective indices.
 
