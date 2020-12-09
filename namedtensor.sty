@@ -6,8 +6,9 @@
 \newcommand{\name}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\nidx}[2]{\ensuremath{\name{#1}(#2)}}
 \newcommand{\nset}[2]{\ensuremath{\name{#1}[#2]}}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\boldsymbol\cdot}\limits_{\name{#1}}}}
-\newcommand{\ncat}[1]{\mathbin{\mathop{\oplus}\limits_{\name{#1}}}}
+\newcommand{\nbin}[2]{\mathbin{\mathop{#2}\limits_{\name{#1}}}}
+\newcommand{\ndot}[1]{\nbin{#1}{\boldsymbol\cdot}}
+\newcommand{\ncat}[1]{\nbin{#1}{\oplus}}
 \newcommand{\nsum}[1]{\sum\limits_{\name{#1}}}
-\newcommand{\nfun}[2]{\mathop{\text{#2}}\limits_{\name{#1}}}
+\newcommand{\nfun}[2]{\mathop{\mathrm{#2}}\limits_{\name{#1}}}
 \newcommand{\nmov}[3]{\left[#3\right]_{\name{#1}\rightarrow\name{#2}}}

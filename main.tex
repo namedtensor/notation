@@ -569,7 +569,11 @@ All of the tensor operations described in \S\ref{sec:operations} can be defined 
 A \ndot{i} B &= \sum_{i=1}^n A_{\nidx{i}{i}} B_{\nidx{i}{i}}.
 \end{align*}
 
-\section{Duality}
+\section{Extensions}
+
+\input{types}
+
+\subsection{Duality}
 \label{sec:duality}
 
 In applied linear algebra, we distinguish between column and row vectors; in pure linear algebra, vector spaces and dual vector spaces; in tensor algebra, contravariant and covariant indices; in quantum mechanics, bras and kets. Do we need something like this?
@@ -578,7 +582,7 @@ In \S\ref{sec:rnn} we saw that defining an RNN requires renaming of indices, bec
 
 In this section, we describe three possible solutions to this problem, and welcome comments about which (if any) would be best.
 
-\subsection{Contracting two names}
+\subsubsection{Contracting two names}
 
 We define a version of the contraction operator that can contract two indices with different names (and the same size):
 \begin{align*}
@@ -596,7 +600,7 @@ c &\in \mathbb{R}^{\nset{state}{d}} \\
 h^{(t+1)} &= \tanh\left( A \nndot{state'}{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)
 \end{align*}
 
-\subsection{Starred index names}
+\subsubsection{Starred index names}
 
 If $\name{i}$ is a name, we also allow a tensor to have an index $\name{i*}$ (alternatively: superscript $\name{i}$). Multiplication contracts starred indices in the left operand with non-starred indices in the right operand.
 \begin{align*}
@@ -620,7 +624,7 @@ There are a few variants of this idea that have been floated:
 \item $\ndot{i}$ always contracts $\name{i*}$ with $\name{i}$; there's no way to contract $\name{i}$ with $\name{i}$.
 \end{enumerate}
 
-\subsection{Named and numbered indices}
+\subsubsection{Named and numbered indices}
 \label{sec:tensorsoftensors}
 
 We allow indices to have names that are natural numbers $1, 2, \ldots$, and we define ``numbering'' and ``naming'' operators:
@@ -674,6 +678,8 @@ X &\in \mathbb{R}^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
 \end{align*}
 
 Because this notation can be a little more verbose (often requiring you to write index names twice), we'd keep around the notation $A \ndot{i} B$ as a shorthand for $A_{\name{i}} \cdot B_{\name{i}}$. We'd also keep named reductions, or at least $\nfun{i}{softmax}$.
+
+\input{fancy}
 
 \section*{Acknowledgements}
 

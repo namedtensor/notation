@@ -14,3 +14,5 @@ pdf: main.pdf transformer.pdf convnet.pdf
 html: main.html transformer.html convnet.html
 	cp main.html index.html
 
+main.pdf main.html: main.tex types.tex fancy.tex
+
