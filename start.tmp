@@ -26,9 +26,8 @@
 <div style="display:none">
 \(
   \require{ams}
-  \newcommand{\displaylimits}{}
   \DeclareMathOperator*{\softmax}{softmax}
-  \DeclareMathOperator{\tupledom}{dom}
   \DeclareMathOperator{\tupleshape}{ind}
+  \newcommand{\ensuremath}[1]{#1}
 \)
 </div>
