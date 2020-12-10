@@ -35,7 +35,7 @@
 \section{Introduction}
 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
-\[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
+\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
 where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
 
 Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying indices by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify indices by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. (Some of these libraries also add types to indices, but here we are only interested in adding names.)
@@ -44,7 +44,7 @@ Back in the realm of mathematical notation, then, we want two things: first, the
 
 As a preview, the above equation becomes
 \begin{equation*}
-  \text{Attention}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{equation*}
 making it unambiguous which index each operation applies to. The same equation works with multiple heads and with minibatching.
 
@@ -117,6 +117,8 @@ More elementwise unary operations:
 \[\begin{array}{cl}
 kA & \text{scalar multiplication by $k$} \\
 -A & \text{negation} \\
+A^k & \text{elementwise exponentiation} \\
+\sqrt{A} &\text{elementwise square root} \\
 \exp A & \text{elementwise exponential function} \\
 \tanh A & \text{hyperbolic tangent} \\
 \sigma(A) & \text{logistic sigmoid} \\
@@ -160,7 +162,7 @@ More elementwise binary operations:
 A+B & \text{addition} \\
 A-B & \text{subtraction} \\
 A\odot B & \text{elementwise (Hadamard) product} \\
-A / B & \text{elementwise division} \\
+\displaystyle\frac{A}{B} & \text{elementwise division} \\[1.2ex]
 \max \{A, B\} & \text{elementwise maximum} \\
 \min \{A, B\} & \text{elementwise minimum}
 \end{array}\]
@@ -275,7 +277,7 @@ Let $d_k$ and $d_v$ be positive integers, and let $n$ be the input sequence leng
   \name{key} &\ndef [d_k] \\
   \name{val} &\ndef [d_v] \\
   \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}_n(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att}_n(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
