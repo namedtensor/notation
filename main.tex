@@ -270,12 +270,12 @@ As further proof of concept, in separate pages we have written out the full mode
 
 \subsection{Attention}
 
-Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
+Let $d_k$ and $d_v$ be positive integers, and let $n$ be the input sequence length. Define a function
 \begin{align*}
   \name{key} &\ndef [d_k] \\
   \name{val} &\ndef [d_v] \\
-  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\nset{seq'}{n'} \times\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}_n(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
@@ -288,12 +288,12 @@ In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  L
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V)}
+  \text{SelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
+  \text{SelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(\nmov{seq}{seq'}{Q}, K, V)}
 \end{align*}
 where
 \begin{align*}
-  Q &= W^Q \ndot{emb} \nmov{seq}{seq'}{X} \\
+  Q &= W^Q \ndot{emb} X \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X.
 \end{align*}
@@ -308,8 +308,8 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 \end{align*}
 and define
 \begin{align*}
-\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
-\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
+\text{MultiSelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
+\text{MultiSelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
 Finally, when the Transformer is used for generation, it is necessary to have
@@ -317,7 +317,7 @@ an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
-\text{Attention}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
+\text{Att}_n(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
 M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
 M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise.} \end{cases}
@@ -566,7 +566,7 @@ We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whene
 
 If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the unique tuple in $\tupleshape{\mathcal{S}}$ such that $\tuplerestrict{t}{\mathcal{S}} \subseteq t$.
 
-Because it's very common for a name to be always used with the same index set, we can write $\name{i} \ndef X$ to define $\name{i}$ to be the named index set $\nset{i'}{X}$, where $\name{i'}$ is a new name not used anywhere else. Moreover, in any context where a name is expected, we can write $\name{i}$ when we mean $\name{i'}$.
+Because it's very common for a name to be always used with the same index set, we can write $\name{i} \ndef X$ to create a named index set $\nset{i}{X}$, and this named index set is \emph{also} called $\name{i}$. The context always makes it clear whether the name or the named index set is meant.
 
 \subsection{Named tensors}
 
