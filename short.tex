@@ -22,7 +22,7 @@
 \newcommand{\dmodel}{d_{\text{model}}}
 
 
-\newcommand{\mean}[1]{\sfun{mean}{#1}} 
+\newcommand{\mean}[1]{\funax{mean}{#1}} 
 
 \newcommand{\defaxis}{\underset{\text{\tiny axis}}{=}}
 
@@ -30,6 +30,8 @@
 \setcounter{tocdepth}{1}
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
+
+\newcommand{\annot}[1]{\text{\it #1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -39,8 +41,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\title{Named/Typed Tensors: Brief Overview}
 \begin{document}
 
+\maketitle 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra.  This notation works well with vector spaces, but is ill suited for describing neural networks that operate on tensors with many different axes. Consider the following equation \citep{vaswani+:2017}:
 \begin{equation}
   \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. 
@@ -56,13 +60,13 @@ As a preview, in our notation the above equation becomes
 making it unambiguous the types of the tensors, and which axis each operation applies to. The same equation works \emph{unchanged} when we let $Q$ be a sequence of vectors in $\mathbb{R}^{\name{key}}$ rather than a single vector and make the values in $V$ be vectors rather than scalar. It also extends to multiple heads and minibatching. 
 
 
-We now explain our notation using a running example. Consider an image that is modeled of as an order three tensor $I$ that maps a triple $(x,y,c)$ where $x$ is an X-coordinate, $y$ is Y-coordinate, and $c$ is a \emph{channel} in $\{ \text{`R'}, \text{`G'}, \text{`B'} \}$ into a real number corresponding to the intensity of this channel at this pixel.
+We now explain our notation using a running example. Consider an image that is modeled as an order-three tensor $I$ that maps a triple $(x,y,c)$ into a real number corresponding to the intensity of the channel  $c\in \{ \text{`R'}, \text{`G'}, \text{`B'} \}$ at the  pixel $(x,y)$.
 In our notation we write this as $I \in \mathbb{R}^{\name{width},\name{height},\name{channel}}$. 
 The \emph{type} of $I$ is denoted as $\{ \name{width},\name{height},\name{channel} \}$ and we will sometimes use  superscripts such as $I^{\name{width},\name{height},\name{channel}}$ to remind the reader of it. 
-If $x,y,c$ are known to be indices into the $\name{width},\name{height},\name{channel}$ axes respectively, then we can simply write $I_{x,y,c}$ for corresponding coordinate of $I$. Order here does not matter and $I_{x,y,c} = I_{y,x,c}=I_{c,x,y}$ etc. 
+If $x,y,c$ are known to be indices into the $\name{width},\name{height},\name{channel}$ axes respectively, then we can simply write $I_{x,y,c}$ for the corresponding element of $I$. Order here does not matter and $I_{x,y,c} = I_{y,x,c}=I_{c,x,y}$ etc. 
 If $x,y,c$ do not have such types (e.g., if they are simply integers) then we need to \emph{explicitly cast} them into these types by writing $I_{\name{width}[x],\name{height}[y],\name{channel}[c]}$.
 If we provide fewer indices than the number of axes in $I$ then the result is the restriction of the tensor to these values.
-For example, $I_{x,y,\name{channel}[\text{`B'}]}$ is the $\{ \name{width} , \name{height} \}$ tensor for which every $(x,y)$  coordinate is the intensity of the blue channel.
+For example, $I_{\name{channel}[\text{`B'}]}$ is the $\{ \name{width} , \name{height} \}$ tensor for which every $(x,y)$  coordinate is the intensity of the blue channel at the $(x,y)$ pixel. We can also write this as $I_{\name{channel}=\text{`B'}}$.
 
 
 By specifying axes, we can use notation such as  $\mean{\name{channel}}(I)$ to denote the $\{ \name{width} , \name{height} \}$ type tensor where each pixel location $(x,y)$ contains the mean pixel intensity across the $\name{channel}$ axis.
@@ -70,46 +74,49 @@ In contrast, $\mean{\name{width},\name{weight}}(I)$ denotes the $\{ \name{channe
 The same logic extends to any operation on tensors. Consider the ``90 degree rotation'' operation $ROT$ that takes a tensor $A \in \mathbb{R}^{\name{width},\name{height}}$ and maps it to the tensor $B \in \mathbb{R}^{\name{width},\name{height}}$ such that for every $(x,y)$ pair of coordinates, $B_{x,y} = A_{y,x}$.
 In our notation we write this as follows: 
 
-\[
-  ROT(A^{\name{width},\name{height}}) = B 
-\]
+\begin{equation}
+  ROT(A^{\name{width},\name{height}}) = B^{\name{width},\name{height}} \label{eq:rotsig} 
+\end{equation}
 
 where
 
 \begin{equation}
-  B_{\name{height}[x],\name{width}[y]} = A_{x,y} \;\;\; \text{For every } (x,y) \in \name{width}(A)\times \name{height}(A) \label{eq:rotate}
+  B_{\name{width}[y],\name{height}[x]} = A_{x,y} \;\;\; \text{For every } (x,y) \in \name{width}(A)\times \name{height}(A) \label{eq:rotate}
 \end{equation}
 
 
-That is, $\name{width}(A)$ is the set of all indices that index into $\name{width}$ axis of $A$ (i.e., the elements of $\name{width}$ on which the partial map $A$ is defined), and we consider this as a disjoint set from the analog set $\name{height}(A)$. Hence there is no ambiguity as to which point $A_{x,y}$ corresponds to, and the order does not matter (i.e., $A_{x,y}$ is equal to $A_{y,x}$ and in both cases correspond to the value of $A$ at the point where the $\name{width}$ axis is $x$ and the $\name{height}$ axis is $y$).
+Here $\name{width}(A)$ is the set of all indices that index into $\name{width}$ axis of $A$ (i.e., the elements of $\name{width}$ on which the partial map $A$ is defined), and we consider this as a disjoint set from the analog set $\name{height}(A)$. Hence there is no ambiguity as to which point $A_{x,y}$ corresponds to, and the order does not matter (i.e., $A_{x,y}$ is equal to $A_{y,x}$ and in both cases correspond to the value of $A$ at the point where the $\name{width}$ axis is $x$ and the $\name{height}$ axis is $y$).
 If we want $x$ to index into the $\name{height}$ axis of $B$ instead of into the $\name{width}$ axis then we need to explicitly \emph{cast} it as is done in (\ref{eq:rotate}).
 
-The \emph{signature} of $ROT$ is that it maps a $\{ \name{width} , \name{height} \}$-type tensor into a $\{ \name{width} , \name{height} \}$-type tensor.
-If we feed into $ROT$ a tensor $A$ with an extra axis such as $\name{channel}$ then it is considered a \emph{dangling axis} which means that it is carried through to the output, which will be a tensor $B$ of type $\{ \name{width} , \name{height}  , \name{batch} \}$, such that for every $c \in \name{channel}(A)$, $B_c = ROT(A_c)$. 
+The \emph{signature} of $ROT$, stated in (\ref{eq:rotsig}), is that it maps a $\{ \name{width} , \name{height} \}$-type tensor into a $\{ \name{width} , \name{height} \}$-type tensor.
+If we feed into $ROT$ a tensor $A$ with an extra axis such as $\name{channel}$ then it is considered a \emph{dangling axis} which means that the axis $\name{channel}$ is carried through to the output, which will be a tensor $B$ of type $\{ \name{width} , \name{height}  , \name{channel} \}$, such that for every $c \in \name{channel}(A)$, $B_c = ROT(A_c)$. 
 That is, the operation ROT is applied independently to every restriction of $A$ to the coordinates where the $\name{channel}$ axis equals $c$.
-Similarly, if we feed into a tensor $A$ with type $\{ \name{width} , \name{height} , \name{channel} , \name{batch} \}$ corresponding to a \emph{batch} of images then the output type will be $\{ \name{width} , \name{height} , \name{channel} , \name{batch} \}$, with $ROT$ applied to every $\{ \name{width},\name{height} \}$ restriction independently.
+Similarly, if we feed into a tensor $A$ with type $\{ \name{width} , \name{height} , \name{channel} , \name{batch} \}$ corresponding to a \emph{batch} of images then the output type will be $\{ \name{width} , \name{height} , \name{channel} , \name{batch} \}$, with $ROT$ applied to every $\{ \name{channel},\name{batch} \}$ restriction independently.
 
 \section{Formal definitions}
 
-We now describe the formal definitions. An \emph{axis} is a set of the form $\{ (\text{name}  ,x ) | x\in X \}$ where $\text{name}$ is a string  and  $X$ is an ordered set. 
+We now describe the formal definitions. 
+
+\paragraph{Axes.} An \emph{axis} is a set of the form $\{ (\text{name}  ,x ) | x\in X \}$ where $\text{name}$ is a string  and  $X$ is an ordered set. 
 If we don't specify the ordered set $X$ then it is assumed to be the set of natural numbers $\mathbb{N}$.
-Our convention is that that axes' names are of the form $\text{type}$ or $\text{type}^{\text{annotation}}$, with the assumption that axes with names such as $\text{layer}^{\text{in}}$ and $\name{\text{layer}}^{\text{out}}$ correspond to the same type of indices. 
-All our axes will have a unique names of the form $\text{type}^{\text{annotation}}$ (where $\text{annotation}$ might be empty). 
-We use $\name{type}^{\text{annotation}}$ to denote the unique axis with name $\text{type}^{\text{annotation}}$.
-For $x\in X$, we use $\name{type}^{\text{annotation}}[x]$ to denote the corresponding element $(\text{type}^{\text{annotation}}, x)$ in the set $\name{type}^{\text{annotation}}$.
+Our convention is that that axes' names are strings of the form ``$\text{type}$'' or ``$\text{type}^{\annot{annotation}}$'', with the assumption that axes with names such as $\text{layer}^{\text{in}}$ and $\name{\text{layer}}^{\text{out}}$ correspond to the same type of indices.
+The names are always unique, and we use the notation $\name{type}^{\annot{annotation}}$ to denote the unique axis with name $\text{type}^{\annot{annotation}}$.
+For $x\in X$, we use $\name{type}^{\annot{annotation}}[x]$ to denote the corresponding element $(\text{type}^{\annot{annotation}}, x)$ in the set $\name{type}^{\annot{annotation}}$.
 we use notation such as $\name{ax}$ or  $\name{ax}^1,\name{ax}^2,\ldots$ to denote generic axes.
 
-A \emph{tensor type} is a finite set $\mathcal{T} = \{ \name{ax}^1,\ldots, \name{ax}^d \}$ of axes.
+\paragraph{Tensors.} A \emph{tensor type} is a finite set $\mathcal{T} = \{ \name{ax}^1,\ldots, \name{ax}^d \}$ of axes.
 A  (real-valued) \emph{tensor} of type $\mathcal{T}$ is a partial map $A:\name{ax}^1 \times \name{ax}^2 \times \cdots \times \name{ax}^d \rightarrow \mathbb{R}$,
 where the set of coordinates $(i_1,\ldots,i_d)$ on which $A$ is defined is a product set $I_1 \times \cdots I_d$ where $I_j \subseteq \name{ax}^j$ for $j=1 \ldots d$.
 We write $A(i_1,\ldots,i_d)$ or $A_{i_1,\ldots,i_d}$ for the corresponding coordinate.
-Since $i_1,\ldots,i_d$ are elements of disjoint sets, we can write the indices or inputs in any order without ambiguity.
-If we supply a partial assignment $I = \{ i_{i_1},\ldots,i_{j_\ell} \}$ to the axes $\name{ax}^{j_1},\ldots,\name{ax}^{j_\ell}$ with $j_1\,ldots,j_\ell$ being distinct indices in  $[d]$, then $A_I$ is the tensor of shape $\mathcal{T}' = \mathcal{T} \setminus \{ \name{ax}^{j_1},\ldots,\name{ax}^{j_\ell} \}$ that maps every $d-\ell$ set of indices $\{ k_1,\ldots,k_{d-\ell} \}$ which are elements of distinct axes in $\mathcal{T}'$ into $A_{k_1,\ldots,k_{d-\ell}, i_{i_1},\ldots,i_{j_\ell}}$.
+Since $i_1,\ldots,i_d$ are elements of disjoint sets, we can write the inputs to a tensor in any order without ambiguity.
+
+
+\paragraph{Partial assignments.} If we supply a partial assignment $I = \{ i_{i_1},\ldots,i_{j_\ell} \}$ to the axes $\name{ax}^{j_1},\ldots,\name{ax}^{j_\ell}$ with $j_1\,ldots,j_\ell$ being distinct indices in  $[d]$, then $A_I$ is the tensor of shape $\mathcal{T}' = \mathcal{T} \setminus \{ \name{ax}^{j_1},\ldots,\name{ax}^{j_\ell} \}$ that maps every $d-\ell$ set of indices $\{ k_1,\ldots,k_{d-\ell} \}$ which are elements of distinct axes in $\mathcal{T}'$ into $A_{k_1,\ldots,k_{d-\ell}, i_{i_1},\ldots,i_{j_\ell}}$.
 If $\mathcal{T} = \{ \name{ax}^1,\ldots, \name{ax}^d \}$ is a type then we let $\mathbb{R}^{\name{ax}^1,\ldots, \name{ax}^d }$ denote the set of all tensors of type $\mathcal{T}$.
 We denote the set $I_j$ of coordinates of $\name{ax}^j$ on which $A$ is defined by $\name{ax}^j(A)$. 
 
 
-An \emph{operator}  is a (possibly partial) map that takes as input one or more tensors of a specified type, and outputs a tensor of a specified type.
+\paragraph{Operators.} An \emph{operator}  is a (possibly partial) map that takes as input one or more tensors of a specified type, and outputs a tensor of a specified type.
 The \emph{signature} of an operator is the types of tensors it takes as input and the type of tensor is output.
 If we invoke an operator $F$ with $k$ inputs on tensors $A^1,\ldots,A^k$  that contain axes not appearing in the signatures then the result is defined as follows.
 For every $i$, we let $\mathcal{T}^i$ be the set of axes that the $i$-th tensor contains and are missing from the corresponding part of  $F$'s signature.
@@ -138,6 +145,7 @@ So for example, $\name{channel} \rightarrow \name{layer}$ might map $( \text{`R'
 We can also cast multiple axes into one or vice versa, such as the flattening operations $A_{ \{ \name{width},\name{height},\name{channel} \} \rightarrow \name{layer} }$.
 
 \paragraph{Slicing.} If $\name{ax}$ is an ax of the form $\{ (ax,x) | x \in X \}$ and $Y \subseteq X$ then $\name{ax}[Y]$ is the subset of $\name{ax}$ defined as $\{ (ax,x) | x\in Y \}$. Since $X$ is well ordered, for every $a,b$ we can use $\name{ax}[a..b]$, $\name{ax}[a..]$ or $\name{ax}[..b]$ to denote the restrictions of $\name{ax}$ to the sets $Y$ of inputs between $a$ and $b$, at least $a$, or at most $b$ respectively.\footnote{For concreteness, we use ``math style'' one-based indexing and inclusive intervals here, and assume the natural numbers $\mathbb{N}$ start with $1$, and so for an axis $\name{ax}$ supported on $\mathbb{N}$,  $\name{ax}[..n] = \name{ax}[\{1,\ldots,n\}]$.}
+
 
 
 
