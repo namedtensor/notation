@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex short"] 1607616396 "short.aux" "short.bbl" "short" 1607616403
+["bibtex short"] 1607616396 "short.aux" "short.bbl" "short" 1607618126
   "./acl_natbib.bst" 1607366693 49689 bac5bee2f0a7f9d17cd75f07df5df4dc ""
   "references.bib" 1607366693 3921 2418fab3e70b5c7eee38b41ffcf78467 ""
-  "short.aux" 1607616401 1667 fc20cf3404ef0cbfe31285899a86121f "pdflatex"
+  "short.aux" 1607618124 1667 fc20cf3404ef0cbfe31285899a86121f "pdflatex"
   (generated)
-  "short.blg"
   "short.bbl"
-["pdflatex"] 1607616398 "c:/DBOX/WORK/Code/notation/short.tex" "c:/DBOX/WORK/Code/notation/short.pdf" "short" 1607616403
+  "short.blg"
+["pdflatex"] 1607618118 "c:/DBOX/WORK/Code/notation/short.tex" "c:/DBOX/WORK/Code/notation/short.pdf" "short" 1607618126
   "C:/Users/boazb/AppData/Local/MiKTeX/2.9/miktex/data/le/pdftex/pdflatex.fmt" 1592338125 10020706 c70fcf6108fd70395645d6b5523ea7bc ""
   "C:/Users/boazb/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map" 1607615563 136546 d3c694e685c42d9007b2778ae9d812ed ""
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1233951848 1120 1e8878807317373affa7f7bba4cf2f6a ""
@@ -117,17 +117,17 @@
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/tools/calc.sty" 1580644886 10216 5efd55f2010055e7b7875afd6a75be82 ""
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/tex/latex/xcolor/xcolor.sty" 1463131981 57049 34128738f682d033422ca125f82e5d62 ""
-  "c:/DBOX/WORK/Code/notation/short.aux" 1607616401 1667 fc20cf3404ef0cbfe31285899a86121f ""
-  "c:/DBOX/WORK/Code/notation/short.tex" 1607616320 13958 b73baac50c9d64327f3dff93b98bc4e5 ""
+  "c:/DBOX/WORK/Code/notation/short.aux" 1607618124 1667 fc20cf3404ef0cbfe31285899a86121f ""
+  "c:/DBOX/WORK/Code/notation/short.tex" 1607618112 13946 ef626dd6f511e6cc62807ff01b7f7eac ""
   "namedtensor.sty" 1607607155 714 5ceb72853d37c7f208ed0580274475e3 ""
-  "short.aux" 1607616401 1667 fc20cf3404ef0cbfe31285899a86121f "pdflatex"
+  "short.aux" 1607618124 1667 fc20cf3404ef0cbfe31285899a86121f "pdflatex"
   "short.bbl" 1607616397 662 c7a40583448875982a0fea8eebfcdd32 "bibtex short"
-  "short.out" 1607616401 53 9d521dced9b0e3bae7640e64cf9fcf17 "pdflatex"
-  "short.tex" 1607616320 13958 b73baac50c9d64327f3dff93b98bc4e5 ""
+  "short.out" 1607618124 53 9d521dced9b0e3bae7640e64cf9fcf17 "pdflatex"
+  "short.tex" 1607618112 13946 ef626dd6f511e6cc62807ff01b7f7eac ""
   (generated)
-  "short.log"
-  "short.aux"
-  "short.out"
-  "c:/DBOX/WORK/Code/notation/short.pdf"
   "short.pdf"
   "c:/DBOX/WORK/Code/notation/short.log"
+  "short.log"
+  "short.aux"
+  "c:/DBOX/WORK/Code/notation/short.pdf"
+  "short.out"
