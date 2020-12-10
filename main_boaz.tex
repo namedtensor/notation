@@ -523,18 +523,18 @@ We can express attention as follows:
 
 \begin{align*}
   \text{Att} &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq},\name{key}} \times \mathbb{R}^{\name{seq}} \rightarrow \mathbb{R} \\
-  \text{Att}(Q,K,V) &= \nfun{time}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}(Q)|}} \right) \nadot{\name{seq}} V
+  \text{Att}(Q,K,V) &= \nfun{}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}(Q)|}} \right) \nadot{\name{seq}} V
 \end{align*}
 
-(We don't really need to specify the axes $\name{key}$ and  $\name{seq}$ we take the dot products over, since they are only aligned ones, but it doesn't hurt to be explicit)
+(We don't really need to  specify the axes $\name{key}$ and  $\name{seq}$ we take the dot products over, since they are only aligned ones, but it doesn't hurt to be explicit)
 
 The function requires the precondition that $|\name{key}(Q)|=|\name{key}(K)|$ and $|\name{seq}(K)|=|\name{seq}(V)|$.
 We only follow the rules with "dangling" and "aligned" axes for the axes that are \emph{not contained in the signature of the function}.
 This means that if we evaluate this function with the first input $Q$ being  a two dimensional vector of type $\{ \name{seq} , \name{key} \}$ (instead of a single vector of type $\{ \name{key} \}$) then because $\name{seq}$ is not in the signature of the function,
 it will be treated as a dangling axis.
 Similarly if $V$ has the shape $\{ \name{seq} , \name{val} \}$ instead of only name $\{ \name{seq} \}$ then it is a dangling axis as well.
-Hence in this case  the output of $\text{Att}(Q,K,V)$ will have type $\{ \name{val} ,\name{seq} \}$. 
-If the output is $Y$ then we will satisfy the postcondition  $|\name{seq}^{out}(Y)|=|\name{seq}^{out}(Q)|$.
+Hence in the case $Q$ is of type  $\{ \name{seq} , \name{key} \}$ and $V$ is of type   $\{ \name{seq} , \name{val} \}$ then the output of $\text{Att}(Q,K,V)$ will have type $\{ \name{val} ,\name{seq} \}$. 
+The output $Y$ satisfies the postconditions  $|\name{seq}(Y)|=|\name{seq}(Q)|$ and $|\name{val}(Y)|=|\name{val}(V)|$.
 
 
 

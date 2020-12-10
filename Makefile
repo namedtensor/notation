@@ -9,8 +9,8 @@
 
 all: pdf html
 
-pdf: main.pdf main_boaz.pdf transformer.pdf convnet.pdf
+pdf: main.pdf main_boaz.pdf short.pdf transformer.pdf convnet.pdf
 
-html: main.html main_boaz.html transformer.html convnet.html
+html: main.html main_boaz.html short.html transformer.html convnet.html
 	cp main_boaz.html index.html
 
