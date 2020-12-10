@@ -63,11 +63,11 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-A \emph{named tuple} looks like this: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}}.\] The order of the elements, called \emph{named indices}, doesn't matter: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}} = \tuple{\nidx{bar}{3}, \nidx{foo}{1}}.\] We use \textsf{sans-serif} font for names.
+We want to make tensors into functions, no longer on tuples, but on \emph{records}, which look like this: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}}\] where $\name{foo}$ and $\name{bar}$ are \emph{names} (written in sans-serif font), mapped to 1 and 3, respectively. The pairs $\nidx{foo}{1}$ and $\nidx{bar}{3}$ are called \emph{named indices}. Their order doesn't matter: $\tuple{\nidx{foo}{1}, \nidx{bar}{3}}$ and $\tuple{\nidx{bar}{3}, \nidx{foo}{1}}$ are the same record.
 
-A \emph{named shape} looks like this: \[\nset{foo}{2} \times \nset{bar}{3}.\] Again, the order of the elements, called \emph{named index sets}, doesn't matter: \[\nset{foo}{2} \times \nset{bar}{3} = \nset{bar}{3} \times \nset{foo}{2}.\] A named shape defines a set of possible named tuples: in this example, an index named $\name{foo}$ ranges from 1 to 2, and an index named $\name{bar}$ ranges from 1 to 3.
+The set of records that can be used to index a named tensor is defined by a \emph{named shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where index $\name{foo}$ ranges from 1 to 2, and index $\name{bar}$ ranges from 1 to 3. Again, the order of the elements, called \emph{named index sets}, doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
 
-Then, a real \emph{named tensor} is a function from a named shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
+Then, a real \emph{named tensor} is a function from (the set of records defined by) a named shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -75,22 +75,22 @@ A = \nmatrix{foo}{bar}{
 }.
 \end{equation*}
 
-We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{foo}{2}, \nidx{bar}{3}}$ -- 
-not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
-
-Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
-
-We access elements of $A$ using subscripts: $A_{\nidx{foo}{1}, \nidx{bar}{3}} = A_{\nidx{bar}{3}, \nidx{foo}{1}} = 4$.
+We access elements of $A$ using subscripts: $A_{\nidx{foo}{1}, \nidx{bar}{3}} = 4$.
 We also allow partial indexing:
 \begin{align*}
 A_{\nidx{foo}{1}} &= \nmatrix{}{bar}{
   3 & 1 & 4
 }
-\\
+&
 A_{\nidx{bar}{3}} &= \nmatrix{}{foo}{
   4 & 9
 }.
 \end{align*}
+
+We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{foo}{2}, \nidx{bar}{3}}$ -- 
+not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
+
+Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 
 What are good choices for index names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three indices, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
 
@@ -508,15 +508,15 @@ The style file contains a small number of macros:
 % ugly hack to get non-sans-serif into names
 \newcommand{\sub}[1]{_\text{$#1$}}
 
-\subsection{Named tuples}
+\subsection{Records}
 
 A \emph{named index} is a pair, written $\nidx{i}{x}$, where $\name{i}$ is a \emph{name} and $x$ is usually a positive integer. We write both names and variables ranging over names using sans-serif font.
 
-A \emph{named tuple} is a set of named indices $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
+A \emph{record} is a set of named indices $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
 
 If $\name{i}$ is a name and $X$ is a set, define the \emph{named index set} $\nset{i}{X}$ to be the set $\{\nidx{i}{x} \mid x \in X\}$. We deal with named index sets of the form $\nset{i}{[n]}$ (${}=\nset{i}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as $\nset{i}{n}$.
 
-A \emph{named shape} is a set of named index sets $\{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A named shape defines a set of named tuples:
+A \emph{named shape} is a set of named index sets $\{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A named shape defines a set of records:
 \begin{equation*}
 \tupleshape \{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\} = \left\{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\},
 \end{equation*}
@@ -528,11 +528,11 @@ If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then
 
 \subsection{Named tensors}
 
-Let $F$ be a field and let $\mathcal{T}$ be a set of named tuples. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
+Let $F$ be a field and let $\mathcal{T}$ be a set of records. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a named tuple $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
+If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a record $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
 
 We also allow partial indices. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \tupleshape \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \tupleshape (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
