@@ -109,11 +109,12 @@ A  (real-valued) \emph{tensor} of type $\mathcal{T}$ is a partial map $A:\name{a
 where the set of coordinates $(i_1,\ldots,i_d)$ on which $A$ is defined is a product set $I_1 \times \cdots I_d$ where $I_j \subseteq \name{ax}^j$ for $j=1 \ldots d$.
 We write $A(i_1,\ldots,i_d)$ or $A_{i_1,\ldots,i_d}$ for the corresponding coordinate.
 Since $i_1,\ldots,i_d$ are elements of disjoint sets, we can write the inputs to a tensor in any order without ambiguity.
+We denote the set $I_j$ of coordinates of $\name{ax}^j$ on which $A$ is defined by $\name{ax}^j(A)$. 
 
 
 \paragraph{Partial assignments.} If we supply a partial assignment $I = \{ i_{i_1},\ldots,i_{j_\ell} \}$ to the axes $\name{ax}^{j_1},\ldots,\name{ax}^{j_\ell}$ with $j_1\,ldots,j_\ell$ being distinct indices in  $[d]$, then $A_I$ is the tensor of shape $\mathcal{T}' = \mathcal{T} \setminus \{ \name{ax}^{j_1},\ldots,\name{ax}^{j_\ell} \}$ that maps every $d-\ell$ set of indices $\{ k_1,\ldots,k_{d-\ell} \}$ which are elements of distinct axes in $\mathcal{T}'$ into $A_{k_1,\ldots,k_{d-\ell}, i_{i_1},\ldots,i_{j_\ell}}$.
 If $\mathcal{T} = \{ \name{ax}^1,\ldots, \name{ax}^d \}$ is a type then we let $\mathbb{R}^{\name{ax}^1,\ldots, \name{ax}^d }$ denote the set of all tensors of type $\mathcal{T}$.
-We denote the set $I_j$ of coordinates of $\name{ax}^j$ on which $A$ is defined by $\name{ax}^j(A)$. 
+
 
 
 \paragraph{Operators.} An \emph{operator}  is a (possibly partial) map that takes as input one or more tensors of a specified type, and outputs a tensor of a specified type.

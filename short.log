@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  10 DEC 2020 15:58
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  10 DEC 2020 16:27
 entering extended mode
 **./short.tex
 (short.tex
@@ -470,19 +470,19 @@ LaTeX Warning: No \author given.
 
 {C:/Users/boazb/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2]
 (short.bbl)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 166.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 167.
  [3]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 166.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 167.
  (short.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 166.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 166.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 167.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 167.
 Package rerunfilecheck Info: File `short.out' has not changed.
 (rerunfilecheck)             Checksum: 9D521DCED9B0E3BAE7640E64CF9FCF17;53.
  ) 
 Here is how much of TeX's memory you used:
  9415 strings out of 480797
  139169 string characters out of 2895575
- 418476 words of memory out of 3000000
+ 417476 words of memory out of 3000000
  25230 multiletter control sequences out of 15000+200000
  544892 words of font info for 70 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -515,7 +515,7 @@ msfonts/cm/cmsy8.pfb><C:/Users/boazb/AppData/Local/Programs/MiKTeX 2.9/fonts/ty
 pe1/public/amsfonts/cm/cmti10.pfb><C:/Users/boazb/AppData/Local/Programs/MiKTeX
  2.9/fonts/type1/public/amsfonts/cm/cmti7.pfb><C:/Users/boazb/AppData/Local/Pro
 grams/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on short.pdf (3 pages, 268786 bytes).
+Output written on short.pdf (3 pages, 268833 bytes).
 PDF statistics:
  146 PDF objects out of 1000 (max. 8388607)
  21 named destinations out of 1000 (max. 500000)
