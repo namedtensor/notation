@@ -306,7 +306,7 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 and define
 \begin{align*}
 \text{MultiSelfAtt} &\colon \mathbb{R}^{\name{seq} \times\name{emb}} \rightarrow \mathbb{R}^{\name{seq} \times\name{emb}} \\
-\text{MultiSelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
+\text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
 Finally, when the Transformer is used for generation, it is necessary to have
@@ -490,7 +490,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 X &\in \reals^{\name{d}}  \\
 \mu &\in \reals^{\name{d}}  \\
 \Sigma & \in   \reals^{\name{d1} \times \name{d2}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
 \end{align*}
 
 \section{\LaTeX{} Macros}
