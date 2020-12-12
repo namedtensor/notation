@@ -97,7 +97,7 @@ It's very common for an index name to be used with only one size. If you write
 \name{foo} &\ndef [2] \\
 \name{bar} &\ndef [3]
 \end{align*}
-then you can simply write $\mathbb{R}^{\name{foo} \times \name{bar}}$ for the set of tensors with index $\name{foo}$ ranging from 1 to 2 and $\name{bar}$ ranging from 1 to 3. For more information on what $\ndef$ does, please see \S\ref{sec:definitions}.
+then you can simply write $\mathbb{R}^{\name{foo} \times \name{bar}}$ for the set of tensors with index $\name{foo}$ ranging from 1 to 2 and $\name{bar}$ ranging from 1 to 3. We write $|\name{foo}|$ for the size of $\name{foo}$ (in this example, $|\name{foo}| = 2$). For more information on what $\ndef$ does, please see \S\ref{sec:definitions}.
 
 What are good choices for index names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three indices, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
 
@@ -275,14 +275,12 @@ As further proof of concept, in separate pages we have written out the full mode
 Let $d_k$ and $d_v$ be positive integers, and let $n$ be the input sequence length. Define a function
 \begin{align*}
   \name{key} &\ndef [d_k] \\
-  \name{val} &\ndef [d_v] \\
-  \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}_n(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att} &\colon \mathbb{R}^{\name{key} \times \mathbb{R}^{\name{seq}} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
 In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
 \begin{align*}
-  \name{emb} &\ndef [\dmodel] \\
   W^Q &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
   W^K &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
   W^V &\in \mathbb{R}^{\name{emb} \times \name{val}} \\
@@ -290,8 +288,8 @@ In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  L
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
-  \text{SelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(\nmov{seq}{seq'}{Q}, K, V)}
+  \text{SelfAtt} &\colon \mathbb{R}^{\name{seq} \times\name{emb}} \rightarrow \mathbb{R}^{\name{seq} \times\name{emb}} \\
+  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(\nmov{seq}{seq'}{Q}, K, V)}
 \end{align*}
 where
 \begin{align*}
@@ -302,7 +300,6 @@ where
 
 To change this to multi-head self-attention with $h$ attention heads, simply redefine 
 \begin{align*}
-  \name{head} &\ndef [h] \\
   W^Q &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
   W^K &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
   W^V &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{val}} \\
@@ -310,7 +307,7 @@ To change this to multi-head self-attention with $h$ attention heads, simply red
 \end{align*}
 and define
 \begin{align*}
-\text{MultiSelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
+\text{MultiSelfAtt} &\colon \mathbb{R}^{\name{seq} \times\name{emb}} \rightarrow \mathbb{R}^{\name{seq} \times\name{emb}} \\
 \text{MultiSelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
@@ -319,8 +316,8 @@ an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
-\text{Att}_n(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
-M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
+\text{Att}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
+M & \in \reals^{\name{seq} \times \name{seq'}} & |\name{seq}|&=|\name{seq'}| \\
 M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise.} \end{cases}
 \end{align*}
@@ -332,11 +329,9 @@ M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 As a second example, let's define a simple (Elman) RNN. Let $d$ be a positive integer.
 
 \begin{align*}
-\name{emb} &\ndef [e] \\
-\name{state}, \name{state'} &\ndef [d] \\
 x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
 h^{(t)} &\in \mathbb{R}^{\name{state}} & t &= 0, \ldots, n\\
-A &\in \mathbb{R}^{\name{state} \times \name{state'}} \\
+A &\in \mathbb{R}^{\name{state} \times \name{state'}} & |\name{state}| &= |\name{state'}| \\
 B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
 c &\in \mathbb{R}^{\name{state'}} \\
 h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
@@ -349,10 +344,6 @@ The renaming is necessary because our notation doesn't provide a one-step way to
 Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
 
 \begin{align*}
-\name{input} &\ndef [i] \\  
-\name{hidden} &\ndef [h] \\  
-\name{output} &\ndef [o] \\  
-\name{batch} &\ndef [b] \\  
 V &\in \reals^{\name{output} \times \name{hidden}} & c\in \reals^{\name{output}} \\
 W &\in \reals^{{\name{hidden} \times \name{input}}} & b \in \reals^{\name{hidden}} \\
 X &\in \reals^{{\name{batch} \times \name{input}}} \\
@@ -365,12 +356,6 @@ Z &= \sigma \left( V \ndot{hidden} Y + c \right)
 These three functions are often informally described using the same
 equation, but they each correspond to very different functions. They differ
 by which axes are normalized.
-
-\begin{align*}
-  \name{batch} &\ndef [b] \\
-  \name{channels} &\ndef [c] \\
-  \name{hidden} &\ndef [h]
-\end{align*}
 
 \subsubsection*{Batch normalization}
 
@@ -403,10 +388,7 @@ X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*}
-\name{vocab} &\ndef [v] \\
-\name{hidden} &\ndef [h] \\
-\name{classes} &\ndef [c] \\
-X &\in \{0, 1\}^{{\nset{seq}{n} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
+X &\in \{0, 1\}^{{\name{seq} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
 E &\in \reals^{{\name{vocab} \times \name{hidden}}}\\
 W &\in \reals^{{\name{classes} \times \name{hidden}}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
@@ -417,8 +399,6 @@ Here, the two contractions can be done in either order, so we leave the parenthe
 
 Named indices are very helpful for working with discrete random variables, because each random variable can be represented by an index with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*}
-\name{A} &\ndef [a] \\
-\name{B} &\ndef [b] \\
 p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
 p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
 \end{align*}
@@ -464,13 +444,11 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx
 applying a standard dot product.
 
 \begin{align*}
-\name{channels} &\ndef [c] \\  
-\name{outchannels} &\ndef [c'] \\  
-\name{kw} &\ndef [k] \\  
 X &\in \reals^{{\name{channels} \times \nset{seq}{n}}}  \\
-W &\in \reals^{{\name{outchannels} \times \name{channels} \times \name{kw}}}  \\
-\text{conv1d}(X, W) &= W \ndot{channels, kw} U \\
-U &\in \reals^{{\name{channels} \times \nset{seq}{n-k +1} \times \name{kw}}}  \\
+W &\in \reals^{{\name{channels} \times \name{kw}}}  \\
+b &\in \reals \\
+\text{conv1d}(X, W) &= W \ndot{channels, kw} U + b \\
+U &\in \reals^{{\name{channels} \times \nset{seq}{n-|\name{kw}| +1} \times \name{kw}}}  \\
 U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}  
 \end{align*} 
 
@@ -479,15 +457,11 @@ U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}
 
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*}
-\name{batch} &\ndef [b] \\
-\name{space} &\ndef [k] \\
-\name{clusters} &\ndef [c] \\
   X &\in \reals^{\name{batch} \times \name{space}} \\
 C &\in \reals^{\name{clusters} \times \name{space}}
 \end{align*}
 we compute cluster assignments
 \begin{align*}
-% Q &\in \{0, 1\}^{\nset{batch}{b} \times\nset{clusters}{c}} \\
 Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X) \\
   &= \lim_{\alpha \rightarrow -\infty} \nfun{clusters}{softmax} \left(\alpha \nfun{space}{norm}(C-X)\right)
 \end{align*}
@@ -502,9 +476,7 @@ Beam search is a commonly used approach for approximate discrete search. Here $H
 Beam step returns the new $H$ tensor. 
 
 \begin{align*} 
-\name{batch} &\ndef [b] \\
-\name{beam} &\ndef [k] \\
-\name{state}, \name{state'} &\ndef [s] \\
+|\name{state}| &= |\name{state'}| \\
 H &\in \reals^{{\name{batch} \times \name{beam}}} \\
 S &\in \{0, 1\}^{{\name{batch} \times \name{beam} \times \name{state}}} & \nsum{state} S &= 1\\
 f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\ 
@@ -516,9 +488,8 @@ f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
-\name{batch} &\ndef [b] \\
-\name{d}, \name{d1}, \name{d2} &\ndef [k] \\
-X &\in \reals^{\name{batch} \times \name{d}}  \\
+|\name{d}| &= |\name{d1}| = |\name{d2}| \\
+X &\in \reals^{\name{d}}  \\
 \mu &\in \reals^{\name{d}}  \\
 \Sigma & \in   \reals^{\name{d1} \times \name{d2}}  \\
 {\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
