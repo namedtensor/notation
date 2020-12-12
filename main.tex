@@ -17,9 +17,10 @@
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\dmodel}{d_{\text{model}}}
+\newcommand{\dff}{d_{\text{ff}}}
 
 \usepackage{parskip}
-\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{2}
 \usepackage{natbib}
 \usepackage[hidelinks]{hyperref}
 
@@ -31,6 +32,8 @@
 \maketitle
 
 \tableofcontents
+
+\clearpage
 
 \section{Introduction}
 
@@ -268,71 +271,26 @@ For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot
 
 In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning.
 
-As further proof of concept, in separate pages we have written out the full models for Transformer (\url{https://namedtensor.github.io/transformer.html}) and LeNet (\url{https://namedtensor.github.io/convnet.html}).
+\subsection{Building blocks}
 
-\subsection{Attention}
+\subsubsection{Fully-connected layers}
 
-Let $d_k$ and $d_v$ be positive integers, and let $n$ be the input sequence length. Define a function
+We use rectified linear units (ReLUs) because some of the larger models we define later require it; a logistic function or tanh would also work here.
 \begin{align*}
-  \name{key} &\ndef [d_k] \\
-  \name{val} &\ndef [d_v] \\
-  \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}_n(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
-\end{align*}
-
-In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
-\begin{align*}
-  \name{emb} &\ndef [\dmodel] \\
-  W^Q &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
-  W^K &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
-  W^V &\in \mathbb{R}^{\name{emb} \times \name{val}} \\
-  W^O &\in \mathbb{R}^{\name{val} \times \name{emb}}
-\end{align*}
-Then define
-\begin{align*}
-  \text{SelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
-  \text{SelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(\nmov{seq}{seq'}{Q}, K, V)}
+  \text{Full} &\colon \reals^{\name{layer}} \rightarrow \reals^{\name{layer'}} \\
+  \text{Full}(x; W, b) &= \max \left\{ 0, W \ndot{layer} x + b \right\}
 \end{align*}
 where
 \begin{align*}
-  Q &= W^Q \ndot{emb} X \\
-  K &= W^K \ndot{emb} X \\
-  V &= W^V \ndot{emb} X.
+  W &\in \reals^{\name{layer'} \times \name{layer}} \\
+  b &\in \reals^{\name{layer'}} \\
 \end{align*}
-
-To change this to multi-head self-attention with $h$ attention heads, simply redefine 
-\begin{align*}
-  \name{head} &\ndef [h] \\
-  W^Q &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
-  W^K &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
-  W^V &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{val}} \\
-  W^O &\in \mathbb{R}^{\name{head} \times \name{val} \times \name{emb}}
-\end{align*}
-and define
-\begin{align*}
-\text{MultiSelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{emb}} \\
-\text{MultiSelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
-\end{align*}
-
-Finally, when the Transformer is used for generation, it is necessary to have
-an additional mask to ensure the model does not look at future words.
-This can be included in the attention definition with clear names.
-
-\begin{align*} 
-\text{Att}_n(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
-M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
-M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
--\infty & \text{otherwise.} \end{cases}
-\end{align*}
-
-
-\subsection{Recurrent neural networks}
+  
+\subsubsection{Recurrent neural networks}
 \label{sec:rnn}
 
 As a second example, let's define a simple (Elman) RNN. Let $d$ be a positive integer.
-
 \begin{align*}
-\name{emb} &\ndef [e] \\
 \name{state}, \name{state'} &\ndef [d] \\
 x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
 h^{(t)} &\in \mathbb{R}^{\name{state}} & t &= 0, \ldots, n\\
@@ -341,77 +299,90 @@ B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
 c &\in \mathbb{R}^{\name{state'}} \\
 h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
 \end{align*}
+Here the index name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
 
-The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
+\subsubsection{Attention}
+\label{sec:attention}
 
-\subsection{Fully-connected layers}
-
-Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
-
+Let $d_k$ and $d_v$ be positive integers, and let $n$ be the input sequence length.
 \begin{align*}
-\name{input} &\ndef [i] \\  
-\name{hidden} &\ndef [h] \\  
-\name{output} &\ndef [o] \\  
-\name{batch} &\ndef [b] \\  
-V &\in \reals^{\name{output} \times \name{hidden}} & c\in \reals^{\name{output}} \\
-W &\in \reals^{{\name{hidden} \times \name{input}}} & b \in \reals^{\name{hidden}} \\
-X &\in \reals^{{\name{batch} \times \name{input}}} \\
-Y &= \sigma \left( W \ndot{input} X + b \right) \\
-Z &= \sigma \left( V \ndot{hidden} Y + c \right)  
+  \name{key} &\ndef [d_k] \\
+  \name{val} &\ndef [d_v] \\
+  \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}_n(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
 \end{align*}
 
-\subsection{Normalization layers}
+Sometimes we need to apply a mask to keep from attending to certain positions.
+\begin{align*} 
+  \text{Att}_n &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{key}} \times \mathbb{R}^{\nset{seq}{n} \times\name{val}} \times \mathbb{R}^{\name{seq}} \rightarrow \mathbb{R}^{\name{val}} \\
+\text{Att}_n(Q, K, V, M) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V 
+\end{align*}
 
-These three functions are often informally described using the same
+If $Q$, $K$, and $V$ have a \name{head} index for multiple attention heads, then the above equations will compute multi-head attention without modification.
+
+\subsubsection{Convolution}
+
+A 1-dimensional convolution can be easily written by unrolling a tensor and then
+applying a standard dot product.
+\begin{align*}
+\name{kernel} &\ndef [k] \\  
+X &\in \reals^{\name{channels} \times \nset{seq}{n}}  \\
+W &\in \reals^{\name{channels} \times \name{kernel}} &
+b &\in \reals \\
+\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b \\
+U &\in \reals^{\name{channels} \times \nset{seq}{n-k+1} \times \name{kernel}}  \\
+U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}}  
+\end{align*} 
+
+A 2-dimensional convolution:
+\begin{align*}
+\name{kh} &\ndef [kh] \\  
+\name{kw} &\ndef [kw] \\  
+X &\in \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} \\
+W &\in \reals^{\name{channels} \times\name{kh} \times \name{kw}} &
+b &\in \reals \\
+\text{conv2d}(X; W, b) &=  W \ndot{channels, kh, kw} U + b \\
+U &\in \reals^{\name{channels} \times \nset{height}{h-kh+1} \times
+\nset{width}{w-kw+1} \times \name{kh} \times \name{kw}}  \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}}  
+\end{align*}
+
+\subsubsection{Max pooling}
+
+\begin{align*}
+X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
+\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
+U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
+\end{align*}
+
+\subsubsection{Normalization layers}
+
+Batch, instance, and layer normalization are often informally described using the same
 equation, but they each correspond to very different functions. They differ
 by which axes are normalized.
 
+We can define a single generic normalization layer, parameterized by a named index set \name{d}:
 \begin{align*}
-  \name{batch} &\ndef [b] \\
-  \name{channels} &\ndef [c] \\
-  \name{hidden} &\ndef [h]
+  \nfun{d}{xnorm} &\colon \mathbb{R}^{\name{d}} \rightarrow \mathbb{R}^{\name{d}} \\
+  \nfun{d}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{d}{mean}(X)}{\sqrt{\nfun{d}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
-
-\subsubsection*{Batch normalization}
-
+where
 \begin{align*}
-X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}}\\
-\gamma, \beta &\in \reals^{{\name{batch}}} \\
-\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \gamma, \beta &\in \mathbb{R}^{\name{d}} \\
+  \epsilon &> 0
 \end{align*}
 
-
-\subsubsection*{Instance normalization}
-
-\begin{align*} 
-X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}}\\
-\gamma, \beta &\in \reals^{{\name{hidden}}} \\
-\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta
-\end{align*}
-
-\subsubsection*{Layer normalization}
-
-\begin{align*} 
-X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}} \\
-\gamma, \beta &\in \reals^{{\name{channels} \times \name{hidden}}} \\
-\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channels}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channels}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta 
-\end{align*}
-
-
-\subsection{Continuous bag of words}
-
-A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
-
+Now, suppose that the input has three indices:
 \begin{align*}
-\name{vocab} &\ndef [v] \\
-\name{hidden} &\ndef [h] \\
-\name{classes} &\ndef [c] \\
-X &\in \{0, 1\}^{{\nset{seq}{n} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
-E &\in \reals^{{\name{vocab} \times \name{hidden}}}\\
-W &\in \reals^{{\name{classes} \times \name{hidden}}}\\
-\text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
+X &\in \reals^{{\name{batch} \times \name{channels} \times \name{layer}}}
 \end{align*}
-Here, the two contractions can be done in either order, so we leave the parentheses off.
+Then the three kinds of normalization layers can be written as:
+\begin{align*}
+Y &= \nfun{batch}{xnorm}(X) && \text{batch normalization} \\
+Y &= \nfun{layer}{xnorm}(X) && \text{instance normalization} \\
+Y &= \nfun{layer,channels}{xnorm}(X) && \text{layer normalization}
+\end{align*}
 
 \subsection{Discrete random variables}
 
@@ -427,11 +398,110 @@ Then Bayes' rule is just:
 p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}.
 \end{align*}
 
-\subsection{Sudoku ILP}
+\subsection{Transformer}
+\label{sec:transformer}
+
+We define a Transformer used autoregressively as a language model. The input is a sequence of one-hot vectors $I$, from which we compute word embeddings and positional encodings. Let $\dmodel$ be a positive integer. 
+\begin{align*}
+  \name{layer} &\ndef [\dmodel] \\
+  I &\in \{0, 1\}^{{\nset{seq}{n} \times \name{vocab}}} & \nsum{vocab} I &= 1\\
+  E &\in \reals^{\name{vocab} \times \name{layer}} \\
+  W &= (E \ndot{vocab} I)\sqrt{\dmodel} \\
+  P &\in \reals^{\nset{seq}{n} \times \name{layer}} \\
+  P_{\nidx{seq}{p}, \nidx{layer}{i}} &= \begin{cases}
+    \sin((p-1) / 10000^{(i-1) / \dmodel}) & \text{$i$ odd} \\ 
+    \cos((p-1) / 10000^{(i-2) / \dmodel}) & \text{$i$ even}
+  \end{cases}
+\end{align*}
+Then we use $L$ layers of self-attention and feed-forward neural networks.
+\begin{align*} 
+X^0 &= W+P \\
+T^1 &= \nfun{layer}{xnorm}(\text{SelfAtt}(X^0)) + X^0\\
+X^1 &= \nfun{layer}{xnorm}(\text{FFN}(T^1)) + T^1\\
+&\vdotswithin{=} \\
+T^{L} &= \nfun{layer}{xnorm}(\text{SelfAtt}(X^{L-1})) + X^{L-1}\\
+X^{L} &= \nfun{layer}{xnorm}(\text{FFN}(T^L)) + T^L\\
+O &= \nfun{vocab}{softmax}(E \ndot{layer} X^L)
+\end{align*}
+where $\text{SelfAtt}$ and $\text{FFNN}$ are defined below.
+
+The feedforward neural networks are:
+\begin{align*}
+  W^1 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^1 \in \mathbb{R}^{\name{hidden}} \\
+  W^2 &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^2 \in \mathbb{R}^{\name{layer}} \\
+  \text{FFN} &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{FFN}(x; W^1, b^1, W^2, b^2) &= \text{ReLU}(W^2 \ndot{hidden} y + b^2) \\
+  y &= \text{ReLU}(W^1 \ndot{layer} x + b^1)
+\end{align*}
+
+We defined attention above (\S\ref{sec:attention}); the Transformer uses multi-head self-attention, in which $Q$, $K$, and $V$ are all computed from the same sequence. The parameters are:
+\begin{align*}
+  \name{heads} &\ndef [h] \\
+  \name{key}, \name{val} &\ndef [\dmodel/h] \\
+  W^Q &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  W^K &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  W^V &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  W^O &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+\end{align*}
+Then define
+\begin{align*}
+  \text{SelfAtt}_n &\colon \mathbb{R}^{\nset{seq}{n} \times\name{layer}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\name{layer}} \\
+  \text{SelfAtt}_n(X; W^Q, W^K, W^V, W^O) &= \nsum{heads} W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)}
+\end{align*}
+where
+\begin{align*}
+  Q &= \nmov{seq}{seq'}{W^Q \ndot{layer} X} \\
+  K &= W^K \ndot{layer} X \\
+  V &= W^V \ndot{layer} X \\
+  M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
+  M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
+    0 & i \leq j\\
+    -\infty & \text{otherwise.}
+  \end{cases}
+\end{align*}
+
+\subsection{LeNet}
+
+Parameters:
+\begin{align*} 
+W^1 & \in \reals^{\nset{channels'}{c_2} \times \nset{channels}{c_1} \times \nset{kh}{kh_1} \times \nset{kw}{kw_1}} & b^1 \in \reals^{\nset{channels'}{c_2}} \\ 
+W^2 & \in \reals^{\nset{channels'}{c_3} \times \nset{channels}{c_2} \times \nset{kh}{kh_2} \times \nset{kw}{kw_2}} & b^2 \in \reals^{\nset{channels'}{c_3}} \\ 
+\end{align*}
+Model:
+\begin{align*}
+X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}}\\
+X^1 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^0; W^1, b^1))} \\
+X^2 &= \text{maxpool2d}(X^1, ph_1, ph_2) \\
+X^3 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^2; W^2, b^2))} \\
+X^4 &= \text{maxpool2d}(X^3, ph_2, ph_2) \\
+X^5 &= \nmov{height,width,channels}{layer}{X^4} \\
+H &= \text{ReLU}(W^3 \ndot{layer} X^5 + b^3) \\
+O &= \nfun{class}{softmax}(\text{ReLU}(W^4 \ndot{hidden} H + b^4))
+\end{align*}
+The flattening operation in the equation for $X^5$ is defined in \S{\ref{sec:reshaping}}.
+
+\subsection{Other examples}
+
+\subsubsection{Continuous bag of words}
+
+A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
+
+\begin{align*}
+\name{vocab} &\ndef [v] \\
+\name{hidden} &\ndef [h] \\
+\name{classes} &\ndef [c] \\
+X &\in \{0, 1\}^{{\nset{seq}{n} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
+E &\in \reals^{{\name{vocab} \times \name{hidden}}}\\
+W &\in \reals^{{\name{classes} \times \name{hidden}}}\\
+\text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
+\end{align*}
+Here, the two contractions can be done in either order, so we leave the parentheses off.
+
+\subsubsection{Sudoku ILP}
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
-Constraints then ensure that there is one digit per row, per column and per sub-box. 
+Constraints then ensure that there is one digit per row, per column and per sub-box
 
 \begin{align*} 
 X &\in \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}}  \\
@@ -444,38 +514,7 @@ Y &\in \{0, 1\}^{\nset{Height}{3} \times \nset{Width}{3} \times \nset{height}{3}
 Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_{\nidx{height}{r\times 3 + r'-1}, \nidx{width}{c\times3 + c'-1}}
 \end{align*} 
 
-
-\subsection{Max pooling}
-
-Max pooling used in image recognition takes a similar form as the Sudoku example.
-
-\begin{align*}
-X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
-U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
-\end{align*}
-
-
-
-\subsection{1D convolution}
-
-1D convolution can be easily written by unrolling a tensor and then
-applying a standard dot product.
-
-\begin{align*}
-\name{channels} &\ndef [c] \\  
-\name{outchannels} &\ndef [c'] \\  
-\name{kw} &\ndef [k] \\  
-X &\in \reals^{{\name{channels} \times \nset{seq}{n}}}  \\
-W &\in \reals^{{\name{outchannels} \times \name{channels} \times \name{kw}}}  \\
-\text{conv1d}(X, W) &= W \ndot{channels, kw} U \\
-U &\in \reals^{{\name{channels} \times \nset{seq}{n-k +1} \times \name{kw}}}  \\
-U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}  
-\end{align*} 
-
-
-\subsection{$K$-means clustering}
+\subsubsection{$K$-means clustering}
 
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*}
@@ -496,7 +535,7 @@ then we recompute the cluster centers:
 C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
 \end{equation*}
 
-\subsection{Beam search}
+\subsubsection{Beam search}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 Beam step returns the new $H$ tensor. 
@@ -511,7 +550,7 @@ f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\
 \text{beamstep}(H, S) &= \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H \right)
 \end{align*} 
 
-\subsection{Multivariate normal distribution}
+\subsubsection{Multivariate normal distribution}
 
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
