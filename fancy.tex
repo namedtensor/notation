@@ -4,6 +4,13 @@ Contributors: Tongfei Chen and Chu-Cheng Lin
 
 NumPy defines two kinds of \emph{advanced} (also known as \emph{fancy}) indexing: by integer arrays and by Boolean arrays. Here, we generalize indexing by integer arrays to named tensors. That is, if $A$ is a named tensor with $D$ indices and $I^1, \ldots, I^D$ are named tensors, called ``indexers,'' what is $A_{I^1, \ldots, I^D}$?
 
+Advanced indexing could be derived by taking a function
+\begin{align*}
+  \nfun{d}{index} &\colon F^{\nset{d}{X}} \times X \rightarrow F \\
+  \nfun{d}{index}(A, i) &= A_{\nidx{d}{i}}
+\end{align*}
+and extending it to higher-order tensors in its second argument according to the rules in \S\ref{sec:tensorfunctions}. But because that's somewhat abstract, we give a more concrete definition below.
+
 We first consider the case where all the indexers have the same shape $\mathcal{S}$:
 \begin{align*}
   A &\in F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{D}}{X_D}} \\
@@ -25,16 +32,14 @@ where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{I^1, \ldots, I^D}$ i
 
 Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\nset{batch}{B}, \nset{sent}{N}, \nset{emb}{E}}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\nset{batch}{B}, \nset{span}{M}, \nset{emb}{E}}$.
 
-We create a indexer for the $\name{sent}$ axis: $I_{\name{sent}} \in [N]^{\name{batch}:B \times \name{span}: M}$ that selects the desired tokens. Then we can write
-\begin{equation*}
-  Y = X_{\nset{batch}{I}, \nset{sent}{I}, \nset{emb}{I}}
-\end{equation*}
-where the other two indexers
+We create a indexer for the $\name{sent}$ axis: $I \in [N]^{\nset{batch}{B} \times \nset{span}{M}}$ that selects the desired tokens. Also define the function
 \begin{align*}
-  I_{\name{batch}} &\in [B]^{\nset{batch}{B}} \\
-  [I_{\name{batch}}]_{\nset{batch}{b}} &= b \\
-  I_{\name{emb}} &\in [E]^{\nset{emb}{E}} \\
-  [I_{\name{sent}}]_{\nset{sent}{n}} &= n
+  \nfun{d}{arange}(X) &\in X^{\nset{d}{X}} \\
+  \left[\nfun{d}{arange}(X)\right]_{\nidx{d}{i}} &= i
 \end{align*}
-select all values of their respective indices.
+which generalizes the NumPy function of the same name.
 
+Then we can write
+\begin{equation*}
+  Y = X_{\nidx{batch}{I}, \nidx{sent}{\nfun{sent}{arange}(n)}, \nidx{emb}{\nfun{emb}{arange}(E)}}.
+\end{equation*}
