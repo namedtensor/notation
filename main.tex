@@ -16,6 +16,7 @@
 
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
+\newcommand{\dff}{d_{\text{ff}}}
 
 \usepackage{parskip}
 \setcounter{tocdepth}{2}
@@ -276,7 +277,7 @@ In this section we give a series of examples illustrating how to use named tenso
 We use rectified linear units (ReLUs) because some of the larger models we define later require it; a logistic function or tanh would also work here.
 \begin{align*}
   \text{Full} &\colon \reals^{\name{layer}} \rightarrow \reals^{\name{layer'}} \\
-  \text{Full}(x; W, b) &= \max \left\{ 0, W \ndot{layer} x + b \right\}
+  \text{Full}(x) &= \nmov{layer'}{layer}{\max \left\{ 0, W \ndot{layer} x + b \right\}}
 \end{align*}
 where
 \begin{align*}
@@ -357,7 +358,7 @@ by which axes are normalized.
 We can define a single generic normalization layer:
 \begin{align*}
   \nfun{d}{xnorm} &\colon \mathbb{R}^{\name{d}} \rightarrow \mathbb{R}^{\name{d}} \\
-  \nfun{d}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{d}{mean}(X)}{\sqrt{\nfun{d}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{d}{xnorm}(X) &= \frac{X - \nfun{d}{mean}(X)}{\sqrt{\nfun{d}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 where
 \begin{align*}
@@ -391,57 +392,72 @@ p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{
 \subsection{Transformer}
 \label{sec:transformer}
 
-We define a Transformer used autoregressively as a language model. The input is a sequence of one-hot vectors $I$, from which we compute word embeddings and positional encodings.
+We define a Transformer used autoregressively as a language model.
+
+We define the parameters of the model and the instances of functions that use them (analogous to modules in neural network libraries):
+
+The input is a sequence of one-hot vectors
 \begin{align*}
-  I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1\\
+  I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1
+\end{align*}
+from which we compute word embeddings
+\begin{align*}
   E &\in \reals^{\name{vocab} \times \name{layer}} \\
-  W &= (E \ndot{vocab} I)\sqrt{|\name{layer}|} \\
+  W &= (E \ndot{vocab} I)\sqrt{|\name{layer}|}
+\end{align*}
+and positional encodings
+\begin{align*}
   P &\in \reals^{\name{seq} \times \name{layer}} \\
   P_{\nidx{seq}{p}, \nidx{layer}{i}} &= \begin{cases}
     \sin((p-1) / 10000^{(i-1) / |\name{layer}|}) & \text{$i$ odd} \\ 
-    \cos((p-1) / 10000^{(i-2) / |\name{layer}|}) & \text{$i$ even}
+    \cos((p-1) / 10000^{(i-2) / |\name{layer}|}) & \text{$i$ even.}
   \end{cases}
 \end{align*}
 Then we use $L$ layers of self-attention and feed-forward neural networks.
 \begin{align*} 
 X^0 &= W+P \\
-T^1 &= \nfun{layer}{xnorm}(\text{SelfAtt}(X^0)) + X^0\\
-X^1 &= \nfun{layer}{xnorm}(\text{FFN}(T^1)) + T^1\\
+T^1 &= \text{LayerNorm}^1(\text{SelfAtt}^1(X^0)) + X^0\\
+X^1 &= \text{LayerNorm}^{1'}(\text{FFN}^1(T^1)) + T^1\\
 &\vdotswithin{=} \\
-T^{L} &= \nfun{layer}{xnorm}(\text{SelfAtt}(X^{L-1})) + X^{L-1}\\
-X^{L} &= \nfun{layer}{xnorm}(\text{FFN}(T^L)) + T^L\\
+T^{L} &= \text{LayerNorm}^L(\text{SelfAtt}^L(X^{L-1})) + X^{L-1}\\
+X^{L} &= \text{LayerNorm}^{L'}(\text{FFN}^L(T^L)) + T^L\\
 O &= \nfun{vocab}{softmax}(E \ndot{layer} X^L)
 \end{align*}
-where $\text{SelfAtt}$ and $\text{FFNN}$ are defined below.
+where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
 
-The feedforward neural networks are:
+Layer normalization ($l = 1, 1', \ldots, L, L'$):
 \begin{align*}
-  W^1 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^1 \in \mathbb{R}^{\name{hidden}} \\
-  W^2 &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^2 \in \mathbb{R}^{\name{layer}} \\
-  \text{FFN} &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{FFN}(x; W^1, b^1, W^2, b^2) &= \text{ReLU}(W^2 \ndot{hidden} y + b^2) \\
-  y &= \text{ReLU}(W^1 \ndot{layer} x + b^1)
+  \text{LayerNorm}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{LayerNorm}^l(X) &= \nfun{layer}{xnorm}(X; \beta^l, \gamma^l) 
+\end{align*}
+
+Feedforward neural networks:
+\begin{align*}
+  \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{FFN}^l(X) &= Z \\
+  Y &= \text{Full}(X; W^{l,1}, b^{l,1}) \in \mathbb{R}^{\nset{layer}{\dff}}\\
+  Z &= \text{Full}(Y; W^{l,2}, b^{l,2})
 \end{align*}
 
 We defined attention above (\S\ref{sec:attention}); the Transformer uses multi-head self-attention, in which $Q$, $K$, and $V$ are all computed from the same sequence. The parameters are:
 \begin{align*}
   |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  W^Q &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  W^K &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  W^V &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
-  W^O &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt} &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{heads} W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)}
+  \text{SelfAtt}^l &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
+  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)}
 \end{align*}
 where
 \begin{align*}
   |\name{seq}| &= |\name{seq'}| \\
-  Q &= \nmov{seq}{seq'}{W^Q \ndot{layer} X} \\
-  K &= W^K \ndot{layer} X \\
-  V &= W^V \ndot{layer} X \\
+  Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} \\
+  K &= W^{l,K} \ndot{layer} X \\
+  V &= W^{l,V} \ndot{layer} X \\
   M & \in \reals^{\name{seq} \times \name{seq'}} \\
   M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
     0 & i \leq j\\
@@ -451,21 +467,30 @@ where
 
 \subsection{LeNet}
 
-Parameters:
-\begin{align*} 
-W^1 & \in \reals^{\nset{channels'}{c_2} \times \nset{channels}{c_1} \times \nset{kh}{kh_1} \times \nset{kw}{kw_1}} & b^1 \in \reals^{\nset{channels'}{c_2}} \\ 
-W^2 & \in \reals^{\nset{channels'}{c_3} \times \nset{channels}{c_2} \times \nset{kh}{kh_2} \times \nset{kw}{kw_2}} & b^2 \in \reals^{\nset{channels'}{c_3}} \\ 
+Convolution layers ($l = 1, 3$):
+\begin{align*}
+\name{channels} &= \name{channels'} \\  
+\text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)} \\
+W^l & \in \reals^{\nset{channels'}{c_{l+1}} \times \nset{channels}{c_l} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
+b^l &\in \reals^{\nset{channels'}{c_{l+1}}}
 \end{align*}
+
+Pooling layers ($l = 2, 4$):
+\begin{align*}
+\text{maxpool}^l(X) &= \text{maxpool2d}(X; ph_l, ph_l)
+\end{align*}
+
 Model:
 \begin{align*}
 X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}}\\
-X^1 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^0; W^1, b^1))} \\
-X^2 &= \text{maxpool2d}(X^1, ph_1, ph_2) \\
-X^3 &= \nmov{channels'}{channels}{\text{ReLU}(\text{conv2d}(X^2; W^2, b^2))} \\
-X^4 &= \text{maxpool2d}(X^3, ph_2, ph_2) \\
+X^1 &= \text{ReLU}(\text{conv}^1(X^0)) \\
+X^2 &= \text{maxpool}^2(X^1) \\
+X^3 &= \text{ReLU}(\text{conv}^3(X^2)) \\
+X^4 &= \text{maxpool}^4(X^3) \\
 X^5 &= \nmov{height,width,channels}{layer}{X^4} \\
-H &= \text{ReLU}(W^3 \ndot{layer} X^5 + b^3) \\
-O &= \nfun{class}{softmax}(\text{ReLU}(W^4 \ndot{hidden} H + b^4))
+X^6 &= \text{Full}(X^5) \in \mathbb{R}^{\nset{layer}{h}} \\
+X^7 &= \nmov{layer}{classes}{\text{Full}(X^6)} \\
+O &= \nfun{classes}{softmax}(X^7).
 \end{align*}
 The flattening operation in the equation for $X^5$ is defined in \S{\ref{sec:reshaping}}.
 
