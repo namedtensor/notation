@@ -387,9 +387,6 @@ p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{
 \label{sec:transformer}
 
 We define a Transformer used autoregressively as a language model.
-
-We define the parameters of the model and the instances of functions that use them (analogous to modules in neural network libraries):
-
 The input is a sequence of one-hot vectors
 \begin{align*}
   I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1
@@ -407,6 +404,7 @@ and positional encodings
     \cos((p-1) / 10000^{(i-2) / |\name{layer}|}) & \text{$i$ even.}
   \end{cases}
 \end{align*}
+
 Then we use $L$ layers of self-attention and feed-forward neural networks.
 \begin{align*} 
 X^0 &= W+P \\
@@ -429,8 +427,8 @@ Feedforward neural networks:
 \begin{align*}
   \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
   \text{FFN}^l(X) &= Z \\
-  Y &= \text{Full}(X; W^{l,1}, b^{l,1}) \in \mathbb{R}^{\nset{layer}{\dff}}\\
-  Z &= \text{Full}(Y; W^{l,2}, b^{l,2})
+  Y &= \text{ReLU}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
+  Z &= \text{ReLU}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 We defined attention above (\S\ref{sec:attention}); the Transformer uses multi-head self-attention, in which $Q$, $K$, and $V$ are all computed from the same sequence. The parameters are:
@@ -482,9 +480,8 @@ X^2 &= \text{maxpool}^2(X^1) \\
 X^3 &= \text{ReLU}(\text{conv}^3(X^2)) \\
 X^4 &= \text{maxpool}^4(X^3) \\
 X^5 &= \nmov{height,width,channels}{layer}{X^4} \\
-X^6 &= \text{Full}(X^5) \in \mathbb{R}^{\nset{layer}{h}} \\
-X^7 &= \nmov{layer}{classes}{\text{Full}(X^6)} \\
-O &= \nfun{classes}{softmax}(X^7).
+X^6 &= \text{ReLU}(W^6 \ndot{layer} X^5 + b^6) & W^6 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^6 &\in \mathbb{R}^{\name{hidden}} \\
+O &= \nfun{classes}{softmax} (W^7 \ndot{hidden} X^6 + b^7) & W^7 &\in \mathbb{R}^{\name{classes}, \name{hidden}} & b^7 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
 The flattening operation in the equation for $X^5$ is defined in \S{\ref{sec:reshaping}}.
 
