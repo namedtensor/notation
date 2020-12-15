@@ -246,7 +246,7 @@ It's also very handy to have a function that renames an axis:
 
 We can reshape two or more axes into one axis:
 \begin{equation*}
-  \nmov{foo,bar}{baz}{A} = \nmatrix{}{baz}{
+  \nmov{(foo,bar)}{baz}{A} = \nmatrix{}{baz}{
     3 & 1 & 4 & 1 & 5 & 9
   }
 \end{equation*}
@@ -255,7 +255,7 @@ The order of elements in the new axis or axes is undefined. If you need a partic
 
 \subsubsection{Matrices}
 
-Finally, we briefly consider functions on matrices, for which you have to give \emph{two} axis names (and the order in general matters). Let $A$ be a named tensor with shape $\{\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2\}}$:
+Finally, we briefly consider functions on matrices, for which you have to give \emph{two} axis names (and the order in general matters). Let $A$ be a named tensor with shape $\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2}$:
 \begin{align*}
 A_{\nidx{foo}{1}} &= \nmatrix{bar}{baz}{
   1 & 2 \\
@@ -295,8 +295,8 @@ This definition outputs a scalar; if you want to output a vector, simply add an 
 To stack these into a feedforward neural network:
 \begin{align*}
   X^0 &\in \mathbb{R}^{\name{input}} \\
-  X^1 &= \tanh \nfun{input}{Affine}(X^0; W^0, b^0) & W^0 &\in \mathbb{R}^{\name{hidden},\name{input}} & b^0 &\in \mathbb{R}^{\name{hidden}} \\
-  X^2 &= \tanh \nfun{hidden}{Affine}(X^1; W^1, b^1) & W^1 &\in \mathbb{R}^{\name{output},\name{hidden}} & b^1 &\in \mathbb{R}^{\name{output}}
+  X^1 &= \tanh \nfun{input}{Affine}(X^0; W^0, b^0) & W^0 &\in \mathbb{R}^{\name{hidden} \times \name{input}} & b^0 &\in \mathbb{R}^{\name{hidden}} \\
+  X^2 &= \tanh \nfun{hidden}{Affine}(X^1; W^1, b^1) & W^1 &\in \mathbb{R}^{\name{output} \times \name{hidden}} & b^1 &\in \mathbb{R}^{\name{output}}
 \end{align*}
   
 \subsubsection{Recurrent neural networks}
@@ -459,8 +459,8 @@ Feedforward neural networks:
 \begin{align*}
   \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
   \text{FFN}^l(X) &= Z \\
-  Y &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
-  Z &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
+  Y &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
+  Z &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 \subsection{LeNet}
@@ -471,12 +471,12 @@ T^1 &= \text{relu}(\text{conv}^1(X^0)) \\
 X^1 &= \text{maxpool}^1(T^1) \\
 T^2 &= \text{relu}(\text{conv}^2(X^1)) \\
 X^2 &= \text{maxpool}^2(T^2) \\
-X^3 &= \text{relu}(W^3 \ndot{layer} \nmov{height,width,channels}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
-O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes}, \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
+X^3 &= \text{relu}(W^3 \ndot{layer} \nmov{(height,width,channels)}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
+O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
 The flattening operation in the equation for $X^3$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
 \begin{align*}
-X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden},\name{height},\name{width},\name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
+X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 The convolution and pooling operations are defined as:

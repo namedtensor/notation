@@ -13,7 +13,7 @@ and extending it to higher-order tensors in its second argument according to the
 
 We first consider the case where all the indexers have the same shape $\mathcal{S}$:
 \begin{align*}
-  A &\in F^{\nset{ax\sub{1}}{I_1}, \ldots, \nset{ax\sub{D}}{I_D}} \\
+  A &\in F^{\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{D}}{I_D}} \\
   \iota^d &\in I_d^{\mathcal{S}} & d &= 1, \ldots, D.
 \end{align*}
 Then $A_{\iota^1, \ldots, \iota^D}$ is the named tensor with shape $\mathcal{S}$ such that for any $s \in \rec{\mathcal{S}}$,
@@ -22,7 +22,7 @@ Then $A_{\iota^1, \ldots, \iota^D}$ is the named tensor with shape $\mathcal{S}$
 \end{align*}
 More generally, suppose the indexers have different but compatible shapes:
 \begin{align*}
-  A &\in F^{\nset{ax\sub{1}}{I_1}, \ldots, \nset{ax\sub{D}}{I_D}} \\
+  A &\in F^{\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{D}}{I_D}} \\
   \iota^d &\in I_d^{\mathcal{S}_d} & d &= 1, \ldots, D,
 \end{align*}
 where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{\iota^1, \ldots, \iota^D}$ is the named tensor with shape $\mathcal{S} = \bigcup_d \mathcal{S}_d$ such that for any $s \in \rec{\mathcal{S}}$,
@@ -30,7 +30,7 @@ where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{\iota^1, \ldots, \io
   [A_{\iota^1, \ldots, \iota^D}]_s &= A_{\iota^1_{\restrict{s}{\mathcal{S}_1}}, \ldots, \iota^D_{\restrict{s}{\mathcal{S}_D}}}.
 \end{align*}
 
-Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\nset{batch}{B}, \nset{sent}{N}, \nset{emb}{E}}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\nset{batch}{B}, \nset{span}{M}, \nset{emb}{E}}$.
+Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\nset{batch}{B} \times \nset{sent}{N} \times \nset{emb}{E}}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\nset{batch}{B} \times \nset{span}{M} \times \nset{emb}{E}}$.
 
 We create a indexer for the $\name{sent}$ axis: $\iota \in [N]^{\nset{batch}{B} \times \nset{span}{M}}$ that selects the desired tokens. Also define the function
 \begin{align*}

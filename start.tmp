@@ -29,5 +29,6 @@
   \DeclareMathOperator*{\softmax}{softmax}
   \DeclareMathOperator{\tupleshape}{ind}
   \newcommand{\ensuremath}[1]{#1}
+  \newcommand{\vdotswithin}[1]{\vdots}
 \)
 </div>
