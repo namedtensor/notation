@@ -1,10 +1,10 @@
 \subsection{Index types}
 
-We have defined an axis as a pair $\nset{i}{X}$, where $\name{i}$ is a name and $X$ is a set, usually $[n]$ for some $n$. In this section, we consider some other possibilities for~$X$.
+We have defined an axis as a pair $\nset{ax}{I}$, where $\name{ax}$ is a name and $I$ is a set, usually $[n]$ for some $n$. In this section, we consider some other possibilities for~$I$.
 
 \subsubsection{Non-integral types}
 
-The sets $X$ don't have to contain integers. For example, if $V$ is the vocabulary of a natural language ($V = \{ \name{cat}, \name{dog}, \ldots \}$), we could define a matrix of word embeddings:
+The sets $I$ don't have to contain integers. For example, if $V$ is the vocabulary of a natural language ($V = \{ \name{cat}, \name{dog}, \ldots \}$), we could define a matrix of word embeddings:
 \begin{align*}
   E &\in \mathbb{R}^{\nset{vocab}{V} \times \nset{emb}{d}}.
 \end{align*}
@@ -23,11 +23,11 @@ and even if it happens that $h = w = n$, it would be incorrect to write $A+B$ be
 
 An index set could also be $[m] \times [n]$, which would be a way of sneaking ordered indices into named tensors, useful for matrix operations. For example, instead of defining an $\text{inv}$ operator that takes two subscripts, we could write
 \begin{align*}
-  A &\in \mathbb{R}^{\nset{d}{{m\times n}}} = \mathbb{R}^{\nset{d}{{[m]\times [n]}}} \\
-  B &= \nfun{d}{inv} A.
+  A &\in \mathbb{R}^{\nset{ax}{{m\times n}}} = \mathbb{R}^{\nset{ax}{{[m]\times [n]}}} \\
+  B &= \nfun{ax}{inv} A.
 \end{align*}
 We could also define an operator $\circ$ for matrix-matrix and matrix-vector multiplication:
 \begin{align*}
-  c &\in \mathbb{R}^{\nset{d}{n}} \\
-  D &= A \nbin{d}{\circ} B \nbin{d}{\circ} c.
+  c &\in \mathbb{R}^{\nset{ax}{n}} \\
+  D &= A \nbin{ax}{\circ} B \nbin{ax}{\circ} c.
 \end{align*}

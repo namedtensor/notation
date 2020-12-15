@@ -23,7 +23,7 @@
 \usepackage[hidelinks]{hyperref}
 
 \title{Named Tensor Notation}
-\author{David Chiang and Sasha Rush}
+\author{David Chiang, Sasha Rush, and Boaz Barak}
 
 \begin{document}
 
@@ -66,7 +66,7 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 We want to make tensors into functions, no longer on tuples, but on \emph{records}, which look like this: \[\{\nidx{foo}{1}, \nidx{bar}{3}\}\] where $\name{foo}$ and $\name{bar}$ are \emph{names} (written in sans-serif font), mapped to 1 and 3, respectively. The pairs $\nidx{foo}{1}$ and $\nidx{bar}{3}$ are called \emph{named indices}. Their order doesn't matter: $\{\nidx{foo}{1}, \nidx{bar}{3}\}$ and $\{\nidx{bar}{3}, \nidx{foo}{1}\}$ are the same record.
 
-The set of records that can be used to index a named tensor is defined by a \emph{shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where $\name{foo}$'s index ranges from 1 to 2, and $\name{bar}$'s index ranges from 1 to 3. Again, the order of the elements, called \emph{axes}, doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
+The set of records that can be used to index a named tensor is defined by a \emph{shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where $\name{foo}$'s index ranges from 1 to 2, and $\name{bar}$'s index ranges from 1 to 3. The pairs $\nset{foo}{2}$ and $\nset{bar}{3}$ are called \emph{axes}, and again their order doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
 
 Then, a real \emph{named tensor} is a function from (the set of records defined by) a shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 \begin{equation*}
@@ -91,9 +91,9 @@ A_{\nidx{bar}{3}} &= \nmatrix{}{foo}{
 We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{foo}{2}, \nidx{bar}{3}}$ -- 
 not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
 
-Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
+Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$, we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 
-In many contexts, an axis name is used with only one size. In this case, you can simply write $\mathbb{R}^{\name{foo} \times \name{bar}}$ for the set of tensors that have axes $\name{foo}$ and $\name{bar}$. It's common to leave the size of an axis unspecified at first, and specify its size later (like in a section or appendix on experimental details). To do this, write $|\name{foo}|=2$, $|\name{bar}|=3$.
+In many contexts, an axis name is used with only one size. In this case, you can simply write $\name{foo}$ for the unique axis with name $\name{foo}$, as in $\mathbb{R}^{\name{foo} \times \name{bar}}$. It's common to leave the size of an axis unspecified at first, and specify its size later (like in a section or appendix on experimental details). To do this, write $|\name{foo}|=2$, $|\name{bar}|=3$.
 
 What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three axes, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
 
@@ -118,7 +118,7 @@ A^k & \text{elementwise exponentiation} \\
 \exp A & \text{elementwise exponential function} \\
 \tanh A & \text{hyperbolic tangent} \\
 \sigma(A) & \text{logistic sigmoid} \\
-\text{ReLU}(A) & \text{rectified linear unit}
+\text{relu}(A) & \text{rectified linear unit}
 \end{array}\]
 
 Any function or operator that takes two scalar arguments can be applied elementwise to two named tensors with the same shape. If $A$ is as above and
@@ -136,7 +136,7 @@ A + B = \nmatrix{foo}{bar}{
 }.
 \end{equation*}
 
-But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an axis with the same name (and size), the two axes are \emph{aligned}, as above. But if $A$ has an axis named $\name{i}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of axis $\name{i}$.
+But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an axis with the same name (and size), the two axes are \emph{aligned}, as above. But if $A$ has an axis named $\name{foo}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of axis $\name{foo}$.
 \begin{align*}
 A + 1 &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
@@ -151,7 +151,7 @@ A + B_{\nidx{bar}{3}} &= \nmatrix{foo}{bar}{
   1+8 & 5+8 & 9+8
 }.
 \end{align*}
-Similarly, if $B$ has an axis named $\name{i}$ and $A$ doesn't, then we effectively replace $A$ with a new tensor $A'$ that contains a copy of $A$ for every value of axis $\name{i}$. If you've programmed with NumPy or any of its derivatives, this should be unsurprising to you.
+Similarly, if $B$ has an axis named $\name{foo}$ and $A$ doesn't, then we effectively replace $A$ with a new tensor $A'$ that contains a copy of $A$ for every value of axis $\name{foo}$. If you've programmed with NumPy or any of its derivatives, this should be unsurprising to you.
 
 More elementwise binary operations:
 \[\begin{array}{cl}
@@ -176,14 +176,14 @@ For example, using the same example tensor $A$ from above,
   3+1+4 & 1+5+9
 }.
 \end{align*}
-More reductions: If $A$ has shape $\nset{foo}{I} \times \ldots$, then
+More reductions: If $A$ has an axis $\nset{foo}{I}$, then
 \begin{align*}
   \nsum{foo} A &= \sum_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
   \nfun{foo}{min} A &= \min_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
   \nfun{foo}{max} A &= \max_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
   \nfun{foo}{mean} A &= \frac{1}{|I|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
-  \nfun{foo}{var} A &= \frac1{|I|} \nsum{i} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
+  \nfun{foo}{var} A &= \frac1{|I|} \nsum{ax} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
@@ -282,12 +282,12 @@ In this section we give a series of examples illustrating how to use named tenso
 
 A fully-connected layer is simple enough that you might not need to write a function for it, but it's a good first example:
 \begin{align*}
-  \nfun{layer}{Affine} &\colon \reals^{\name{layer}} \rightarrow \reals \\
-  \nfun{layer}{Affine}(x; W, b) &= W \ndot{layer} x + b
+  \nfun{ax}{Affine} &\colon \reals^{\name{ax}} \rightarrow \reals \\
+  \nfun{ax}{Affine}(x; W, b) &= W \ndot{ax} x + b
 \end{align*}
 where
 \begin{align*}
-  W &\in \reals^{\name{layer}} \\
+  W &\in \reals^{\name{ax}} \\
   b &\in \reals
 \end{align*}
 This definition outputs a scalar; if you want to output a vector, simply add an axis to both $W$ and $b$.
@@ -459,24 +459,24 @@ Feedforward neural networks:
 \begin{align*}
   \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
   \text{FFN}^l(X) &= Z \\
-  Y &= \text{ReLU}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
-  Z &= \text{ReLU}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
+  Y &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
+  Z &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 \subsection{LeNet}
 
 \begin{align*}
 X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}} \\
-T^1 &= \text{ReLU}(\text{conv}^1(X^0)) \\
+T^1 &= \text{relu}(\text{conv}^1(X^0)) \\
 X^1 &= \text{maxpool}^1(T^1) \\
-T^2 &= \text{ReLU}(\text{conv}^2(X^1)) \\
+T^2 &= \text{relu}(\text{conv}^2(X^1)) \\
 X^2 &= \text{maxpool}^2(T^2) \\
-X^3 &= \text{ReLU}(W^3 \ndot{layer} \nmov{height,width,channels}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
+X^3 &= \text{relu}(W^3 \ndot{layer} \nmov{height,width,channels}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes}, \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
 The flattening operation in the equation for $X^3$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
 \begin{align*}
-X^3 &= \text{ReLU}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden},\name{height},\name{width},\name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
+X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden},\name{height},\name{width},\name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 The convolution and pooling operations are defined as:
@@ -588,38 +588,38 @@ The style file contains a small number of macros:
 
 \subsection{Records and shapes}
 
-A \emph{named index} is a pair, written $\nidx{i}{x}$, where $\name{i}$ is a \emph{name} and $x$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
+A \emph{named index} is a pair, written $\nidx{ax}{i}$, where $\name{ax}$ is a \emph{name} and $i$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
 
-A \emph{record} is a set of named indices $\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
+A \emph{record} is a set of named indices $\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. 
 
-An \emph{axis} is a pair, written $\nset{i}{X}$, where $\name{i}$ is a name and $X$ is a set of \emph{indices}.
+An \emph{axis} is a pair, written $\nset{ax}{I}$, where $\name{ax}$ is a name and $I$ is a set of \emph{indices}.
 
-We deal with axes of the form $\nset{i}{[n]}$ (that is, $\nset{i}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{i}{n}$.
+We deal with axes of the form $\nset{ax}{[n]}$ (that is, $\nset{ax}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{ax}{n}$.
 
-In many contexts, there is only one axis with name $\name{i}$, and so we refer to the axis simply as $\name{i}$. The context always makes it clear whether $\name{i}$ is a name or an axis. If $\name{i}$ is an axis, we write $\ind(\name{i})$ for its index set, and we write $|\name{i}|$ as shorthand for~$|\ind(\name{i})|$.
+In many contexts, there is only one axis with name $\name{ax}$, and so we refer to the axis simply as $\name{ax}$. The context always makes it clear whether $\name{ax}$ is a name or an axis. If $\name{ax}$ is an axis, we write $\ind(\name{ax})$ for its index set, and we write $|\name{ax}|$ as shorthand for~$|\ind(\name{ax})|$.
 
-A \emph{shape} is a set of axes, written $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A shape defines a set of records:
+A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. A shape defines a set of records:
 \begin{equation*}
-\rec (\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}) = \left\{\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}\} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
+\rec (\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}) = \left\{\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
 \end{equation*}
 
-We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$, then $X = Y$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{i}$ such that $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$ for any $X$, $Y$.
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
 
 If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
 
 \subsection{Named tensors}
 
-Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
+Let $F$ be a field and let $\mathcal{S}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{S}$} is a mapping from $\mathcal{S}$ to $F$. We write the set of all named tensors with shape $\mathcal{S}$ as $F^{\mathcal{S}}$.
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a record $t \in \rec \mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}\}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
+If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}\}$, we usually write $A_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$.
 
 We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \rec \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \rec (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
 \left[A_s\right]_t &= A_{s \cup t}.
 \end{align*}
-(For the edge case $\mathcal{S} = \mathcal{U}$ and $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
+(For the edge case $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
 
 \subsection{Extending functions to named tensors}
 \label{sec:tensorfunctions}
@@ -640,8 +640,8 @@ f &: F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} 
 
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
 \begin{align*}
-\ndot{i} &: F^{\nset{i}{n}} \times F^{\nset{i}{n}} \rightarrow F \\
-A \ndot{i} B &= \sum_{i=1}^n A_{\nidx{i}{i}} B_{\nidx{i}{i}}.
+\ndot{ax} &: F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} \rightarrow F \\
+A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
 \end{align*}
 
 \section{Extensions}
