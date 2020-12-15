@@ -216,14 +216,6 @@ A very common example of a function from vectors to vectors is the softmax:
   }.
 \end{equation*}
 
-And it's also very handy to have a function that renames an axis:
-\begin{equation*}
-\nmov{bar}{baz}{A} = \nmatrix{foo}{baz}{
-  3 & 1 & 4 \\
-  1 & 5 & 9
-}
-\end{equation*}
-
 Concatenation combines two vectors into one:
 \begin{align*}
   A \ncat{foo} B &= \nmatrix{foo}{bar}{
@@ -237,6 +229,26 @@ Concatenation combines two vectors into one:
     1 & 5 & 9 & 8 & 2 & 8
   }
 \end{align*}
+
+\subsubsection{Renaming and reshaping}
+\label{sec:reshaping}
+
+It's also very handy to have a function that renames an axis:
+\begin{equation*}
+\nmov{bar}{baz}{A} = \nmatrix{foo}{baz}{
+  3 & 1 & 4 \\
+  1 & 5 & 9
+}
+\end{equation*}
+
+We can reshape two or more axes into one axis:
+\begin{equation*}
+  \nmov{foo,bar}{baz}{A} = \nmatrix{}{baz}{
+    3 & 1 & 4 & 1 & 5 & 9
+  }
+\end{equation*}
+Similarly, we can reshape one axis into two or more axes, or even multiple axes into multiple axes.
+The order of elements in the new axis or axes is undefined. If you need a particular order, you can write a more specific definition.
 
 \subsubsection{Matrices}
 
