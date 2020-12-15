@@ -407,17 +407,10 @@ p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{
 \label{sec:transformer}
 
 We define a Transformer used autoregressively as a language model.
-The input is a sequence of one-hot vectors
+The input is a sequence of one-hot vectors, from which we compute word embeddings and positional encodings:
 \begin{align*}
-  I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1
-\end{align*}
-from which we compute word embeddings
-\begin{align*}
-  E &\in \reals^{\name{vocab} \times \name{layer}} \\
-  W &= (E \ndot{vocab} I)\sqrt{|\name{layer}|}
-\end{align*}
-and positional encodings
-\begin{align*}
+  I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1 \\
+  W &= (E \ndot{vocab} I)\sqrt{|\name{layer}|} & E &\in \reals^{\name{vocab} \times \name{layer}} \\
   P &\in \reals^{\name{seq} \times \name{layer}} \\
   P_{\nidx{seq}{p}, \nidx{layer}{i}} &= \begin{cases}
     \sin((p-1) / 10000^{(i-1) / |\name{layer}|}) & \text{$i$ odd} \\ 
@@ -425,7 +418,7 @@ and positional encodings
   \end{cases}
 \end{align*}
 
-Then we use $L$ layers of self-attention and feed-forward neural networks.
+Then we use $L$ layers of self-attention and feed-forward neural networks:
 \begin{align*} 
 X^0 &= W+P \\
 T^1 &= \text{LayerNorm}^1(\text{SelfAtt}^1(X^0)) + X^0\\
@@ -440,7 +433,26 @@ where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
 Layer normalization ($l = 1, 1', \ldots, L, L'$):
 \begin{align*}
   \text{LayerNorm}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{LayerNorm}^l(X) &= \nfun{layer}{xnorm}(X; \beta^l, \gamma^l) 
+  \text{LayerNorm}^l(X) &= \nfun{layer}{xnorm}(X; \beta^l, \gamma^l).
+\end{align*}
+
+We defined attention in \S\ref{sec:attention}; the Transformer uses multi-head self-attention, in which queries, keys, and values are all computed from the same sequence.
+\begin{align*}
+  \text{SelfAtt}^l &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
+  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+\end{align*}
+where
+\begin{align*}
+  |\name{seq}| &= |\name{seq'}| \\
+  |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
+  Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  M & \in \reals^{\name{seq} \times \name{seq'}} \\
+  M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
+    0 & i \leq j\\
+    -\infty & \text{otherwise.}
+  \end{cases}
 \end{align*}
 
 Feedforward neural networks:
@@ -451,59 +463,30 @@ Feedforward neural networks:
   Z &= \text{ReLU}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer}, \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
-We defined attention above (\S\ref{sec:attention}); the Transformer uses multi-head self-attention, in which $Q$, $K$, and $V$ are all computed from the same sequence. The parameters are:
-\begin{align*}
-  |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
-  W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
-\end{align*}
-Then define
-\begin{align*}
-  \text{SelfAtt}^l &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
-  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)}
-\end{align*}
-where
-\begin{align*}
-  |\name{seq}| &= |\name{seq'}| \\
-  Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} \\
-  K &= W^{l,K} \ndot{layer} X \\
-  V &= W^{l,V} \ndot{layer} X \\
-  M & \in \reals^{\name{seq} \times \name{seq'}} \\
-  M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
-    0 & i \leq j\\
-    -\infty & \text{otherwise.}
-  \end{cases}
-\end{align*}
-
 \subsection{LeNet}
 
-Convolution layers ($l = 1, 3$):
 \begin{align*}
-\name{channels} &= \name{channels'} \\  
+X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}} \\
+T^1 &= \text{ReLU}(\text{conv}^1(X^0)) \\
+X^1 &= \text{maxpool}^1(T^1) \\
+T^2 &= \text{ReLU}(\text{conv}^2(X^1)) \\
+X^2 &= \text{maxpool}^2(T^2) \\
+X^3 &= \text{ReLU}(W^3 \ndot{layer} \nmov{height,width,channels}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
+O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes}, \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
+\end{align*}
+The flattening operation in the equation for $X^3$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
+\begin{align*}
+X^3 &= \text{ReLU}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden},\name{height},\name{width},\name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
+\end{align*}
+
+The convolution and pooling operations are defined as:
+\begin{align*}
+|\name{channels}| &= |\name{channels'}| \\
 \text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)} \\
 W^l & \in \reals^{\nset{channels'}{c_{l+1}} \times \nset{channels}{c_l} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{channels'}{c_{l+1}}}
+b^l &\in \reals^{\nset{channels'}{c_{l+1}}} \\
+\text{maxpool}^l(X) &= \text{maxpool2d}(X; ph^l, ph^l).
 \end{align*}
-
-Pooling layers ($l = 2, 4$):
-\begin{align*}
-\text{maxpool}^l(X) &= \text{maxpool2d}(X; ph_l, ph_l)
-\end{align*}
-
-Model:
-\begin{align*}
-X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}}\\
-X^1 &= \text{ReLU}(\text{conv}^1(X^0)) \\
-X^2 &= \text{maxpool}^2(X^1) \\
-X^3 &= \text{ReLU}(\text{conv}^3(X^2)) \\
-X^4 &= \text{maxpool}^4(X^3) \\
-X^5 &= \nmov{height,width,channels}{layer}{X^4} \\
-X^6 &= \text{ReLU}(W^6 \ndot{layer} X^5 + b^6) & W^6 &\in \mathbb{R}^{\name{hidden}, \name{layer}} & b^6 &\in \mathbb{R}^{\name{hidden}} \\
-O &= \nfun{classes}{softmax} (W^7 \ndot{hidden} X^6 + b^7) & W^7 &\in \mathbb{R}^{\name{classes}, \name{hidden}} & b^7 &\in \mathbb{R}^{\name{classes}}
-\end{align*}
-The flattening operation in the equation for $X^5$ is defined in \S{\ref{sec:reshaping}}.
 
 \subsection{Other examples}
 
