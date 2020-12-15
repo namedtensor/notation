@@ -280,15 +280,23 @@ In this section we give a series of examples illustrating how to use named tenso
 
 \subsubsection{Fully-connected layers}
 
-We use rectified linear units (ReLUs) because some of the larger models we define later require it; a logistic function or tanh would also work here.
+A fully-connected layer is simple enough that you might not need to write a function for it, but it's a good first example:
 \begin{align*}
-  \text{Full} &\colon \reals^{\name{layer}} \rightarrow \reals^{\name{layer'}} \\
-  \text{Full}(x) &= \nmov{layer'}{layer}{\max \left\{ 0, W \ndot{layer} x + b \right\}}
+  \nfun{layer}{Affine} &\colon \reals^{\name{layer}} \rightarrow \reals \\
+  \nfun{layer}{Affine}(x; W, b) &= W \ndot{layer} x + b
 \end{align*}
 where
 \begin{align*}
-  W &\in \reals^{\name{layer'} \times \name{layer}} \\
-  b &\in \reals^{\name{layer'}} \\
+  W &\in \reals^{\name{layer}} \\
+  b &\in \reals
+\end{align*}
+This definition outputs a scalar; if you want to output a vector, simply add an axis to both $W$ and $b$.
+
+To stack these into a feedforward neural network:
+\begin{align*}
+  X^0 &\in \mathbb{R}^{\name{input}} \\
+  X^1 &= \tanh \nfun{input}{Affine}(X^0; W^0, b^0) & W^0 &\in \mathbb{R}^{\name{hidden},\name{input}} & b^0 &\in \mathbb{R}^{\name{hidden}} \\
+  X^2 &= \tanh \nfun{hidden}{Affine}(X^1; W^1, b^1) & W^1 &\in \mathbb{R}^{\name{output},\name{hidden}} & b^1 &\in \mathbb{R}^{\name{output}}
 \end{align*}
   
 \subsubsection{Recurrent neural networks}
@@ -350,7 +358,7 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{
 
 \begin{align*}
 X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
+\text{maxpool2d}(X; kh, kw) &=  \nfun{kh, kw}{max} U \\
 U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
 U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
 \end{align*}
@@ -363,12 +371,12 @@ by which axes are normalized.
 
 We can define a single generic normalization layer:
 \begin{align*}
-  \nfun{d}{xnorm} &\colon \mathbb{R}^{\name{d}} \rightarrow \mathbb{R}^{\name{d}} \\
-  \nfun{d}{xnorm}(X) &= \frac{X - \nfun{d}{mean}(X)}{\sqrt{\nfun{d}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{layer}{xnorm} &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
+  \nfun{layer}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{layer}{mean}(X)}{\sqrt{\nfun{layer}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 where
 \begin{align*}
-  \gamma, \beta &\in \mathbb{R}^{\name{d}} \\
+  \gamma, \beta &\in \mathbb{R}^{\name{layer}} \\
   \epsilon &> 0
 \end{align*}
 
