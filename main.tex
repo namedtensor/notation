@@ -1,5 +1,4 @@
 \documentclass{article}
-
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
@@ -9,14 +8,13 @@
 \newcommand{\nndot}[2]{\mathbin{\mathop{\boldsymbol\cdot}\limits_{\name{#1}|\name{#2}}}}
 
 % for formal definitions
-\newcommand{\tuple}[1]{\{#1\}}
-\DeclareMathOperator{\tupleshape}{ind}
-\newcommand{\tuplerestrict}[2]{\left.#1\right|_{#2}}
+\DeclareMathOperator{\ind}{ind}
+\DeclareMathOperator{\rec}{rec}
+\newcommand{\restrict}[2]{\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
-\newcommand{\dmodel}{d_{\text{model}}}
 
 \usepackage{parskip}
 \setcounter{tocdepth}{1}
@@ -35,18 +33,18 @@
 \section{Introduction}
 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
-\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
+\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{|\name{key}|}} \right) V. \]
 where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
 
-Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying indices by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify indices by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. (Some of these libraries also add types to indices, but here we are only interested in adding names.)
+Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying axes by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
 
-Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying indices by name instead of by position. This document describes our proposal to do both.
+Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying axes by name instead of by position. This document describes our proposal to do both.
 
 As a preview, the above equation becomes
 \begin{equation*}
-  \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
 \end{equation*}
-making it unambiguous which index each operation applies to. The same equation works with multiple heads and with minibatching.
+making it unambiguous which axis each operation applies to. The same equation works with multiple heads and with minibatching.
 
 More examples of the notation are given in \S\ref{sec:examples}.
 
@@ -55,7 +53,7 @@ The source code for this document can be found at \url{https://github.com/namedt
 \section{Informal Overview}
 \label{sec:intro}
 
-Let's think first about the usual notions of vectors, matrices, and tensors, without named indices.
+Let's think first about the usual notions of vectors, matrices, and tensors, without named axes.
 
 Define $[n] = \{1, \ldots, n\}$. We can think of a size-$n$ real vector $v$ as a function from $[n]$ to $\mathbb{R}$. We get the $i$th element of $v$ by applying $v$ to $i$, but we normally write this as $v_i$ (instead of $v(i)$). 
 
@@ -63,11 +61,11 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 
 \subsection{Named tensors}
 
-We want to make tensors into functions, no longer on tuples, but on \emph{records}, which look like this: \[\tuple{\nidx{foo}{1}, \nidx{bar}{3}}\] where $\name{foo}$ and $\name{bar}$ are \emph{names} (written in sans-serif font), mapped to 1 and 3, respectively. The pairs $\nidx{foo}{1}$ and $\nidx{bar}{3}$ are called \emph{named indices}. Their order doesn't matter: $\tuple{\nidx{foo}{1}, \nidx{bar}{3}}$ and $\tuple{\nidx{bar}{3}, \nidx{foo}{1}}$ are the same record.
+We want to make tensors into functions, no longer on tuples, but on \emph{records}, which look like this: \[\{\nidx{foo}{1}, \nidx{bar}{3}\}\] where $\name{foo}$ and $\name{bar}$ are \emph{names} (written in sans-serif font), mapped to 1 and 3, respectively. The pairs $\nidx{foo}{1}$ and $\nidx{bar}{3}$ are called \emph{named indices}. Their order doesn't matter: $\{\nidx{foo}{1}, \nidx{bar}{3}\}$ and $\{\nidx{bar}{3}, \nidx{foo}{1}\}$ are the same record.
 
-The set of records that can be used to index a named tensor is defined by a \emph{named shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where index $\name{foo}$ ranges from 1 to 2, and index $\name{bar}$ ranges from 1 to 3. Again, the order of the elements, called \emph{named index sets}, doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
+The set of records that can be used to index a named tensor is defined by a \emph{shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where $\name{foo}$'s index ranges from 1 to 2, and $\name{bar}$'s index ranges from 1 to 3. Again, the order of the elements, called \emph{axes}, doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
 
-Then, a real \emph{named tensor} is a function from (the set of records defined by) a named shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
+Then, a real \emph{named tensor} is a function from (the set of records defined by) a shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -92,7 +90,9 @@ not $A_{\nidx{foo}{2},\nidx{bar}{3}}$ or $a_{\nidx{foo}{2},\nidx{bar}{3}}$.
 
 Just as the set of all size-$n$ real vectors is written $\mathbb{R}^n$, and the set of all $m\times n$ real matrices is often written $\mathbb{R}^{m \times n}$ (which makes sense because one sometimes writes $Y^X$ for the set of all functions from $X$ to $Y$), we write $\mathbb{R}^{\nset{foo}{2} \times \nset{bar}{3}}$ for the set of all tensors with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 
-What are good choices for index names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three indices, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
+In many contexts, an axis name is used with only one size. In this case, you can simply write $\mathbb{R}^{\name{foo} \times \name{bar}}$ for the set of tensors that have axes $\name{foo}$ and $\name{bar}$. It's common to leave the size of an axis unspecified at first, and specify its size later (like in a section or appendix on experimental details). To do this, write $|\name{foo}|=2$, $|\name{bar}|=3$.
+
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, a minibatch of sentences, each of which is a sequence of one-hot vectors, would be represented by a tensor with three axes, which we might name $\name{batch}$, $\name{seq}$, and $\name{vocab}$. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -133,7 +133,7 @@ A + B = \nmatrix{foo}{bar}{
 }.
 \end{equation*}
 
-But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an index with the same name (and size), the two indices are \emph{aligned}, as above. But if $A$ has an index named $\name{i}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of index $\name{i}$.
+But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an axis with the same name (and size), the two axes are \emph{aligned}, as above. But if $A$ has an axis named $\name{i}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of axis $\name{i}$.
 \begin{align*}
 A + 1 &= \nmatrix{foo}{bar}{
   3+1 & 1+1 & 4+1 \\
@@ -148,7 +148,7 @@ A + B_{\nidx{bar}{3}} &= \nmatrix{foo}{bar}{
   1+8 & 5+8 & 9+8
 }.
 \end{align*}
-Similarly, if $B$ has an index named $\name{i}$ and $A$ doesn't, then we effectively replace $A$ with a new tensor $A'$ that contains a copy of $A$ for every value of index $\name{i}$. If you've programmed with NumPy or any of its derivatives, this should be unsurprising to you.
+Similarly, if $B$ has an axis named $\name{i}$ and $A$ doesn't, then we effectively replace $A$ with a new tensor $A'$ that contains a copy of $A$ for every value of axis $\name{i}$. If you've programmed with NumPy or any of its derivatives, this should be unsurprising to you.
 
 More elementwise binary operations:
 \[\begin{array}{cl}
@@ -162,7 +162,7 @@ A\odot B & \text{elementwise (Hadamard) product} \\
 
 \subsubsection{Reductions}
 
-The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which index these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
+The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
 For example, using the same example tensor $A$ from above,
 \begin{align*}
@@ -184,11 +184,11 @@ More reductions: If $A$ has shape $\nset{foo}{I} \times \ldots$, then
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
-You can also write multiple names to perform the reduction over multiple indices at once.
+You can also write multiple names to perform the reduction over multiple axes at once.
 
 \subsubsection{Contraction}
 
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator, which performs elementwise multiplication, then sums along an index. It can be used, for example, for matrix multiplication:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator, which performs elementwise multiplication, then sums along an axis. It can be used, for example, for matrix multiplication:
 \begin{align*}
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
@@ -216,7 +216,7 @@ A very common example of a function from vectors to vectors is the softmax:
   }.
 \end{equation*}
 
-And it's also very handy to have a function that renames an index:
+And it's also very handy to have a function that renames an axis:
 \begin{equation*}
 \nmov{bar}{baz}{A} = \nmatrix{foo}{baz}{
   3 & 1 & 4 \\
@@ -240,7 +240,7 @@ Concatenation combines two vectors into one:
 
 \subsubsection{Matrices}
 
-Finally, we briefly consider functions on matrices, for which you have to give \emph{two} index names (and the order in general matters). Let $A$ be a named tensor with shape $\{\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2\}}$:
+Finally, we briefly consider functions on matrices, for which you have to give \emph{two} axis names (and the order in general matters). Let $A$ be a named tensor with shape $\{\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2\}}$:
 \begin{align*}
 A_{\nidx{foo}{1}} &= \nmatrix{bar}{baz}{
   1 & 2 \\
@@ -265,41 +265,41 @@ As further proof of concept, in separate pages we have written out the full mode
 
 \subsection{Attention}
 
-Let $d_k$ and $d_v$ be positive integers, and let $n$ and $n'$ be the input and output sequence length. Define a function
+Define a function
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'} \times\nset{val}{d_v}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} \right) \ndot{seq} V
+  \text{Att} &\colon \mathbb{R}^{\name{key} \times \mathbb{R}^{\name{seq}} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
 \end{align*}
 
-In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence.  Let $\dmodel$ be a positive integer. The parameters are:
+In self-attention, $Q$, $K$, and $V$ are all computed from the same sequence. The parameters are:
 \begin{align*}
-  W^Q &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
-  W^K &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
-  W^V &\in \mathbb{R}^{\nset{emb}{\dmodel} \times \nset{val}{d_v}} \\
-  W^O &\in \mathbb{R}^{\nset{val}{d_v} \times \nset{emb}{\dmodel}}
+  W^Q &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
+  W^K &\in \mathbb{R}^{\name{emb} \times \name{key}} \\
+  W^V &\in \mathbb{R}^{\name{emb} \times \name{val}} \\
+  W^O &\in \mathbb{R}^{\name{val} \times \name{emb}}
 \end{align*}
 Then define
 \begin{align*}
-  \text{SelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \\
-  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V)}
+  \text{SelfAtt} &\colon \mathbb{R}^{\name{seq} \times\name{emb}} \rightarrow \mathbb{R}^{\name{seq} \times\name{emb}} \\
+  \text{SelfAtt}(X; W^Q, W^K, W^V, W^O) &= W^O \ndot{val} \nmov{seq'}{seq}{\text{Att}(\nmov{seq}{seq'}{Q}, K, V)}
 \end{align*}
 where
 \begin{align*}
-  Q &= W^Q \ndot{emb} \nmov{seq}{seq'}{X} \\
+  Q &= W^Q \ndot{emb} X \\
   K &= W^K \ndot{emb} X \\
   V &= W^V \ndot{emb} X.
 \end{align*}
 
 To change this to multi-head self-attention with $h$ attention heads, simply redefine 
 \begin{align*}
-  W^Q &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
-  W^K &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{key}{d_k}} \\
-  W^V &\in \mathbb{R}^{\nset{head}{h} \times \nset{emb}{\dmodel} \times \nset{val}{d_v}} \\
-  W^O &\in \mathbb{R}^{\nset{head}{h} \times \nset{val}{d_v} \times \nset{emb}{\dmodel}}
+  W^Q &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
+  W^K &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{key}} \\
+  W^V &\in \mathbb{R}^{\name{head} \times \name{emb} \times \name{val}} \\
+  W^O &\in \mathbb{R}^{\name{head} \times \name{val} \times \name{emb}}
 \end{align*}
 and define
 \begin{align*}
-\text{MultiSelfAtt} &\colon \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \rightarrow \mathbb{R}^{\nset{seq}{n} \times\nset{emb}{\dmodel}} \\
+\text{MultiSelfAtt} &\colon \mathbb{R}^{\name{seq} \times\name{emb}} \rightarrow \mathbb{R}^{\name{seq} \times\name{emb}} \\
 \text{MultiSelfAtt}(X; W^Q, W^K, W^V, W^O) &= \nsum{head} \text{SelfAtt}(X; W^Q, W^K, W^V, W^O).
 \end{align*}
 
@@ -308,8 +308,8 @@ an additional mask to ensure the model does not look at future words.
 This can be included in the attention definition with clear names.
 
 \begin{align*} 
-\text{Att}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{d_k}} + M \right) \ndot{seq} V \\
-M & \in \reals^{\nset{seq}{n} \times \nset{seq'}{n}} \\
+\text{Att}(Q, K, V) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V \\
+M & \in \reals^{\name{seq} \times \name{seq'}} & |\name{seq}|&=|\name{seq'}| \\
 M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 -\infty & \text{otherwise.} \end{cases}
 \end{align*}
@@ -321,25 +321,25 @@ M_{\nidx{seq}{i}, \nidx{seq'}{j}} & = \begin{cases}0 & i \leq j\\
 As a second example, let's define a simple (Elman) RNN. Let $d$ be a positive integer.
 
 \begin{align*}
-x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} & t &= 1, \ldots, n \\
-h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} & t &= 0, \ldots, n\\
-A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{emb}{d} \times \nset{state'}{d}} \\
-c &\in \mathbb{R}^{\nset{state'}{d}} \\
+x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
+h^{(t)} &\in \mathbb{R}^{\name{state}} & t &= 0, \ldots, n\\
+A &\in \mathbb{R}^{\name{state} \times \name{state'}} & |\name{state}| &= |\name{state'}| \\
+B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
+c &\in \mathbb{R}^{\name{state'}} \\
 h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
 \end{align*}
 
-The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one index and put the result in the same index. For possible solutions, see \S\ref{sec:duality}.
+The renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
 \subsection{Fully-connected layers}
 
 Fully-connected layers are bit more verbose, but make more explicit which parameters connect which layers.
 
-\begin{align*} 
-V &\in \reals^{\nset{output}{o} \times \nset{hidden}{h}} & c\in \reals^{\nset{output}{o}} \\
-W &\in \reals^{{\nset{hidden}{h} \times \nset{in}{i}}} & b \in \reals^{\nset{hidden}{h}} \\
-X &\in \reals^{{\nset{batch}{b} \times \nset{in}{i}}} \\
-Y &= \sigma \left( W \ndot{in} X + b \right) \\
+\begin{align*}
+V &\in \reals^{\name{output} \times \name{hidden}} & c\in \reals^{\name{output}} \\
+W &\in \reals^{{\name{hidden} \times \name{input}}} & b \in \reals^{\name{hidden}} \\
+X &\in \reals^{{\name{batch} \times \name{input}}} \\
+Y &= \sigma \left( W \ndot{input} X + b \right) \\
 Z &= \sigma \left( V \ndot{hidden} Y + c \right)  
 \end{align*}
 
@@ -351,9 +351,9 @@ by which axes are normalized.
 
 \subsubsection*{Batch normalization}
 
-\begin{align*} 
-X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
-\gamma, \beta &\in \reals^{{\nset{batch}{b}}} \\
+\begin{align*}
+X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}}\\
+\gamma, \beta &\in \reals^{{\name{batch}}} \\
 \text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{mean}(X)}{\sqrt{\nfun{batch}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 
@@ -361,16 +361,16 @@ X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h
 \subsubsection*{Instance normalization}
 
 \begin{align*} 
-X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}}\\
-\gamma, \beta &\in \reals^{{\nset{hidden}{h}}} \\
+X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}}\\
+\gamma, \beta &\in \reals^{{\name{hidden}}} \\
 \text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}(X)}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 
 \subsubsection*{Layer normalization}
 
 \begin{align*} 
-X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h}}} \\
-\gamma, \beta &\in \reals^{{\nset{channels}{c} \times \nset{hidden}{h}}} \\
+X &\in \reals^{{\name{batch} \times \name{channels} \times \name{hidden}}} \\
+\gamma, \beta &\in \reals^{{\name{channels} \times \name{hidden}}} \\
 \text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channels}{\text{mean}}(X)}{\sqrt{\nfun{hidden, channels}{\text{var}}(X)} + \epsilon} \odot \gamma + \beta 
 \end{align*}
 
@@ -379,20 +379,20 @@ X &\in \reals^{{\nset{batch}{b} \times \nset{channels}{c} \times \nset{hidden}{h
 
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
-\begin{align*} 
-X &\in \{0, 1\}^{{\nset{seq}{n} \times \nset{vocab}{v}}} & \nsum{vocab} X &= 1\\
-E &\in \reals^{{\nset{vocab}{v} \times \nset{hidden}{h}}}\\
-W &\in \reals^{{\nset{class}{c} \times \nset{hidden}{h}}}\\
+\begin{align*}
+X &\in \{0, 1\}^{{\name{seq} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
+E &\in \reals^{{\name{vocab} \times \name{hidden}}}\\
+W &\in \reals^{{\name{classes} \times \name{hidden}}}\\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsection{Discrete random variables}
 
-Named indices are very helpful for working with discrete random variables, because each random variable can be represented by an index with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
-\begin{align*} 
-p(\name{B} \mid \name{A}) &\in [0, 1]^{\nset{A}{a} \times \nset{B}{b}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
-p(\name{A}) &\in [0, 1]^{\nset{A}{a}} & \nsum{A} p(\name{A}) &= 1
+Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
+\begin{align*}
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
+p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
 \end{align*}
 Then Bayes' rule is just:
 \begin{align*}
@@ -421,7 +421,7 @@ Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_
 
 Max pooling used in image recognition takes a similar form as the Sudoku example.
 
-\begin{align*} 
+\begin{align*}
 X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
 \text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{max} U \\
 U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
@@ -435,11 +435,12 @@ U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx
 1D convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 
-\begin{align*} 
-X &\in \reals^{{\nset{channels}{c} \times \nset{seq}{n}}}  \\
-W &\in \reals^{{\nset{out\_channels}{c'} \times \nset{channels}{c} \times \nset{kw}{k}}}  \\
-\text{conv1d}(X, W) &= W \ndot{channels, kw} U \\
-U &\in \reals^{{\nset{channels}{c} \times \nset{seq}{n-k +1} \times \nset{kw}{k}}}  \\
+\begin{align*}
+X &\in \reals^{{\name{channels} \times \nset{seq}{n}}}  \\
+W &\in \reals^{{\name{channels} \times \name{kw}}}  \\
+b &\in \reals \\
+\text{conv1d}(X, W) &= W \ndot{channels, kw} U + b \\
+U &\in \reals^{{\name{channels} \times \nset{seq}{n-|\name{kw}| +1} \times \name{kw}}}  \\
 U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}  
 \end{align*} 
 
@@ -447,13 +448,12 @@ U_{\nidx{seq}{i}, \nidx{kw}{j}} & = X_{\nidx{seq}{i+j - 1}}
 \subsection{$K$-means clustering}
 
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
-\begin{align*} 
-X &\in \reals^{\nset{batch}{b} \times \nset{space}{k}} \\
-C &\in \reals^{\nset{clusters}{c} \times \nset{space}{k}}
+\begin{align*}
+  X &\in \reals^{\name{batch} \times \name{space}} \\
+C &\in \reals^{\name{clusters} \times \name{space}}
 \end{align*}
 we compute cluster assignments
 \begin{align*}
-% Q &\in \{0, 1\}^{\nset{batch}{b} \times\nset{clusters}{c}} \\
 Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X) \\
   &= \lim_{\alpha \rightarrow -\infty} \nfun{clusters}{softmax} \left(\alpha \nfun{space}{norm}(C-X)\right)
 \end{align*}
@@ -468,9 +468,10 @@ Beam search is a commonly used approach for approximate discrete search. Here $H
 Beam step returns the new $H$ tensor. 
 
 \begin{align*} 
-H &\in \reals^{{\nset{batch}{b} \times \nset{beam}{k}}} \\
-S &\in \{0, 1\}^{{\nset{batch}{b} \times \nset{beam}{k} \times \nset{state}{s}}} & \nsum{state} S &= 1\\
-f &\colon \{0, 1\}^{{\nset{state}{s}}} \rightarrow \reals^{{\nset{state'}{s}}} \\ 
+|\name{state}| &= |\name{state'}| \\
+H &\in \reals^{{\name{batch} \times \name{beam}}} \\
+S &\in \{0, 1\}^{{\name{batch} \times \name{beam} \times \name{state}}} & \nsum{state} S &= 1\\
+f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\ 
 \text{beamstep}(H, S) &= \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H \right)
 \end{align*} 
 
@@ -479,10 +480,11 @@ f &\colon \{0, 1\}^{{\nset{state}{s}}} \rightarrow \reals^{{\nset{state'}{s}}} \
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*} 
-X &\in \reals^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
-\mu &\in \reals^{{\nset{d}{{k}}}}  \\
-\Sigma & \in   \reals^{{\nset{d1}{{k}} \times \nset{d2}{{k}}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^k \nfun{d1, d2}{det}(\Sigma)}}
+|\name{d}| &= |\name{d1}| = |\name{d2}| \\
+X &\in \reals^{\name{d}}  \\
+\mu &\in \reals^{\name{d}}  \\
+\Sigma & \in   \reals^{\name{d1} \times \name{d2}}  \\
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
 \end{align*}
 
 \section{\LaTeX{} Macros}
@@ -497,7 +499,7 @@ in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article
 
 The style file contains a small number of macros:
 \begin{itemize}
-\item Use \verb|\name{foo}| to write an index name: $\name{foo}$.
+\item Use \verb|\name{foo}| to write an axis name: $\name{foo}$.
 \item Use \verb|A \ndot{foo} B| for contraction: $A \ndot{foo} B$. Similarly, use \verb|A \ncat{foo} B| for concatenation.
 \item Use \verb|\nsum{foo} A| for summation: $\nsum{foo} A$.
 \item Use \verb|\nfun{foo}{qux} A| for a function named qux with a name under it: $\nfun{foo}{qux} A$.
@@ -510,33 +512,36 @@ The style file contains a small number of macros:
 % ugly hack to get non-sans-serif into names
 \newcommand{\sub}[1]{_\text{$#1$}}
 
-\subsection{Records}
+\subsection{Records and shapes}
 
-A \emph{named index} is a pair, written $\nidx{i}{x}$, where $\name{i}$ is a \emph{name} and $x$ is usually a positive integer. We write both names and variables ranging over names using sans-serif font.
+A \emph{named index} is a pair, written $\nidx{i}{x}$, where $\name{i}$ is a \emph{name} and $x$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
 
-A \emph{record} is a set of named indices $\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
+A \emph{record} is a set of named indices $\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. 
 
-If $\name{i}$ is a name and $X$ is a set, define the \emph{named index set} $\nset{i}{X}$ to be the set $\{\nidx{i}{x} \mid x \in X\}$. We deal with named index sets of the form $\nset{i}{[n]}$ (${}=\nset{i}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as $\nset{i}{n}$.
+An \emph{axis} is a pair, written $\nset{i}{X}$, where $\name{i}$ is a name and $X$ is a set of \emph{indices}.
 
-A \emph{named shape} is a set of named index sets $\{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A named shape defines a set of records:
+We deal with axes of the form $\nset{i}{[n]}$ (that is, $\nset{i}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{i}{n}$.
+
+In many contexts, there is only one axis with name $\name{i}$, and so we refer to the axis simply as $\name{i}$. The context always makes it clear whether $\name{i}$ is a name or an axis. If $\name{i}$ is an axis, we write $\ind(\name{i})$ for its index set, and we write $|\name{i}|$ as shorthand for~$|\ind(\name{i})|$.
+
+A \emph{shape} is a set of axes, written $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$, where $\name{i\sub{1}}, \ldots \name{i\sub{r}}$ are pairwise distinct names. A shape defines a set of records:
 \begin{equation*}
-\tupleshape \{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{r}}{X_r}\} = \left\{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\},
+\rec (\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}) = \left\{\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}\} \mid x_1 \in X_1, \ldots, x_r \in X_r\right\}.
 \end{equation*}
-and for this reason we often write a shape with the alternative notation $\nset{i\sub{1}}{X_1} \times \cdots \times \nset{i\sub{r}}{X_r}$, because it's like an ``unordered Cartesian product'' of the index sets.
 
 We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$, then $X = Y$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{i}$ such that $\nidx{i}{X} \in \mathcal{S}$ and $\nidx{i}{Y} \in \mathcal{T}$ for any $X$, $Y$.
 
-If $t \in \tupleshape \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\tuplerestrict{t}{\mathcal{S}}$ for the unique tuple in $\tupleshape{\mathcal{S}}$ such that $\tuplerestrict{t}{\mathcal{S}} \subseteq t$.
+If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
 
 \subsection{Named tensors}
 
-Let $F$ be a field and let $\mathcal{T}$ be a set of records. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
+Let $F$ be a field and let $\mathcal{T}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{T}$} is a mapping from $\mathcal{T}$ to $F$. We write the set of all named tensors with shape $\mathcal{T}$ as $F^{\mathcal{T}}$.
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a record $t \in \tupleshape\mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\tuple{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
+If $A \in F^{\mathcal{T}}$, then we access an element of $A$ by applying it to a record $t \in \rec \mathcal{T}$; but we write this using the usual subscript notation: $A_t$ rather than $A(t)$. To avoid clutter, in place of $A_{\{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}\}$, we usually write $A_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{i\sub{1}}{x_1}, \ldots, \nidx{i\sub{r}}{x_r}}$.
 
-We also allow partial indices. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \tupleshape \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \tupleshape (\mathcal{T} \setminus \mathcal{S})$,
+We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \rec \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \rec (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
 \left[A_s\right]_t &= A_{s \cup t}.
 \end{align*}
@@ -550,13 +555,13 @@ In \S\ref{sec:intro}, we described several classes of functions that can be exte
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
 f &: F^{\mathcal{S} \cup \mathcal{U}} \rightarrow G^{\mathcal{T} \cup \mathcal{U}} \\
-[f(A)]_u &= f(A_u) \qquad \text{for all $u \in \tupleshape\mathcal{U}$.}
+[f(A)]_u &= f(A_u) \qquad \text{for all $u \in \rec\mathcal{U}$.}
 \end{align*}
 
 If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{U'} = \mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
 \begin{align*}
 f &: F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} \rightarrow H^{\mathcal{U} \cup \mathcal{U'}} \\
-  [f(A,B)]_u &= f\left(A_{\tuplerestrict{u}{\mathcal{S'}}},B_{\tuplerestrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \tupleshape\mathcal{U'}$.}
+  [f(A,B)]_u &= f\left(A_{\restrict{u}{\mathcal{S'}}},B_{\restrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \rec\mathcal{U'}$.}
 \end{align*}
 
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':

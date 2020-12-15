@@ -16,7 +16,7 @@ We first consider the case where all the indexers have the same shape $\mathcal{
   A &\in F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{D}}{X_D}} \\
   I^d &\in X_D^{\mathcal{S}} & d &= 1, \ldots, D.
 \end{align*}
-Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S}$ such that for any $s \in \tupleshape{\mathcal{S}}$,
+Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S}$ such that for any $s \in \rec{\mathcal{S}}$,
 \begin{align*}
   [A_{I^1, \ldots, I^D}]_s &= A_{I^1_s, \ldots, I^D_s}.
 \end{align*}
@@ -25,9 +25,9 @@ More generally, suppose the indexers have different but compatible shapes:
   A &\in F^{\nset{i\sub{1}}{X_1}, \ldots, \nset{i\sub{D}}{X_D}} \\
   I^d &\in X_D^{\mathcal{S}_d} & d &= 1, \ldots, D,
 \end{align*}
-where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S} = \bigcup_d \mathcal{S}_d$ such that for any $s \in \tupleshape{\mathcal{S}}$,
+where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{I^1, \ldots, I^D}$ is the named tensor with shape $\mathcal{S} = \bigcup_d \mathcal{S}_d$ such that for any $s \in \rec{\mathcal{S}}$,
 \begin{align*}
-  [A_{I^1, \ldots, I^D}]_s &= A_{I^1_{\tuplerestrict{s}{\mathcal{S}_1}}, \ldots, I^D_{\tuplerestrict{s}{\mathcal{S}_D}}}.
+  [A_{I^1, \ldots, I^D}]_s &= A_{I^1_{\restrict{s}{\mathcal{S}_1}}, \ldots, I^D_{\restrict{s}{\mathcal{S}_D}}}.
 \end{align*}
 
 Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\nset{batch}{B}, \nset{sent}{N}, \nset{emb}{E}}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\nset{batch}{B}, \nset{span}{M}, \nset{emb}{E}}$.
