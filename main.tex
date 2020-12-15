@@ -282,13 +282,12 @@ In this section we give a series of examples illustrating how to use named tenso
 
 A fully-connected layer is simple enough that you might not need to write a function for it, but it's a good first example:
 \begin{align*}
-  \nfun{ax}{Affine} &\colon \reals^{\name{ax}} \rightarrow \reals \\
-  \nfun{ax}{Affine}(x; W, b) &= W \ndot{ax} x + b
-\end{align*}
-where
-\begin{align*}
+  x &\in \reals^{\name{ax}} \\
   W &\in \reals^{\name{ax}} \\
-  b &\in \reals
+  b &\in \reals \\
+  %\nfun{ax}{Affine}(x; W, b) &\in \reals \\
+  \nfun{ax}{Affine}(x; W, b)
+  &= W \ndot{ax} x + b \in \reals.
 \end{align*}
 This definition outputs a scalar; if you want to output a vector, simply add an axis to both $W$ and $b$.
 
@@ -305,11 +304,11 @@ To stack these into a feedforward neural network:
 As a second example, let's define a simple (Elman) RNN.
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
-h^{(t)} &\in \mathbb{R}^{\name{state}} & t &= 0, \ldots, n\\
 A &\in \mathbb{R}^{\name{state} \times \name{state'}} & |\name{state}| &= |\name{state'}| \\
 B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
 c &\in \mathbb{R}^{\name{state'}} \\
-h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
+h^{(0)} &\in \mathbb{R}^{\name{state}} \\
+h^{(t)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t-1)} + B \ndot{emb} x^{(t)} + c \right)} & t &= 1, \ldots, n
 \end{align*}
 Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
@@ -318,14 +317,16 @@ Here the axis name $\name{state}$ has to stay the same across time, and the rena
 
 Define a function
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
+  Q &\in \mathbb{R}^{\name{key}} \\
+  K &\in \mathbb{R}^{\name{seq} \times\name{key}} \\
+  V &\in \mathbb{R}^{\name{seq} \times\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \in \mathbb{R}^{\name{val}}.
 \end{align*}
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
-\begin{align*} 
-  \text{Att} &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} \rightarrow \mathbb{R}^{\name{val}} \\
-\text{Att}(Q, K, V, M) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V 
+\begin{align*}
+  M &\in \mathbb{R}^{\name{seq}} \\
+\text{Att}(Q, K, V, M) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V \in \mathbb{R}^{\name{val}}.
 \end{align*}
 
 If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then the above equations will compute multi-head attention without modification.
@@ -335,32 +336,32 @@ If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then 
 A 1-dimensional convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 \begin{align*}
-X &\in \reals^{\name{channels} \times \nset{seq}{n}}  \\
-W &\in \reals^{\name{channels} \times \name{kernel}} &
+X &\in \reals^{\name{channels} \times \nset{seq}{n}} \\
+W &\in \reals^{\name{channels} \times \name{kernel}} \\
 b &\in \reals \\
-\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b \\
-U &\in \reals^{\name{channels} \times \nset{seq}{n-|\name{kernel}|+1} \times \name{kernel}}  \\
-U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}}  
+U &\in \reals^{\name{channels} \times \nset{seq}{n-|\name{kernel}|+1} \times \name{kernel}} \\
+U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
+\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b \in \mathbb{R}^{\nset{seq}{n-|\name{kernel}|+1}}.
 \end{align*} 
 
 A 2-dimensional convolution:
 \begin{align*}
 X &\in \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} \\
-W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} &
+W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} \\
 b &\in \reals \\
-\text{conv2d}(X; W, b) &=  W \ndot{channels, kh, kw} U + b \\
 U &\in \reals^{\name{channels} \times \nset{height}{h-|\name{kh}|+1} \times
 \nset{width}{w-|\name{kw}|+1} \times \name{kh} \times \name{kw}}  \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}}  
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
+\text{conv2d}(X; W, b) &=  W \ndot{channels, kh, kw} U + b \in \reals^{\nset{height}{h-|\name{kh}|+1} \times \nset{width}{w-|\name{kw}|+1}}.
 \end{align*}
 
 \subsubsection{Max pooling}
 
 \begin{align*}
 X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
-\text{maxpool2d}(X; kh, kw) &=  \nfun{kh, kw}{max} U \\
-U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
+U &\in \reals^{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}} \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}} \\
+\text{maxpool2d}(X; kh, kw) &=  \nfun{kh, kw}{max} U \in \reals^{\nset{height}{h / kh} \times \nset{width}{w / kw}}.
 \end{align*}
 
 \subsubsection{Normalization layers}
@@ -371,13 +372,10 @@ by which axes are normalized.
 
 We can define a single generic normalization layer:
 \begin{align*}
-  \nfun{layer}{xnorm} &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \nfun{layer}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{layer}{mean}(X)}{\sqrt{\nfun{layer}{var}(X)} + \epsilon} \odot \gamma + \beta
-\end{align*}
-where
-\begin{align*}
+  X &\in \mathbb{R}^{\name{layer}} \\
   \gamma, \beta &\in \mathbb{R}^{\name{layer}} \\
-  \epsilon &> 0
+  \epsilon &> 0 \\
+  \nfun{layer}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{layer}{mean}(X)}{\sqrt{\nfun{layer}{var}(X)} + \epsilon} \odot \gamma + \beta \in \mathbb{R}^{\name{layer}}.
 \end{align*}
 
 Now, suppose that the input has three indices:
@@ -438,11 +436,7 @@ Layer normalization ($l = 1, 1', \ldots, L, L'$):
 
 We defined attention in \S\ref{sec:attention}; the Transformer uses multi-head self-attention, in which queries, keys, and values are all computed from the same sequence.
 \begin{align*}
-  \text{SelfAtt}^l &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
-  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
-\end{align*}
-where
-\begin{align*}
+  X &\in \mathbb{R}^{\name{seq} \times \name{layer}} \\
   |\name{seq}| &= |\name{seq'}| \\
   |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
   Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
@@ -452,15 +446,18 @@ where
   M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
     0 & i \leq j\\
     -\infty & \text{otherwise.}
-  \end{cases}
+  \end{cases} \\
+  C &= \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} \\
+  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} C & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}} \\
+  &\in \mathbb{R}^{\name{seq} \times \name{layer}}.
 \end{align*}
 
 Feedforward neural networks:
 \begin{align*}
-  \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{FFN}^l(X) &= Z \\
+  X &= \mathbb{R}^{\name{layer}} \\
   Y &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
-  Z &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
+  \text{FFN}^l(X) &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}} \\
+  &\in \mathbb{R}^{\name{layer}}.
 \end{align*}
 
 \subsection{LeNet}
