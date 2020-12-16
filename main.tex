@@ -214,8 +214,15 @@ then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't e
 A very common example of a function from vectors to vectors is the softmax:
 \begin{equation*}
   \nfun{foo}{softmax} A = \frac{\exp A}{\nsum{foo} \exp A} \approx \nmatrix{foo}{bar}{
-    0.731 & 0.002 & 0.953 \\
-    0.269 & 0.998 & 0.047
+    0.881 & 0.018 & 0.007 \\
+    0.119 & 0.982 & 0.993
+  }.
+\end{equation*}
+Also its ``hard'' version, which maps a vector to a one-hot vector where the maximum element becomes 1 and all other elements become 0 (breaking ties arbitrarily):
+\begin{equation*}
+  \nfun{foo}{argmax} A = \nmatrix{foo}{bar}{
+    1 & 0 & 0 \\
+    0 & 1 & 1
   }.
 \end{equation*}
 
@@ -282,13 +289,12 @@ In this section we give a series of examples illustrating how to use named tenso
 
 A fully-connected layer is simple enough that you might not need to write a function for it, but it's a good first example:
 \begin{align*}
-  \nfun{ax}{Affine} &\colon \reals^{\name{ax}} \rightarrow \reals \\
-  \nfun{ax}{Affine}(x; W, b) &= W \ndot{ax} x + b
-\end{align*}
-where
-\begin{align*}
+  x &\in \reals^{\name{ax}} \\
   W &\in \reals^{\name{ax}} \\
-  b &\in \reals
+  b &\in \reals \\
+  %\nfun{ax}{Affine}(x; W, b) &\in \reals \\
+  \nfun{ax}{Affine}(x; W, b)
+  &= W \ndot{ax} x + b \in \reals.
 \end{align*}
 This definition outputs a scalar; if you want to output a vector, simply add an axis to both $W$ and $b$.
 
@@ -305,11 +311,11 @@ To stack these into a feedforward neural network:
 As a second example, let's define a simple (Elman) RNN.
 \begin{align*}
 x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
-h^{(t)} &\in \mathbb{R}^{\name{state}} & t &= 0, \ldots, n\\
 A &\in \mathbb{R}^{\name{state} \times \name{state'}} & |\name{state}| &= |\name{state'}| \\
 B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
 c &\in \mathbb{R}^{\name{state'}} \\
-h^{(t+1)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)}
+h^{(0)} &\in \mathbb{R}^{\name{state}} \\
+h^{(t)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t-1)} + B \ndot{emb} x^{(t)} + c \right)} & t &= 1, \ldots, n
 \end{align*}
 Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
@@ -318,14 +324,14 @@ Here the axis name $\name{state}$ has to stay the same across time, and the rena
 
 Define a function
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
-\begin{align*} 
-  \text{Att} &\colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} \rightarrow \mathbb{R}^{\name{val}} \\
-\text{Att}(Q, K, V, M) &=  \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V 
+\begin{align*}
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
+\text{Att}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
 \end{align*}
 
 If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then the above equations will compute multi-head attention without modification.
@@ -335,32 +341,44 @@ If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then 
 A 1-dimensional convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 \begin{align*}
-X &\in \reals^{\name{channels} \times \nset{seq}{n}}  \\
-W &\in \reals^{\name{channels} \times \name{kernel}} &
-b &\in \reals \\
-\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b \\
-U &\in \reals^{\name{channels} \times \nset{seq}{n-|\name{kernel}|+1} \times \name{kernel}}  \\
-U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}}  
+\text{conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
+\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b
+\end{align*}
+where
+\begin{align*}
+n' &= n-|\name{kernel}|+1 \\
+W &\in \reals^{\name{channels} \times \name{kernel}} \\
+U &\in \reals^{\name{channels} \times \nset{seq}{n'} \times \name{kernel}} \\
+U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
+b &\in \reals.
 \end{align*} 
 
 A 2-dimensional convolution:
 \begin{align*}
-X &\in \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} \\
-W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} &
-b &\in \reals \\
-\text{conv2d}(X; W, b) &=  W \ndot{channels, kh, kw} U + b \\
-U &\in \reals^{\name{channels} \times \nset{height}{h-|\name{kh}|+1} \times
-\nset{width}{w-|\name{kw}|+1} \times \name{kh} \times \name{kw}}  \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}}  
+  \text{conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{channels} \times \name{kh} \times \name{kw}} \times \reals
+  &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
+  \text{conv2d}(X; W, b) &= W \ndot{channels, kh, kw} U + b
+\end{align*}  
+where
+\begin{align*}
+h' &= h-|\name{kh}|+1 \\
+w' &= w-|\name{kw}|+1 \\
+W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} \\
+U &\in \reals^{\name{channels} \times \nset{height}{h'} \times \nset{width}{w'} \times \name{kh} \times \name{kw}}  \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
+b &\in \reals.
 \end{align*}
 
 \subsubsection{Max pooling}
 
 \begin{align*}
-X &\in \reals^{\nset{height}{h} \times \nset{width}{w}} \\
-\text{maxpool2d}(X; kh, kw) &=  \nfun{kh, kw}{max} U \\
-U &\in \reals^{{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}}} \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}  
+\text{maxpool2d}_{kh,kw} \colon \mathbb{R}^{\nset{height}{h} \times \nset{width}{w}} &\rightarrow \mathbb{R}^{\nset{height}{h/kh} \times \nset{width}{w/kw}} \\
+\text{maxpoool2d}_{kh,hw}(X) &= \nfun{kh, kw}{max} U
+\end{align*}
+where
+\begin{align*}
+U &\in \reals^{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}} \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}.
 \end{align*}
 
 \subsubsection{Normalization layers}
@@ -371,13 +389,13 @@ by which axes are normalized.
 
 We can define a single generic normalization layer:
 \begin{align*}
-  \nfun{layer}{xnorm} &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \nfun{layer}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{layer}{mean}(X)}{\sqrt{\nfun{layer}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{ax}{xnorm} \colon \mathbb{R}^{\name{ax}} &\rightarrow \mathbb{R}^{\name{ax}} \\
+  \nfun{ax}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{ax}{mean}(X)}{\sqrt{\nfun{ax}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 where
 \begin{align*}
-  \gamma, \beta &\in \mathbb{R}^{\name{layer}} \\
-  \epsilon &> 0
+  \gamma, \beta &\in \mathbb{R}^{\name{ax}} \\
+  \epsilon &> 0.
 \end{align*}
 
 Now, suppose that the input has three indices:
@@ -432,14 +450,14 @@ where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
 
 Layer normalization ($l = 1, 1', \ldots, L, L'$):
 \begin{align*}
-  \text{LayerNorm}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{LayerNorm}^l \colon \mathbb{R}^{\name{layer}} &\rightarrow \mathbb{R}^{\name{layer}} \\
   \text{LayerNorm}^l(X) &= \nfun{layer}{xnorm}(X; \beta^l, \gamma^l).
 \end{align*}
 
 We defined attention in \S\ref{sec:attention}; the Transformer uses multi-head self-attention, in which queries, keys, and values are all computed from the same sequence.
 \begin{align*}
-  \text{SelfAtt}^l &\colon \mathbb{R}^{\name{seq} \times \name{layer}} \rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
-  \text{SelfAtt}^l(X) &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  \text{SelfAtt}^l \colon \mathbb{R}^{\name{seq} \times \name{layer}} &\rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
+  \text{SelfAtt}^l(X) &= Y
 \end{align*}
 where
 \begin{align*}
@@ -451,16 +469,20 @@ where
   M & \in \reals^{\name{seq} \times \name{seq'}} \\
   M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
     0 & i \leq j\\
-    -\infty & \text{otherwise.}
-  \end{cases}
+    -\infty & \text{otherwise}
+  \end{cases} \\
+  Y &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
 Feedforward neural networks:
 \begin{align*}
-  \text{FFN}^l &\colon \mathbb{R}^{\name{layer}} \rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{FFN}^l(X) &= Z \\
-  Y &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
-  Z &= \text{relu}(W^{l,2} \ndot{hidden} Y + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}
+  \text{FFN}^l \colon \mathbb{R}^{\name{layer}} &\rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{FFN}^l(X) &= X^2
+\end{align*}
+where
+\begin{align*}
+  X^1 &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
+  X^2 &= \text{relu}(W^{l,2} \ndot{hidden} X^1 + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}.
 \end{align*}
 
 \subsection{LeNet}
@@ -470,23 +492,31 @@ X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \
 T^1 &= \text{relu}(\text{conv}^1(X^0)) \\
 X^1 &= \text{maxpool}^1(T^1) \\
 T^2 &= \text{relu}(\text{conv}^2(X^1)) \\
-X^2 &= \text{maxpool}^2(T^2) \\
-X^3 &= \text{relu}(W^3 \ndot{layer} \nmov{(height,width,channels)}{layer}{X^2} + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
+X^2 &= \nmov{(height,width,channels)}{layer}{\text{maxpool}^2(T^2)} \\
+X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
-The flattening operation in the equation for $X^3$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
+The flattening operation in the equation for $X^2$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
 \begin{align*}
+X^2 &= \text{maxpool}^2(T^2) \\
 X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
-The convolution and pooling operations are defined as:
+The convolution and pooling operations are defined as follows:
+\begin{align*}
+\text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)}
+\end{align*}
+where
 \begin{align*}
 |\name{channels}| &= |\name{channels'}| \\
-\text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)} \\
 W^l & \in \reals^{\nset{channels'}{c_{l+1}} \times \nset{channels}{c_l} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{channels'}{c_{l+1}}} \\
-\text{maxpool}^l(X) &= \text{maxpool2d}(X; ph^l, ph^l).
+b^l &\in \reals^{\nset{channels'}{c_{l+1}}}
 \end{align*}
+and
+\begin{align*}
+\text{maxpool}^l(X) &= \text{maxpool2d}_{ph^l,ph^l}(X).
+\end{align*}
+
 
 \subsection{Other examples}
 
@@ -495,10 +525,14 @@ b^l &\in \reals^{\nset{channels'}{c_{l+1}}} \\
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*}
-X &\in \{0, 1\}^{{\name{seq} \times \name{vocab}}} & \nsum{vocab} X &= 1\\
-E &\in \reals^{{\name{vocab} \times \name{hidden}}}\\
-W &\in \reals^{{\name{classes} \times \name{hidden}}}\\
+\text{cbow} \colon \{0, 1\}^{\name{seq} \times \name{vocab}} &\rightarrow \reals^{\name{seq} \times \name{classes}} \\
 \text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
+\end{align*}
+where
+\begin{align*}
+\nsum{vocab} X &= 1 \\
+E &\in \reals^{\name{vocab} \times \name{hidden}} \\
+W &\in \reals^{\name{classes} \times \name{hidden}}.
 \end{align*}
 Here, the two contractions can be done in either order, so we leave the parentheses off.
 
@@ -506,17 +540,20 @@ Here, the two contractions can be done in either order, so we leave the parenthe
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
-Constraints then ensure that there is one digit per row, per column and per sub-box
+Constraints then ensure that there is one digit per row, per column and per sub-box.
 
-\begin{align*} 
-X &\in \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}}  \\
+\begin{align*}
+\text{check} \colon \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}} &\rightarrow \{0, 1\} \\
 \text{check}(X) &=
-\left(\nsum{assign} Y = 
-\nsum{Height, height} Y = 
-\nsum{Width, width} Y =  
-\nsum{height, width} Y = 1 \right) \\
+\mathbb{I}\left[\begin{aligned}
+\nsum{assign} Y = 1 &\land \nsum{height, width} Y = 1 \land {} \\
+\nsum{Height, height} Y = 1 &\land \nsum{Width, width} Y = 1
+\end{aligned}\right]
+\end{align*}
+where
+\begin{align*}
 Y &\in \{0, 1\}^{\nset{Height}{3} \times \nset{Width}{3} \times \nset{height}{3} \times \nset{width}{3} \times \nset{assign}{9}}  \\
-Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_{\nidx{height}{r\times 3 + r'-1}, \nidx{width}{c\times3 + c'-1}}
+Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_{\nidx{height}{r\times 3 + r'-1}, \nidx{width}{c\times3 + c'-1}}.
 \end{align*} 
 
 \subsubsection{$K$-means clustering}
@@ -526,12 +563,11 @@ The following equations define one step of $k$-means clustering. Given a set of 
   X &\in \reals^{\name{batch} \times \name{space}} \\
 C &\in \reals^{\name{clusters} \times \name{space}}
 \end{align*}
-we compute cluster assignments
+we repeat the following update: Compute cluster assignments
 \begin{align*}
-Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X) \\
-  &= \lim_{\alpha \rightarrow -\infty} \nfun{clusters}{softmax} \left(\alpha \nfun{space}{norm}(C-X)\right)
+Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X)
 \end{align*}
-then we recompute the cluster centers:
+then recompute the cluster centers:
 \begin{equation*}
 C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
 \end{equation*}
@@ -539,26 +575,39 @@ C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
 \subsubsection{Beam search}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
-Beam step returns the new $H$ tensor. 
-
 \begin{align*} 
-|\name{state}| &= |\name{state'}| \\
-H &\in \reals^{{\name{batch} \times \name{beam}}} \\
-S &\in \{0, 1\}^{{\name{batch} \times \name{beam} \times \name{state}}} & \nsum{state} S &= 1\\
-f &\colon \{0, 1\}^{{\name{state}}} \rightarrow \reals^{{\name{state'}}} \\ 
-\text{beamstep}(H, S) &= \nfun{beam, state'}{maxk} \left( \nfun{state'}{softmax}(f(S)) \odot H \right)
-\end{align*} 
+H &\in \reals^{\name{beam}} \\
+S &\in \{0, 1\}^{\name{beam} \times \name{state}} & \nsum{state} S &= 1 \\
+f &\colon \{0, 1\}^{\name{state}} \rightarrow \reals^{\name{state}} \\
+\end{align*}
+Then we repeat the following update:
+\begin{align*}
+H' &= \nfun{beam}{max} (H \odot f(S)) \\
+H &\leftarrow \nfun{state,beam}{maxk} H' \\
+S &\leftarrow \nfun{state,beam}{argmaxk} H'
+\end{align*}
+where
+\begin{align*}
+\nfun{ax,k}{maxk} \colon \reals^{\name{ax}} &\rightarrow \reals^{\name{k}} \\
+\nfun{ax,k}{argmaxk} \colon \reals^{\name{ax}} &\rightarrow \{0,1\}^{\name{ax},\name{k}}
+\end{align*}
+are defined such that $[\nfun{ax,k}{maxk} A]_{\nidx{k}{i}}$ is the $i$-th largest value along axis $\name{ax}$ and $A \ndot{ax} (\nfun{ax,k}{argmaxk}{A}) = \nfun{ax,k}{max} A$.
+
+We can add a \name{batch} axis to $H$ and $S$ and the above equations will work unchanged.
 
 \subsubsection{Multivariate normal distribution}
 
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
-\begin{align*} 
+\begin{align*}
+\mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
+\end{align*}
+where
+\begin{align*}
 |\name{d}| &= |\name{d1}| = |\name{d2}| \\
-X &\in \reals^{\name{d}}  \\
-\mu &\in \reals^{\name{d}}  \\
-\Sigma & \in   \reals^{\name{d1} \times \name{d2}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
+\mu &\in \reals^{\name{d}} \\
+\Sigma & \in \reals^{\name{d1} \times \name{d2}}.
 \end{align*}
 
 \section{\LaTeX{} Macros}
