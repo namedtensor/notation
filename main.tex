@@ -55,7 +55,7 @@ More examples of the notation are given in \S\ref{sec:examples}.
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
 \section{Informal Overview}
-\label{sec:intro}
+\label{sec:overview}
 
 Let's think first about the usual notions of vectors, matrices, and tensors, without named axes.
 
@@ -178,14 +178,14 @@ For example, using the same example tensor $A$ from above,
   3+1+4 & 1+5+9
 }.
 \end{align*}
-More reductions: If $A$ has an axis $\nset{foo}{I}$, then
+More reductions: If $A$ has an axis $\nset{foo}{n}$, then
 \begin{align*}
-  \nsum{foo} A &= \sum_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nsum{foo} A &= \sum_{i=1}^n A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{min} A &= \min_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max_{i \in I} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
-  \nfun{foo}{mean} A &= \frac{1}{|I|} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
-  \nfun{foo}{var} A &= \frac1{|I|} \nsum{ax} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
+  \nfun{foo}{min} A &= \min_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
+  \nfun{foo}{mean} A &= \frac{1}{n} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
+  \nfun{foo}{var} A &= \frac{1}{n} \nsum{foo} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
 (Note that $\max$ and $\min$ are overloaded; with multiple arguments and no subscript, they are elementwise, and with a single argument and a subscript, they are reductions.)
 
@@ -384,6 +384,17 @@ b &\in \reals.
 \subsubsection{Max pooling}
 
 \begin{align*}
+\text{maxpool1d}_{k} \colon \mathbb{R}^{\nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n/k}} \\
+\text{maxpool1d}_{k}(X) &= \nfun{k}{max} U
+\end{align*}
+where
+\begin{align*}
+U &\in \reals^{\nset{seq}{n / k} \times \nset{k}{k}} \\
+U_{\nidx{seq}{i}, \nidx{k}{di}} & = X_{\nidx{seq}{i \times k + di -1}}.
+\end{align*}
+
+
+\begin{align*}
 \text{maxpool2d}_{kh,kw} \colon \mathbb{R}^{\nset{height}{h} \times \nset{width}{w}} &\rightarrow \mathbb{R}^{\nset{height}{h/kh} \times \nset{width}{w/kw}} \\
 \text{maxpool2d}_{kh,hw}(X) &= \nfun{kh, kw}{max} U
 \end{align*}
@@ -524,11 +535,13 @@ and
 Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*}
 p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
-(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
+p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
 \end{align*}
-Then Bayes' rule is just:
+Then many common operations on probability distributions can be expressed in terms of tensor operations:
 \begin{align*}
-p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}.
+p(\name{A}, \name{B}) &= p(\name{B} \mid \name{A}) \odot p(\name{A}) && \text{chain rule}\\
+p(\name{B}) &= \nsum{A} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A}) \ndot{A} p(\name{A}) && \text{marginalization} \\
+p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}. && \text{Bayes' rule}
 \end{align*}
 
 \subsubsection{Continuous bag of words}
@@ -684,7 +697,7 @@ We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and 
 \subsection{Extending functions to named tensors}
 \label{sec:tensorfunctions}
 
-In \S\ref{sec:intro}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
+In \S\ref{sec:overview}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
 
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
