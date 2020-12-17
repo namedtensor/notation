@@ -2,6 +2,9 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{parskip}
+\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
 
 \usepackage{namedtensor}
 % "experimental" notation
@@ -15,20 +18,16 @@
 
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
-\newcommand{\dff}{d_{\text{ff}}}
 
-\usepackage{parskip}
-\setcounter{tocdepth}{2}
-\usepackage{natbib}
-\usepackage[hidelinks]{hyperref}
-
-\title{Named Tensor Notation}
-\author{David Chiang, Sasha Rush, and Boaz Barak}
+\title{\bf Named Tensor Notation}
+\author{David Chiang \\ \small University of Notre Dame \and Sasha Rush \\ \small Cornell University \and Boaz Barak \\ \small Harvard University}
+\date{Version 0.2}
 
 \begin{document}
 
 \maketitle
 
+\setcounter{tocdepth}{2}
 \tableofcontents
 
 \clearpage
@@ -510,7 +509,7 @@ O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}
 The flattening operation in the equation for $X^2$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
 \begin{align*}
 X^2 &= \text{maxpool}^2(T^2) \\
-X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}} & b^3 &\in \mathbb{R}^{\name{hidden}}
+X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}} %& b^3 &\in \mathbb{R}^{\name{hidden}}
 \end{align*}
 
 The convolution and pooling operations are defined as follows:
@@ -646,11 +645,24 @@ in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article
 
 The style file contains a small number of macros:
 \begin{itemize}
-\item Use \verb|\name{foo}| to write an axis name: $\name{foo}$.
-\item Use \verb|A \ndot{foo} B| for contraction: $A \ndot{foo} B$. Similarly, use \verb|A \ncat{foo} B| for concatenation.
-\item Use \verb|\nsum{foo} A| for summation: $\nsum{foo} A$.
-\item Use \verb|\nfun{foo}{qux} A| for a function named qux with a name under it: $\nfun{foo}{qux} A$.
-\item Use \verb|\nmov{foo}{bar}{A}| for renaming: $\nmov{foo}{bar}{A}$.
+\item Basics
+  \begin{itemize}
+  \item Use \verb|\name{foo}| to write an axis name: $\name{foo}$.
+  \item Use \verb|\mathbb{R}^{\nset{foo}{2}}| to write a set of tensors: $\mathbb{R}^{\nset{foo}{2}}$.
+  \item Use \verb|A_{\nidx{foo}{1}}| to index a tensor: $A_{\nidx{foo}{1}}$.
+  \item Use \verb|\nmov{foo}{bar}{A}| for renaming: $\nmov{foo}{bar}{A}$.
+  \end{itemize}
+\item Binary operators
+  \begin{itemize}
+  \item Use \verb|A \ndot{foo} B| for contraction: $A \ndot{foo} B$.
+  \item Use \verb|A \ncat{foo} B| for concatenation: $A \ncat{foo} B$.
+  \item In general, you can use \verb|\nbin| to make a new binary operator with a name under it: \verb|A \nbin{foo}{\star} B| gives you $A \nbin{foo}{\star} B$.
+  \end{itemize}
+\item Functions
+  \begin{itemize}
+  \item Use \verb|\nsum{foo} A| for summation: $\nsum{foo} A$.
+  \item In general, you can use \verb|\nfun| to make a function with a name under it: \verb|\nfun{foo}{qux} A| gives you $\nfun{foo}{qux} A$.
+  \end{itemize}
 \end{itemize}
 
 \section{Formal Definitions}
