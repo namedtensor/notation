@@ -34,9 +34,10 @@
 \clearpage
 
 \section{Introduction}
+\label{sec:intro}
 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
-\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{|\name{key}|}} \right) V. \]
+\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
 where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
 
 Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying axes by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
@@ -319,21 +320,21 @@ Then the network can be defined like this:
 \subsubsection{Recurrent neural networks}
 \label{sec:rnn}
 
-As a second example, let's define a simple (Elman) RNN.
+As a second example, let's define a simple (Elman) RNN. This is similar to the feedforward network, except that the number of timesteps is variable and they all share parameters.
 \begin{align*}
-x^{(t)} &\in \mathbb{R}^{\name{emb}} & t &= 1, \ldots, n \\
-A &\in \mathbb{R}^{\name{state} \times \name{state'}} & |\name{state}| &= |\name{state'}| \\
-B &\in \mathbb{R}^{\name{emb} \times \name{state'}} \\
-c &\in \mathbb{R}^{\name{state'}} \\
-h^{(0)} &\in \mathbb{R}^{\name{state}} \\
-h^{(t)} &= \nmov{state'}{state}{\tanh\left( A \ndot{state} h^{(t-1)} + B \ndot{emb} x^{(t)} + c \right)} & t &= 1, \ldots, n
+x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidden}| &= |\name{hidden'}| \\
+W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden'}} \\
+b &\in \mathbb{R}^{\name{hidden'}} \\
+h^{0} &\in \mathbb{R}^{\name{hidden}} \\
+h^{t} &= \nmov{hidden'}{hidden}{\sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)} & t &= 1, \ldots, n
 \end{align*}
-Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($A$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
+Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($W^{\text{h}}$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
 \subsubsection{Attention}
 \label{sec:attention}
 
-Define a function
+In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in interpreting the equation for attention as it's usually written. In our notation, it looks like this:
 \begin{align*}
   \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
   \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
@@ -345,7 +346,7 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 \text{Att}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
 \end{align*}
 
-If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then the above equations will compute multi-head attention without modification.
+Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then it will compute multi-head attention.
 
 \subsubsection{Convolution}
 
@@ -420,18 +421,6 @@ Y &= \nfun{layer}{xnorm}(X; \gamma, \beta) && \text{instance normalization} \\
 Y &= \nfun{layer,channels}{xnorm}(X; \gamma, \beta) && \text{layer normalization}
 \end{align*}
 
-\subsection{Discrete random variables}
-
-Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
-\begin{align*}
-p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
-p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
-\end{align*}
-Then Bayes' rule is just:
-\begin{align*}
-p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}.
-\end{align*}
-
 \subsection{Transformer}
 \label{sec:transformer}
 
@@ -499,7 +488,7 @@ where
 \subsection{LeNet}
 
 \begin{align*}
-X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_1} \times \name{height} \times \name{width}} \\
+X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_0} \times \name{height} \times \name{width}} \\
 T^1 &= \text{relu}(\text{conv}^1(X^0)) \\
 X^1 &= \text{maxpool}^1(T^1) \\
 T^2 &= \text{relu}(\text{conv}^2(X^1)) \\
@@ -520,16 +509,27 @@ The convolution and pooling operations are defined as follows:
 where
 \begin{align*}
 |\name{channels}| &= |\name{channels'}| \\
-W^l & \in \reals^{\nset{channels'}{c_{l+1}} \times \nset{channels}{c_l} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{channels'}{c_{l+1}}}
+W^l & \in \reals^{\nset{channels'}{c_{l}} \times \nset{channels}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
+b^l &\in \reals^{\nset{channels'}{c_{l}}}
 \end{align*}
 and
 \begin{align*}
 \text{maxpool}^l(X) &= \text{maxpool2d}_{ph^l,ph^l}(X).
 \end{align*}
 
-
 \subsection{Other examples}
+
+\subsubsection{Discrete random variables}
+
+Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
+\begin{align*}
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
+(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
+\end{align*}
+Then Bayes' rule is just:
+\begin{align*}
+p(\name{A} \mid \name{B}) &= \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}.
+\end{align*}
 
 \subsubsection{Continuous bag of words}
 
