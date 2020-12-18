@@ -34,9 +34,15 @@
 \newaxis{time}
 \newaxis{emb}
 \newaxis{head}
+\newaxis{ax} 
+\newaxis{layer}
+\newaxis{foo}
+\newaxis{bar}
+\newaxis{hidden}
 
 \newcommand{\qt}[1]{\text{`#1'}}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
 
 \newcommand{\stimes}{\!\vcenter{\hbox{\text{\tiny $\times$}}}\!}
 
@@ -88,10 +94,32 @@ However, in this work our focus is on mathematical notation.
 We hope that widespread adoption of named tensors in papers will lead to their adoption in code as well.
 We welcome comments on this document, as well as additional examples, via issues or pull requests on the repository \url{https://github.com/namedtensor/notation/}. 
 
-\textbf{BOAZ: stopped here} 
 
-More examples of the notation are given in \S\ref{sec:examples}.
 
+\section{Summary of notation}
+
+We now provide a very quick overview of the proposed notation, leaving detailed examples to \S\ref{sec:examples} and formal  mathematical definitions to \S\ref{sec:definitions}.
+A standard (``un-named'') vector, matrix, or tensors is simply a map from one or more intervals of integers to the real numbers.
+For example, a length $n$ vector is a map $v\in \R^{[n]}$, where $[n]= \{1,2,\ldots,n \}$, an $n\times m$ matrix is a map $A \in \R^{[n]\times [m]}$, an $n\times m \times k$ three-tensor is a map of the form $T\in \R^{[n]\times [m] \times [k]}$ and so on and so forth. 
+For a tensor $T \in \R^{[n]\times [m]\times [k]}$ and $(i,j,k) \in [n]\times [m]\times [k]$, we typically denote by $T_{i,j,k}$ the real number that $(i,j,k)$ is mapped to by $T$.
+
+\emph{Named tensors} are maps from \emph{axes} to the real number. For example, an image might be represented as a named tensor $I \in \R^{\width \times \height \times \channel}$. You can think of the axes as intervals of integers,\footnote{Though we will sometimes include axes ranging over sets such as $\{ \qt{Red},\qt{Green},\qt{Blue} \}$ for RGB channels or words, or an axis corresponding to all words in some dictionary or collection.} but one endowed with a \emph{type}, in the sense that (for example) the $7^{th}$ element of the $\width$ axis, which we denote by $\width(7)$, is considered distinct from the $7^{th}$ element of the $\height$ axis.
+In cases where the sizes of an ax is not fixed  or can be inferred from context, we use names such as  $\width,\height,\channel$.
+Otherwise, we use names such as $\width[w],\height[h],\channel[c]$ (with $w,h,c \in \N$) to specify a particular sizes, and so write $I \in \R^{\width[w]\times \height[h]\times\channel[c]}$. If $x,y,a$ is a point in  $(\width,\height,\channel)$ coordinates, then we use $I_{\width[x],\height[y],\channel[c]}$ to denote the corresponding value of $I$. This notation is unordered, and so  $I_{\channel[c],\height[y],\width[x]}$ denotes the same value.
+Similarly, $\R^{\width \times \height \times \channel}$ is the same set as $\R^{\channel \times \height \times \width}$.
+We also use partial indexing to denote \emph{slices}, and so, for example, $I_{\width[22]}$ denotes the $x=22$ slice of the image $I$.
+
+\paragraph{Operations on tensors.}  An \emph{operator} on tensors is a function $F$ mapping one or more tensors into a tensor. The \emph{signature} of $F$ corresponds to the types (names of axes) of each of the input tensors and of the output tensors. If some of the input tensors have additional axes that are not contained in the signature, then these would be added to the output tensors in the following way. If any of those additional axes are in only one of the input tensors, then they are considered \emph{dangling axes} and passed as they are to the output tensors. For example, if $F:\R^{\width\times\height\times\channel} \rightarrow \R^{\layer}$ is an operator, and we pass to $F$ a tensor $X \in \R^{\width\times\height\times\channel\times\batch}$, then $\batch$ is a dangling axis, and $F(X)$ is the tensor $Y$ in $R^{\layer \times \batch}$ such that for every $\batch$ index $i$ of $X$ (for which we sometimes use the notation $i\in \batch(X)$), $Y_{\batch(i)} = F(X_{\batch(i)})$.
+If two or more of the input tensor share the same axis (i.e., with the same name), then these are considered \emph{aligned} axes.
+This axis $\ax$ should have the same support in all the input tensors, and the output will contain $\ax$ with the slice $\ax(i)$ of the output corresponding to the invocation of $F$ on the slices $\ax(i)$ of all inputs with the axis $\ax$.
+For example, if $F$ is the operation that takes two tensors $A,B \in \R^{\width \times \height}$ and produces some number $F(A,B)$ corresponding to their similarity, then if $X,W \in \R^{\width\times \height \times \channel \times \batch}$ having the same support over the $\channel$ and $\batch$ axes, then $F(X,W)$ will be a tensor $Y \in \R^{\channel \times \batch}$ such that for every $c$ in the support of $\channel$ and $b$ in the support of $\batch$, $F(X,W)_{\channel(c),\batch(b)} = F(X_{\channel(c),\batch(b)},W_{\channel(c),\batch(b)})$. 
+
+\paragraph{Contractions.} Named tensors allow us to explicitly state which axis \emph{contractions} such as sum, dot product, mean, variance, etc. operate on.
+For example, if $X \in \R^{\width\times \height \times \channel \times \batch}$ then $\asum{\batch} X = \sum_{b \in \batch(X)}X_{\batch(b)}$ is the tensor in $\R^{\width \times \height \times \channel}$ which is sum of all images across all batches, while $\asum{\channel} X = \sum_{c \in \channel(C)}X_{\channel(c)}$  is the tensor in $\R^{\width \times \height \times \batch}$ which denotes the sum of the channels for every pixel and batch index.
+We also use similar notation for the dot product. For example, if $X \in \R^{\layer \times \batch}$ and $W \in \R^{\layer \times \hidden}$ then $X \adot{\layer} W$ is the tensor $Y$ in $\R^{\hidden \times \batch}$ such that for every $b \in \batch(X)$ and $h \in \hidden(W)$, $Y_{\batch(b),\hidden(h)} = \sum_{\ell \in \layer} X_{\layer(\ell)} W_{\layer(\ell)}$.
+In other words, $X \adot{\layer} W$ equals to the matrix product $WX$ where we think of $W$ as a $\hidden \times \layer$ matrix and of $X$ as a $\layer \times \batch$ matrix.
+
+\iffalse
 
 \section{Informal Overview}
 \label{sec:intro}
@@ -107,8 +135,16 @@ Similarly, we can think of an $m \times n$ real matrix as a function from $[m] \
 We want to make tensors into functions, no longer on tuples, but on \emph{records}, which look like this: \[\{\nidx{foo}{1}, \nidx{bar}{3}\}\] where $\name{foo}$ and $\name{bar}$ are \emph{names} (written in sans-serif font), mapped to 1 and 3, respectively. The pairs $\nidx{foo}{1}$ and $\nidx{bar}{3}$ are called \emph{named indices}. Their order doesn't matter: $\{\nidx{foo}{1}, \nidx{bar}{3}\}$ and $\{\nidx{bar}{3}, \nidx{foo}{1}\}$ are the same record.
 
 The set of records that can be used to index a named tensor is defined by a \emph{shape}, which looks like this: \[\nset{foo}{2} \times \nset{bar}{3}\] which stands for records where $\name{foo}$'s index ranges from 1 to 2, and $\name{bar}$'s index ranges from 1 to 3. The pairs $\nset{foo}{2}$ and $\nset{bar}{3}$ are called \emph{axes}, and again their order doesn't matter: $\nset{foo}{2} \times \nset{bar}{3}$ and $\nset{bar}{3} \times \nset{foo}{2}$ are the same shape.
+\fi
 
-Then, a real \emph{named tensor} is a function from (the set of records defined by) a shape to the real numbers. For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
+\section{Overview of our notation}
+
+
+An \emph{axis} with name $\text{ax}$, which we denote by $\ax$, is a set of pairs  $\ax = \{ (\text{ax}, i) | i \in X \}$ where $X$ is some ordered set (most typically, and by default, $X$ is an interval of integers starting with $1$). The set $X$ is known as the \emph{index set} of $\ax$. We use the notation $\ax(i)$ for the pair $(\text{ax},i)$ and $\ax[n]$ to denote the set $\{ (\text{ax},i) | i \in [n] \}$. More generally for every subset $S$ of $\ax$'s index set, we denote the set $\{ (\text{ax},i) | i \in S \}$ by $\ax[S]$.
+
+If $\foo$ and $\bar$ are axes, a (real-valued) \emph{named tensor} over the axes $\foo$, $\bar$ is a function $A$ that maps pairs $(i,j) \in \foo[S]\times \foo[T]$ into a real number, where $S,T$ are some subsets of $\foo$ and $\bar$'s index sets respectively. 
+We write this as $A \in \R^{\foo \times \bar}$. We use the notation $A \in \R^{\foo[f],\bar[b]}$ when we want to explicitly state the lengths of each of $A$'s axes, and indicate that $A$ is defined over all  $(i,j) \in \foo[f] \times \bar[b]$.
+For example, here is a tensor with shape $\nset{foo}{2} \times \nset{bar}{3}$.
 \begin{equation*}
 A = \nmatrix{foo}{bar}{
   3 & 1 & 4 \\
@@ -685,26 +721,33 @@ The style file contains a small number of macros:
 % ugly hack to get non-sans-serif into names
 \newcommand{\sub}[1]{_\text{$#1$}}
 
-\subsection{Records and shapes}
+\subsection{Axes, shapes, records, and types}
 
-A \emph{named index} is a pair, written $\nidx{ax}{i}$, where $\name{ax}$ is a \emph{name} and $i$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
-
-A \emph{record} is a set of named indices $\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. 
-
-An \emph{axis} is a pair, written $\nset{ax}{I}$, where $\name{ax}$ is a name and $I$ is a set of \emph{indices}.
-
+A \emph{named index} is a pair $(\text{ax},i)$, written $\nidx{ax}{i}$, where $\name{ax}$ is a \emph{name} and $i$ is usually a natural number.
+%We write both names and variables ranging over names using sans-serif font.
+An \emph{axis} is a set of named indices $\{ (\text{ax}, i) | i \in I \}$ all sharing the same name. 
 We deal with axes of the form $\nset{ax}{[n]}$ (that is, $\nset{ax}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{ax}{n}$.
+We sometimes use $\name{ax}$ to specify the abstract axis, without specifying the set of its support, when the size can be inferred from context or when the particular size is immaterial (for example when defining a polymorphic function that can take tensors with given axes regardless of their size).
 
-In many contexts, there is only one axis with name $\name{ax}$, and so we refer to the axis simply as $\name{ax}$. The context always makes it clear whether $\name{ax}$ is a name or an axis. If $\name{ax}$ is an axis, we write $\ind(\name{ax})$ for its index set, and we write $|\name{ax}|$ as shorthand for~$|\ind(\name{ax})|$.
+A \emph{type} is a set of (distinct) axes, without specifying their support size. A \emph{shape} is a set of axes with the support specified.
+For example, $\{ \foo ,\bar \}$ is a type and $\{ \foo[10] , \bar[20] \}$ is a shape.
+If $\mathcal{S} = \{ \ax^1,\ldots, \ax^d \}$ is a shape then a \emph{record} of shape $\mathcal{S}$ is a set $\{ i_1,\ldots, i_d \}$ where $i_j \in \ax^j$.
+We denote by $\rec \mathcal{S}$ the set of all records of shape $\mathcal{S}$.
+A \emph{tensor} of shape $\mathcal{S}$ is a function mapping all records of shape $\mathcal{S}$ into the real numbers.
+We write $A \in \R^{\ax^1 \times \cdots \times \ax^d}$ for the set of all tensors of the shape $\{ \ax^1,\ldots,\ax^d \}$.
+If $A$ is a tensor of shape $\mathcal{S}$ and $r \in \rec \mathcal{S}$ then we denote by $A_r$ the real numbered map into by $r$.
 
-A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. A shape defines a set of records:
-\begin{equation*}
-\rec (\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}) = \left\{\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
-\end{equation*}
 
-We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
 
-If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
+
+A \emph{partial record} of shape $\mathcal{S}= \{ \ax^1 ,\ldots, \ax^d \}$ is a set $\{ \i_1,\ldots, i_{d'} \}$  such that $d' \leq d$ and each of the $i_j$'s is a member of a distinct element of $\mathcal{S}$. If $r = \{ i_1 ,\ldots, i_{d'} \}$ is a partial record of shape $\mathcal{S}$, then we denote by $\mathcal{S}(r)$ the set $\{ \ax^1 , \ldots \ax^{d'} \} \subseteq \mathcal{S}$ such that $i_j \in \ax^j$ for $j = 1,\ldots, d'$.
+If $A$ is a tensor of shape $\mathcal{S} = \{ \ax^1,\ldots, \ax^d \}$ and $r = \{ i_1,\ldots, i_{d'} \}$ is a partial record of shape $\mathcal{S}$, then $A_r$ is the tensor of shape $\mathcal{S} \setminus \mathcal{S}(r)$ that maps every record $r' = \{ j_1,\ldots, j_{d-d'} \}$ to the value  $A_{r \cup r'}$.
+
+
+%If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
+
+
+\iffalse 
 
 \subsection{Named tensors}
 
@@ -720,10 +763,15 @@ We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and 
 \end{align*}
 (For the edge case $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
 
+\fi 
+
 \subsection{Extending functions to named tensors}
 \label{sec:tensorfunctions}
 
 In \S\ref{sec:intro}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
+
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
+
 
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}

@@ -16,8 +16,15 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Boaz's commands
+% define a new axis, right now if we do \newaxis{ax} then \ax becomes a command for \name{ax}
+% when I get the time, I want to add an optional argument that allows to use a different name
+% for the command and the displayed name (in case there is a command we don't want to clobber)
 \newcommand{\newaxis}[1]{\expandafter\def \csname #1\endcsname{\name{#1}}}
+
+
 % commands dropping the \name - useful for annotated axis or more than one axis
 \newcommand{\abin}[2]{\mathbin{\mathop{#2}\limits_{#1}}} 
 \newcommand{\adot}[1]{\nbin{#1}{\boldsymbol\cdot}}
 \newcommand{\afun}[2]{\mathop{\mathop{\mathrm{#2}}\limits_{#1}}}
+\newcommand{\asum}[1]{\sum\limits_{#1}}
+
