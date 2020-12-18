@@ -21,13 +21,15 @@ and even if it happens that $h = w = n$, it would be incorrect to write $A+B$ be
 
 \subsubsection{Tuples of integers}
 
-An index set could also be $[m] \times [n]$, which would be a way of sneaking ordered indices into named tensors, useful for matrix operations. For example, instead of defining an $\text{inv}$ operator that takes two subscripts, we could write
+An index set could also be $[m] \times [n]$, which would be a way of sneaking ordered indices into named tensors, useful for matrix operations. For example, the RNN would look like this:
 \begin{align*}
-  A &\in \mathbb{R}^{\nset{ax}{{m\times n}}} = \mathbb{R}^{\nset{ax}{{[m]\times [n]}}} \\
-  B &= \nfun{ax}{inv} A.
+x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\nset{hidden}{d \times d}} \\
+W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \nset{hidden}{d}} \\
+b &\in \mathbb{R}^{\nset{hidden}{d}} \\
+h^{0} &\in \mathbb{R}^{\nset{hidden}{d}} \\
+h^{t} &= \sigma\left( W^{\text{h}} \nbin{hidden}{\circ} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right) & t &= 1, \ldots, n
 \end{align*}
-We could also define an operator $\circ$ for matrix-matrix and matrix-vector multiplication:
-\begin{align*}
-  c &\in \mathbb{R}^{\nset{ax}{n}} \\
-  D &= A \nbin{ax}{\circ} B \nbin{ax}{\circ} c.
-\end{align*}
+where $\circ$ does matrix-matrix and matrix-vector multiplication.
+
+This wouldn't really help with self-attention. The multivariate normal distribution would need a transpose.

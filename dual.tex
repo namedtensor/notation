@@ -17,37 +17,68 @@ A \nndot{ax1}{ax2} B &= \sum_{i=1}^n A_{\nidx{ax1}{i}} B_{\nidx{ax2}{i}}.
 
 For example, the RNN would look like this.
 \begin{align*}
-x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
-h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{emb}{d} \times \nset{state}{d}} \\
-c &\in \mathbb{R}^{\nset{state}{d}} \\
-h^{(t+1)} &= \tanh\left( A \nndot{state'}{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right)
+x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidden}| &= |\name{hidden'}| \\
+W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden}} \\
+b &\in \mathbb{R}^{\name{hidden}} \\
+h^{0} &\in \mathbb{R}^{\name{hidden}} \\
+h^{t} &= \sigma\left( W^{\text{h}} \nndot{hidden'}{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right) & t &= 1, \ldots, n
+\end{align*}
+
+In self-attention, it seems unavoidable to have one renaming (corresponding to the transpose in the original formula):
+\begin{align*}
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq'}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \nndot{seq'}{seq} V \\
+  |\name{seq}| &= |\name{seq'}| \\
+  Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= \nmov{seq}{seq'}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+\end{align*}
+
+Multivariate normal:
+\begin{align*}
+\mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \nndot{d1}{d} (X - \mu) \right) \nndot{d2}{d} (X - \mu) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
+\end{align*}
+where
+\begin{align*}
+|\name{d}| &= |\name{d1}| = |\name{d2}| \\
+\mu &\in \reals^{\name{d}} \\
+\Sigma & \in \reals^{\name{d1} \times \name{d2}}.
 \end{align*}
 
 \subsubsection{Starred axis names}
 
-If $\name{ax}$ is a name, we also allow a tensor to have an axis $\name{ax*}$ (alternatively: superscript $\name{ax}$). Multiplication contracts starred axes in the left operand with non-starred axes in the right operand.
-\begin{align*}
-x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
-h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state*}{d} \times \nset{state}{d}} \\
-B &\in \mathbb{R}^{\nset{emb*}{d} \times \nset{state}{d}} \\
-c &\in \mathbb{R}^{\nset{state}{d}} \\
-h^{(t+1)} &= \tanh\left( A \ndot{state} h^{(t)} + B \ndot{emb} x^{(t)} + c \right) 
-\end{align*}
-The contraction operator can be defined as:
-\begin{align*}
-\ndot{ax} &: F^{\nset{ax*}{n}} \times F^{\nset{ax}{n}} \rightarrow F \\
-A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax*}{i}} B_{\nidx{ax}{i}}.
-\end{align*}
-
+If $\name{ax}$ is a name, we also allow a tensor to have an axis $\name{ax*}$ with the same index set. (Alternatively, we could write one as a superscript and one as a subscript, as is done with contravariant and covariant indices.) Multiplication contracts starred axes in the left operand with non-starred axes in the right operand.
 There are a few variants of this idea that have been floated:
 \begin{enumerate}
 \item $\ndot{}$ (no subscript) contracts every starred axis in its left operand with every corresponding unstarred axis in its right operand.
 \item $\ndot{ax}$ contracts $\name{ax}$ with $\name{ax}$, and we need another notation like $\ndot{ax(*)}$ or $\nbin{ax}{\times}$ for contracting $\name{ax*}$ with $\name{ax}$.
 \item $\ndot{ax}$ always contracts $\name{ax*}$ with $\name{ax}$; there's no way to contract $\name{ax}$ with $\name{ax}$.
 \end{enumerate}
+
+RNN:
+\begin{align*}
+x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden*}} \\
+W^{\text{i}} &\in \mathbb{R}^{\name{hidden} \times \name{input*}} \\
+b &\in \mathbb{R}^{\name{hidden}} \\
+h^{0} &\in \mathbb{R}^{\name{hidden}} \\
+h^{t} &= \sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right) & t &= 1, \ldots, n
+\end{align*}
+
+Self-attention: Again one renaming seems unavoidable.
+\begin{align*}
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq*} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq*}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \\
+  Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= \nmov{seq}{seq*}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+\end{align*}
+
+Starred axes don't really help much with the multivariant normal distribution.
 
 \subsubsection{Named and numbered axes}
 \label{sec:tensorsoftensors}
@@ -76,31 +107,32 @@ We also get the renaming operation for free: $A_{\name{ax1}\rightarrow\name{ax2}
 
 Finally, this notation alleviates the duality problem, as can be seen in the definition of a RNN:
 \begin{align*}
-x^{(t)} &\in \mathbb{R}^{\nset{emb}{d}} \\
-h^{(t)} &\in \mathbb{R}^{\nset{state}{d}} \\
-A &\in \mathbb{R}^{\nset{state}{d} \times \nset{state'}{d}} \\
-B &\in \mathbb{R}^{\nset{state}{d} \times \nset{emb}{d}} \\
-c &\in \mathbb{R}^{\nset{state}{d}} \\
-h^{(t+1)}_{\name{state}} &= \tanh\left( A_{\name{state},\name{state'}} \, h^{(t)}_{\name{state}} + B_{\name{state},\name{emb}} \, x^{(t)}_{\name{emb}} + c_{\name{state}} \right)
+x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidden}| &= |\name{hidden'}| \\
+W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden}} \\
+b &\in \mathbb{R}^{\name{hidden}} \\
+h^{0} &\in \mathbb{R}^{\name{hidden}} \\
+h^{t} &= \sigma\left( W^{\text{h}}_{\name{hidden'}} \cdot h^{t-1}_{\name{hidden}} + W^{\text{i}}_{\name{input}} \cdot x^{t}_{\name{input}} + b_{\name{hidden}} \right) & t &= 1, \ldots, n
 \end{align*}
-or equivalently,
-\begin{equation*}
-h^{(t+1)} = \tanh\left( A_{\name{state'}} \cdot h^{(t)}_{\name{state}} + B_{\name{emb}} \cdot x^{(t)}_{\name{emb}} + c \right)
-\end{equation*}
 
-Attention:
+Attention requires either a renaming or a transpose:
 \begin{align*}
-  \text{Att} &\colon \mathbb{R}^{\nset{seq'}{n'} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{key}{d_k}} \times \mathbb{R}^{\nset{seq}{n} \times\nset{val}{d_v}} \rightarrow \mathbb{R}^{\nset{seq'}{n'} \times\nset{val}{d_v}} \\
-  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_\name{key}}{\sqrt{d_k}} \right]_{\name{seq}} \cdot V_{\name{seq}}
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_{\name{key}}}{\sqrt{|\name{key}|}} \right]_{\name{seq'}} \cdot V_{\name{seq}} \\
+  |\name{seq}| &= |\name{seq'}| \\
+  Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= \nmov{seq}{seq'}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
+  Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
-Multivariate normal distribution:
+The multivariate normal distribution also needs a renaming or transpose:
 \begin{align*} 
-X &\in \mathbb{R}^{\nset{batch}{{b}} \times \nset{d}{{k}}}  \\
-\mu &\in \mathbb{R}^{{\nset{d}{{k}}}}  \\
-\Sigma & \in   \mathbb{R}^{{\nset{d}{k} \times \nset{d'}{k}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\tfrac{1}{2} [X - \mu]_{\name{d}}^\top \, \Sigma_{\name{d},\name{d'}}^{-1} \, [X - \mu]_{\name{d}} \right)}{\sqrt{(2 \pi)^k \, \mathop{\text{det}} \Sigma_{\name{d},\name{d'}}}}
+X &\in \mathbb{R}^{\name{d}}  \\
+\mu &\in \mathbb{R}^{\name{d}}  \\
+\Sigma & \in \mathbb{R}^{\name{d1} \times \name{d2}}  \\
+{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\tfrac{1}{2} [X - \mu]_{\name{d}}^\top \, \Sigma_{\name{d1},\name{d2}}^{-1} \, [X - \mu]_{\name{d}} \right)}{\sqrt{(2 \pi)^k \, \mathop{\text{det}} \Sigma_{\name{d1},\name{d2}}}}
 \end{align*}
 
-Because this notation can be a little more verbose (often requiring you to write axis names twice), we'd keep around the notation $A \ndot{ax} B$ as a shorthand for $A_{\name{ax}} \cdot B_{\name{ax}}$. We'd also keep named reductions, or at least $\nfun{ax}{softmax}$.
+Because this notation can be a little more verbose (often requiring you to write axis names twice), we'd keep around the notation $A \ndot{ax} B$ as a shorthand for $A_{\name{ax}} \cdot B_{\name{ax}}$.
 
