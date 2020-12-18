@@ -168,7 +168,7 @@ A\odot B & \text{elementwise (Hadamard) product} \\
 
 The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
-For example, using the same example tensor $A$ from above,
+For example, using the same example tensor $A$ from above,\footnote{We can refer to this as summing along the $\name{foo}$ axis.)}
 \begin{align*}
 \nsum{foo} A &= \nmatrix{}{bar}{
   3+1 & 1+5 & 4+9
