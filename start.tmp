@@ -27,7 +27,8 @@
 \(
   \require{ams}
   \DeclareMathOperator*{\softmax}{softmax}
-  \DeclareMathOperator{\tupleshape}{ind}
+  \DeclareMathOperator{\ind}{ind}
+  \DeclareMathOperator{\rec}{rec}
   \newcommand{\ensuremath}[1]{#1}
   \newcommand{\vdotswithin}[1]{\vdots}
 \)
