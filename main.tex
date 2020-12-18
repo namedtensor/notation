@@ -569,14 +569,14 @@ Constraints then ensure that there is one digit per row, per column and per sub-
 \text{check} \colon \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}} &\rightarrow \{0, 1\} \\
 \text{check}(X) &=
 \mathbb{I}\left[\begin{aligned}
-\nsum{assign} Y = 1 &\land \nsum{height, width} Y = 1 \land {} \\
-\nsum{Height, height} Y = 1 &\land \nsum{Width, width} Y = 1
+\nsum{assign} X = 1 &\land \nsum{height, width} Y = 1 \land {} \\
+\nsum{height} X = 1 &\land \nsum{width} X = 1
 \end{aligned}\right]
 \end{align*}
 where
 \begin{align*}
-Y &\in \{0, 1\}^{\nset{Height}{3} \times \nset{Width}{3} \times \nset{height}{3} \times \nset{width}{3} \times \nset{assign}{9}}  \\
-Y_{\nidx{Height}{r}, \nidx{height}{r'}, \nidx{Width}{c}, \nidx{width}{c'}} &= X_{\nidx{height}{r\times 3 + r'-1}, \nidx{width}{c\times3 + c'-1}}.
+Y &\in \{0, 1\}^{\nset{height'}{3} \times \nset{width'}{3} \times \nset{height}{3} \times \nset{width}{3} \times \nset{assign}{9}}  \\
+Y_{\nidx{height'}{h'}, \nidx{height}{h}, \nidx{width'}{w'}, \nidx{width}{w}} &= X_{\nidx{height}{3h' + h-1}, \nidx{width}{3 w' + w-1}}.
 \end{align*} 
 
 \subsubsection{$K$-means clustering}
