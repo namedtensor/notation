@@ -27,11 +27,11 @@ h^{t} &= \sigma\left( W^{\text{h}} \nndot{hidden'}{hidden} h^{t-1} + W^{\text{i}
 
 In self-attention, it seems unavoidable to have one renaming (corresponding to the transpose in the original formula):
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq'}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \nndot{seq'}{seq} V \\
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq'}{softmax} \left( \frac{Q \ndot{key} \nmov{seq}{seq'}{K}}{\sqrt{|\name{key}|}} \right) \nndot{seq'}{seq} V \\
   |\name{seq}| &= |\name{seq'}| \\
   Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  K &= \nmov{seq}{seq'}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
@@ -70,10 +70,10 @@ h^{t} &= \sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{in
 
 Self-attention: Again one renaming seems unavoidable.
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq*} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq*}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \\
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq*}{softmax} \left( \frac{Q \ndot{key} \nmov{seq}{seq*}{K}}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \\
   Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  K &= \nmov{seq}{seq*}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
@@ -117,11 +117,11 @@ h^{t} &= \sigma\left( W^{\text{h}}_{\name{hidden'}} \cdot h^{t-1}_{\name{hidden}
 
 Attention requires either a renaming or a transpose:
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot K_{\name{key}}}{\sqrt{|\name{key}|}} \right]_{\name{seq'}} \cdot V_{\name{seq}} \\
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \softmax \left[ \frac{Q_{\name{key}} \cdot \nmov{seq}{seq'}{K_{\name{key}}}}{\sqrt{|\name{key}|}} \right]_{\name{seq'}} \cdot V_{\name{seq}} \\
   |\name{seq}| &= |\name{seq'}| \\
   Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  K &= \nmov{seq}{seq'}{W^{l,K} \ndot{layer} X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   Y &= \nsum{heads} W^{l,O} \ndot{val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
