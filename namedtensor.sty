@@ -12,3 +12,12 @@
 \newcommand{\nsum}[1]{\sum\limits_{\name{#1}}}
 \newcommand{\nfun}[2]{\mathop{\mathop{\mathrm{#2}}\limits_{\name{#1}}}}
 \newcommand{\nmov}[3]{\left[#3\right]_{\name{#1}\rightarrow\name{#2}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Boaz's commands
+\newcommand{\newaxis}[1]{\expandafter\def \csname #1\endcsname{\name{#1}}}
+% commands dropping the \name - useful for annotated axis or more than one axis
+\newcommand{\abin}[2]{\mathbin{\mathop{#2}\limits_{#1}}} 
+\newcommand{\adot}[1]{\nbin{#1}{\boldsymbol\cdot}}
+\newcommand{\afun}[2]{\mathop{\mathop{\mathrm{#2}}\limits_{#1}}}

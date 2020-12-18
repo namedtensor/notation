@@ -25,34 +25,73 @@
 \title{Named Tensor Notation}
 \author{David Chiang, Sasha Rush, and Boaz Barak}
 
+\newaxis{channel}
+\newaxis{width}
+\newaxis{height}
+\newaxis{batch}
+\newaxis{seq}
+\newaxis{key}
+\newaxis{time}
+\newaxis{emb}
+\newaxis{head}
+
+\newcommand{\qt}[1]{\text{`#1'}}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\stimes}{\!\vcenter{\hbox{\text{\tiny $\times$}}}\!}
+
 \begin{document}
 
 \maketitle
 
-\tableofcontents
+%\tableofcontents
 
-\clearpage
+%\clearpage
+
+\begin{abstract}
+We propose a notation for tensors with named axes. For example, instead of writing $A \in \R^{b\times w \times h \times c}$ for an order-4 tensor corresponding to a batch of images, we use $A \in \R^{\batch \times \width \times \height \times \channel}$.  Such a tensor can be indexed using these names, as in $A_{\batch(25),\width(12),\height(30),\channel(1)}$, which refers to the same index as $A_{\channel(1),\width(12),\height(30),\batch(25)}$.
+Named notation relieves the author, reader, and future implementers from needing to keep track of the order of parameters. It also makes it easier to express ``slices'' of tensors, such as $A_{\batch(17)}$ or $A_{\channel(\qt{Red})}$, and to seamlessly extend operations on low-order tensors to higher order ones (e.g., extend an operation on images to batches on images, or extend the attention mechanism to multiple tokens and heads).
+
+In this document we present the notation, and illustrate it through several examples from modern machine learning, including both building blocks such as Attention and Convolutions, and full network architectures such as Transformers and LeNet. Most of our proposals are not original, and we borrow ideas from several works and packages. We hope that by putting together this document, we can encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations. The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
+\end{abstract} 
 
 \section{Introduction}
 \label{sec:intro}
 
-Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
-\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
-where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
+Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but becomes cumbersome and confusing when extended to the high-order tensors of diverse axes used in modern neural networks. Consider the following equation for the \emph{Attention} mechanism  \citep{vaswani+:2017}:
 
-Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying axes by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
+\begin{equation}
+  \text{Att}(Q\;,\; K\;,\; V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V \;.  \label{eq:attentionbefore}
+\end{equation}
+where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. 
+With multiple attention heads and multiple sentences in a minibatch, $Q$ and $K$ become tensors with four separate axes/dimensions, and most papers skip a full description with all these details. 
 
-Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying axes by name instead of by position. This document describes our proposal to do both.
+% Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying axes by name instead of by position. This document describes our proposal to do both.
 
-As a preview, the above equation becomes
-\begin{equation*}
-  \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
-\end{equation*}
-making it unambiguous which axis each operation applies to. The same equation works with multiple heads and with minibatching.
+
+In this document  we propose an intuitive mathematical notation for Tensors with \emph{named axes}. The notation has a formal underpinning, but it is intuitive enough that researchers in machine learning should be able to follow it without needing to look any concepts up. 
+As a preview, in our notation, Equation (\ref{eq:attentionbefore}) becomes
+
+\begin{flalign}
+  &\text{Att}\!:\!\R^\key \stimes \R^{\seq \times \key} \stimes \R^{\seq} \rightarrow \R \nonumber &\\ 
+  &\text{Att}(\;Q\;,\;K\;\;,\;\;V) \;\;\;\;= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \;. & \label{eq:attentionafter} 
+\end{flalign}
+
+Unlike (\ref{eq:attentionbefore}), in Equation~(\ref{eq:attentionafter}) the reader does not need to remember whether it is the columns or the rows of $K$ that correspond to distinct queries, since the notation makes it clear that the dot product inside the soft max is taken along the \key\ axis, resulting in a vector in $\R^\seq$. The softmax operation is then applied to every element of this vector, and we take a dot product of it with $V$ along the \seq axis.
+The formula generalizes \emph{as written} to the case that the we have multiple heads, tokens, and a minibatch.
+This will correspond to adding a $\seq$ axis to $Q$ (to allow for a sequence of  input tokens), and adding the $\head$ and $\batch$ axes to all input tensors.
+Our convention is that these additional input axes ``pass through'' to the output.
+Thus instead of a single number, the output will be a tensor in $\R^{\seq \times \head \times \batch}$, each coordinate of which corresponds to invoking the original operation on the corresponding ``slice'' of the input tensors. The names ensure that we can properly align these slices. 
+
+Our notation is inspired by several libraries that have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
+However, in this work our focus is on mathematical notation.
+We hope that widespread adoption of named tensors in papers will lead to their adoption in code as well.
+We welcome comments on this document, as well as additional examples, via issues or pull requests on the repository \url{https://github.com/namedtensor/notation/}. 
+
+\textbf{BOAZ: stopped here} 
 
 More examples of the notation are given in \S\ref{sec:examples}.
 
-The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
 \section{Informal Overview}
 \label{sec:intro}
