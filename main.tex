@@ -2,7 +2,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
-
+\usepackage{fullpage}
+\usepackage{xcolor}
 \usepackage{namedtensor}
 % "experimental" notation
 \newcommand{\nndot}[2]{\mathbin{\mathop{\boldsymbol\cdot}\limits_{\name{#1}|\name{#2}}}}
@@ -25,6 +26,12 @@
 \title{Named Tensor Notation}
 \author{David Chiang, Sasha Rush, and Boaz Barak}
 
+\newcommand{\colA}[1]{\textcolor{blue}{#1}}
+\newcommand{\colB}[1]{\textcolor{red}{#1}}
+\newcommand{\colC}[1]{\textcolor{orange}{#1}}
+\newcommand{\colD}[1]{\textcolor{purple}{#1}}
+
+
 \newaxis{channel}
 \newaxis{width}
 \newaxis{height}
@@ -39,10 +46,13 @@
 \newaxis{foo}
 \newaxis{bar}
 \newaxis{hidden}
+\newaxis{val}
 
 \newcommand{\qt}[1]{\text{`#1'}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\N}{\mathbb{N}}
+
+
 
 \newcommand{\stimes}{\!\vcenter{\hbox{\text{\tiny $\times$}}}\!}
 
@@ -56,9 +66,9 @@
 
 \begin{abstract}
 We propose a notation for tensors with named axes. For example, instead of writing $A \in \R^{b\times w \times h \times c}$ for an order-4 tensor corresponding to a batch of images, we use $A \in \R^{\batch \times \width \times \height \times \channel}$.  Such a tensor can be indexed using these names, as in $A_{\batch(25),\width(12),\height(30),\channel(1)}$, which refers to the same index as $A_{\channel(1),\width(12),\height(30),\batch(25)}$.
-Named notation relieves the author, reader, and future implementers from needing to keep track of the order of parameters. It also makes it easier to express ``slices'' of tensors, such as $A_{\batch(17)}$ or $A_{\channel(\qt{Red})}$, and to seamlessly extend operations on low-order tensors to higher order ones (e.g., extend an operation on images to batches on images, or extend the attention mechanism to multiple tokens and heads).
+Named notation relieves the author, reader, and future implementers from needing to keep track of the order of parameters. It also makes it easier to express ``slices'' of tensors, such as $A_{\batch(17)}$ or $A_{\channel(\qt{Red})}$, and to seamlessly extend operations on low-order tensors to higher order ones (e.g., extend an operation on images to batches of images, or extend the attention mechanism to multiple tokens and heads).
 
-In this document we present the notation, and illustrate it through several examples from modern machine learning, including both building blocks such as Attention and Convolutions, and full network architectures such as Transformers and LeNet. Most of our proposals are not original, and we borrow ideas from several works and packages. We hope that by putting together this document, we can encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations.
+In this document we present the notation, and illustrate it through several examples from modern machine learning, including both building blocks such as Attention and Convolutions, as well as full network architectures such as Transformer and LeNet. Most of our proposals are not original, and we borrow ideas from several works and packages. We hope that by putting together this document, we can encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations.
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 \end{abstract} 
@@ -77,7 +87,7 @@ With multiple attention heads and multiple sentences in a minibatch, $Q$ and $K$
 % Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying axes by name instead of by position. This document describes our proposal to do both.
 
 
-In this document  we propose an intuitive mathematical notation for Tensors with \emph{named axes}. The notation has a formal underpinning, but it is intuitive enough that researchers in machine learning should be able to follow it without needing to look any concepts up. 
+In this document  we propose an intuitive mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but it is intuitive enough that researchers in machine learning should be able to follow it without needing to look any concepts up. 
 As a preview, in our notation, Equation (\ref{eq:attentionbefore}) becomes
 
 \begin{flalign}
@@ -85,17 +95,25 @@ As a preview, in our notation, Equation (\ref{eq:attentionbefore}) becomes
   &\text{Att}(\;Q\;,\;K\;\;,\;\;V) \;\;\;\;= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V \;. & \label{eq:attentionafter} 
 \end{flalign}
 
-Unlike (\ref{eq:attentionbefore}), in Equation~(\ref{eq:attentionafter}) the reader does not need to remember whether it is the columns or the rows of $K$ that correspond to distinct queries, since the notation makes it clear that the dot product inside the soft max is taken along the \key\ axis, resulting in a vector in $\R^\seq$. The softmax operation is then applied to every element of this vector, and we take a dot product of it with $V$ along the \seq axis.
-The formula generalizes \emph{as written} to the case that the we have multiple heads, tokens, and a minibatch.
-This will correspond to adding a $\seq$ axis to $Q$ (to allow for a sequence of  input tokens), and adding the $\head$ and $\batch$ axes to all input tensors.
+Unlike (\ref{eq:attentionbefore}), in Equation~(\ref{eq:attentionafter}) the reader does not need to remember whether it is the columns or the rows of $K$ that correspond to distinct queries, since the notation makes it clear that the dot product inside the soft max is taken along the \key\ axis, resulting in a vector in $\R^\seq$. The softmax operation is then applied to every element of this vector (using the whole vector for the normalization), and we take a dot product of it with $V$ along the $\seq$ axis.
+The formula generalizes \emph{as written} to the case that each element is $V_{\seq(i)}$ is itself a vector, we have multiple heads, tokens. a minibatch.
+This will correspond to adding a $\seq$ axis to $Q$ (to allow for a sequence of  input tokens), adding a $\val$ axis to $V$,  and adding the $\head$ and $\batch$ axes to all input tensors.
 Our convention is that these additional input axes ``pass through'' to the output.
-Thus instead of a single number, the output will be a tensor in $\R^{\seq \times \head \times \batch}$, each coordinate of which corresponds to invoking the original operation on the corresponding ``slice'' of the input tensors. The names ensure that we can properly align these slices. 
+Thus instead of a single number, the output will be a tensor in $\R^{\seq \times \val \times \head \times \batch}$, each coordinate of which corresponds to invoking the original operation on the corresponding ``slice'' of the input tensors. The names ensure that we can properly align these slices. 
+This is illustrated in Equation~(\ref{eq:attentionexpand}) below, where we use color to highlight the axes that are not captured by the operator $\text{Att}$'s signature, and use identical colors for axes that will be aligned in the output.\footnote{In this example, the axis $\seq$ of $K$ and $V$ is captured by the signature, and hence is not aligned with the axis $\colA{\seq}$ of $Q$ and need not even be of the same length. We can also emphasize this by using a different name such as $\seq'$ or $\seq^{in}$ for $R$'s axis, and use our renaming/casting operator $Y_{\seq' \rightarrow \seq}$ on the output.}
+
+\begin{flalign}
+  &Q \in \R^{\key\times \colA{\seq} \times \colB{\head} \times \colC{\batch}},  K \in \R^{\key\times \seq \times \colB{\head} \times \colC{\batch}},
+  V \in \R^{\seq \times \colD{\val} \times \colB{\head} \times \colC{\batch}} \\
+  &\text{Att}\!:\!\R^\key \stimes \R^{\seq \times \key} \stimes \R^{\seq} \rightarrow \R \nonumber &\\ 
+  &\text{Att}(\;Q\;,\;K\;\;,\;\;V) \;\;\;\;= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V  \in \R^{\colA{\seq} \times \colB{\head} \times \colC{\batch} \times \colD{\val}}\;. & \label{eq:attentionexpand} 
+\end{flalign}
+
 
 Our notation is inspired by several libraries that have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
 However, in this work our focus is on mathematical notation.
 We hope that widespread adoption of named tensors in papers will lead to their adoption in code as well.
 We welcome comments on this document, as well as additional examples, via issues or pull requests on the repository \url{https://github.com/namedtensor/notation/}. 
-
 
 
 \section{Summary of notation}
@@ -105,9 +123,9 @@ A standard (``un-named'') vector, matrix, or tensors is simply a map from one or
 For example, a length $n$ vector is a map $v\in \R^{[n]}$, where $[n]= \{1,2,\ldots,n \}$, an $n\times m$ matrix is a map $A \in \R^{[n]\times [m]}$, an $n\times m \times k$ three-tensor is a map of the form $T\in \R^{[n]\times [m] \times [k]}$ and so on and so forth. 
 For a tensor $T \in \R^{[n]\times [m]\times [k]}$ and $(i,j,k) \in [n]\times [m]\times [k]$, we typically denote by $T_{i,j,k}$ the real number that $(i,j,k)$ is mapped to by $T$.
 
-\emph{Named tensors} are maps from \emph{axes} to the real number. For example, an image might be represented as a named tensor $I \in \R^{\width \times \height \times \channel}$. You can think of the axes as intervals of integers,\footnote{Though we will sometimes include axes ranging over sets such as $\{ \qt{Red},\qt{Green},\qt{Blue} \}$ for RGB channels or words, or an axis corresponding to all words in some dictionary or collection.} but one endowed with a \emph{type}, in the sense that (for example) the $7^{th}$ element of the $\width$ axis, which we denote by $\width(7)$, is considered distinct from the $7^{th}$ element of the $\height$ axis.
-In cases where the sizes of an ax is not fixed  or can be inferred from context, we use names such as  $\width,\height,\channel$.
-Otherwise, we use names such as $\width[w],\height[h],\channel[c]$ (with $w,h,c \in \N$) to specify a particular sizes, and so write $I \in \R^{\width[w]\times \height[h]\times\channel[c]}$. If $x,y,a$ is a point in  $(\width,\height,\channel)$ coordinates, then we use $I_{\width[x],\height[y],\channel[c]}$ to denote the corresponding value of $I$. This notation is unordered, and so  $I_{\channel[c],\height[y],\width[x]}$ denotes the same value.
+\emph{Named tensors} are maps from \emph{axes} to the real numbers. For example, an image might be represented as a named tensor $I \in \R^{\width \times \height \times \channel}$. You can think of the axes as intervals of integers,\footnote{Though we will sometimes include axes ranging over sets such as $\{ \qt{Red},\qt{Green},\qt{Blue} \}$ for RGB channels or words, or an axis corresponding to all words in some dictionary or collection.} but one endowed with a \emph{type}, in the sense that (for example) the $7^{th}$ element of the $\width$ axis, which we denote by $\width(7)$, is considered distinct from the $7^{th}$ element of the $\height$ axis.
+In cases where the size of an ax is not fixed  or can be inferred from context, we use names such as  $\width,\height,\channel$.
+Otherwise, we use names such as $\width[w],\height[h],\channel[c]$ (with $w,h,c \in \N$) to specify particular sizes, and so write $I \in \R^{\width[w]\times \height[h]\times\channel[c]}$. If $x,y,a$ is a point in  $(\width,\height,\channel)$ coordinates, then we use $I_{\width[x],\height[y],\channel[c]}$ to denote the corresponding value of $I$. This notation is unordered, and so  $I_{\channel[c],\height[y],\width[x]}$ denotes the same value.
 Similarly, $\R^{\width \times \height \times \channel}$ is the same set as $\R^{\channel \times \height \times \width}$.
 We also use partial indexing to denote \emph{slices}, and so, for example, $I_{\width[22]}$ denotes the $x=22$ slice of the image $I$.
 
@@ -142,7 +160,7 @@ The set of records that can be used to index a named tensor is defined by a \emp
 \section{Overview of our notation}
 
 
-An \emph{axis} with name $\text{ax}$, which we denote by $\ax$, is a set of pairs  $\ax = \{ (\text{ax}, i) | i \in X \}$ where $X$ is some ordered set (most typically, and by default, $X$ is an interval of integers starting with $1$). The set $X$ is known as the \emph{index set} of $\ax$. We use the notation $\ax(i)$ for the pair $(\text{ax},i)$ and $\ax[n]$ to denote the set $\{ (\text{ax},i) | i \in [n] \}$. More generally for every subset $S$ of $\ax$'s index set, we denote the set $\{ (\text{ax},i) | i \in S \}$ by $\ax[S]$.
+For every string ``$\text{ax}$'', an \emph{axis} with the name ``$\text{ax}$'', which we denote by $\ax$ in san-serif font, is a set of pairs  $\ax = \{ (\text{ax}, i) \;|\; i \in X \}$ where $X$ is some ordered set (most typically, and by default, $X$ is an interval of integers starting with $1$). The set $X$ is known as the \emph{index set} of $\ax$. We use the notation $\ax(i)$ for the pair $(\text{ax},i)$ and $\ax[n]$ to denote the set $\{ (\text{ax},i) | i \in [n] \}$. More generally for every subset $S$ of $\ax$'s index set, we denote the set $\{ (\text{ax},i) | i \in S \}$ by $\ax[S]$.
 
 If $\foo$ and $\bar$ are axes, a (real-valued) \emph{named tensor} over the axes $\foo$, $\bar$ is a function $A$ that maps pairs $(i,j) \in \foo[S]\times \foo[T]$ into a real number, where $S,T$ are some subsets of $\foo$ and $\bar$'s index sets respectively. 
 We write this as $A \in \R^{\foo \times \bar}$. We use the notation $A \in \R^{\foo[f],\bar[b]}$ when we want to explicitly state the lengths of each of $A$'s axes, and indicate that $A$ is defined over all  $(i,j) \in \foo[f] \times \bar[b]$.
