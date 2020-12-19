@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  19 DEC 2020 00:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7440 64-bit) (preloaded format=pdflatex 2020.6.16)  19 DEC 2020 00:53
 entering extended mode
 **./main.tex
 (main.tex
@@ -446,8 +446,8 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: B9F2E79E8D95421B0B292BBF095CC4A9;1033.
  ) 
 Here is how much of TeX's memory you used:
- 8203 strings out of 480797
- 121281 string characters out of 2895575
+ 8202 strings out of 480797
+ 121269 string characters out of 2895575
  401814 words of memory out of 3000000
  23958 multiletter control sequences out of 15000+200000
  548884 words of font info for 86 fonts, out of 3000000 for 9000
@@ -491,9 +491,9 @@ eX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/boazb/AppData/Local/
 Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt9.pfb><C:/Users/boazb/Ap
 pData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
 
-Output written on main.pdf (21 pages, 464827 bytes).
+Output written on main.pdf (21 pages, 464727 bytes).
 PDF statistics:
- 396 PDF objects out of 1000 (max. 8388607)
- 82 named destinations out of 1000 (max. 500000)
+ 395 PDF objects out of 1000 (max. 8388607)
+ 81 named destinations out of 1000 (max. 500000)
  137 words of extra memory for PDF output out of 10000 (max. 10000000)
 

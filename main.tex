@@ -104,7 +104,7 @@ This is illustrated in Equation~(\ref{eq:attentionexpand}) below, where we use c
 
 \begin{flalign}
   &Q \in \R^{\key\times \colA{\seq} \times \colB{\head} \times \colC{\batch}},  K \in \R^{\key\times \seq \times \colB{\head} \times \colC{\batch}},
-  V \in \R^{\seq \times \colD{\val} \times \colB{\head} \times \colC{\batch}} \\
+  V \in \R^{\seq \times \colD{\val} \times \colB{\head} \times \colC{\batch}} \nonumber \\
   &\text{Att}\!:\!\R^\key \stimes \R^{\seq \times \key} \stimes \R^{\seq} \rightarrow \R \nonumber &\\ 
   &\text{Att}(\;Q\;,\;K\;\;,\;\;V) \;\;\;\;= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V  \in \R^{\colA{\seq} \times \colB{\head} \times \colC{\batch} \times \colD{\val}}\;. & \label{eq:attentionexpand} 
 \end{flalign}
