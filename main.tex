@@ -192,15 +192,16 @@ and sum over the $\name{bar}$ axis like this:
 More reductions: If $A$ has an axis $\nset{foo}{n}$, then
 \begin{align*}
   \nsum{foo} A &= \sum_{i=1}^n A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nfun{foo}{min} A &= \min \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{3 & 5 & 9} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{min} A &= \min_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
-  \nfun{foo}{mean} A &= \frac{1}{n} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
+  \nfun{foo}{mean} A &= \frac{1}{n} \nsum{foo} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
   \nfun{foo}{var} A &= \frac{1}{n} \nsum{foo} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
-(Note that $\max$ and $\min$ are overloaded; with a single argument and an axis subscript, they are reductions; otherwise, they are elementwise.)
+The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction over that axis. But if it is applied to a set of tensors, it's an elementwise operation.
 
 You can also write multiple names to perform the reduction over multiple axes at once.
+But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
 \subsubsection{Contraction}
 
@@ -221,6 +222,8 @@ B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
 C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
 \end{align*}
 then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
+
+You can also write multiple names to contract multiple axes at once. A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
 
 \subsubsection{Vectors to vectors}
 
@@ -749,7 +752,7 @@ A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
 
 \section*{Acknowledgements}
 
-Thanks to Ekin Aky\"{u}rek, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, and Nishant Sinha for their input to this document (or the ideas in it).
+Thanks to Ekin Aky\"{u}rek, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it).
 
 \iffalse % hack to make this heading appear only in pandoc
 \section*{References}
