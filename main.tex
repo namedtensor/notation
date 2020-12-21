@@ -198,9 +198,12 @@ More reductions: If $A$ has an axis $\nset{foo}{n}$, then
   \nfun{foo}{mean} A &= \frac{1}{n} \nsum{foo} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
   \nfun{foo}{var} A &= \frac{1}{n} \nsum{foo} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
-The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction over that axis. But if it is applied to a set of tensors, it's an elementwise operation.
+The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set. (For example, in the first equation above, $\nsum{foo} A$ is a reduction over axis $\name{foo}$, while $\sum_{i=1}^n A_{\nidx{foo}{i}}$ is an elementwise sum over the set $\{A_{\nidx{foo}{i}} \mid i=1, \ldots, n\}$.)
 
-You can also write multiple names to perform the reduction over multiple axes at once.
+You can also write multiple names to perform the reduction over multiple axes at once. For example,
+\begin{equation*}
+  \nsum{foo,bar} A = \sum_i \sum_j A_{\nidx{foo}{i},\nidx{bar}{j}} = 23.
+\end{equation*}
 But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
 \subsubsection{Contraction}
