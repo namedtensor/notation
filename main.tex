@@ -208,7 +208,7 @@ But unlike in NumPy and its derivatives, a reduction with no axis under it is pe
 
 \subsubsection{Contraction}
 
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator, which performs elementwise multiplication, then sums along an axis. It can be used, for example, for matrix multiplication:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of this operator as elementwise multiplication followed by summing over an axis. It can be used, for example, for matrix multiplication:
 \begin{align*}
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
@@ -226,7 +226,7 @@ C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
 \end{align*}
 then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
 
-You can also write multiple names to contract multiple axes at once. A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
+You can also write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
 
 \subsubsection{Vectors to vectors}
 
