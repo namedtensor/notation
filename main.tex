@@ -8,7 +8,7 @@
 
 \usepackage{namedtensor}
 % "experimental" notation
-\newcommand{\nndot}[2]{\mathbin{\mathop{\boldsymbol\cdot}\limits_{\name{#1}|\name{#2}}}}
+\newcommand{\nndot}[2]{\mathbin{\mathop{\odot}\limits_{\name{#1}|\name{#2}}}}
 
 % for formal definitions
 \DeclareMathOperator{\ind}{ind}
@@ -192,19 +192,23 @@ and sum over the $\name{bar}$ axis like this:
 More reductions: If $A$ has an axis $\nset{foo}{n}$, then
 \begin{align*}
   \nsum{foo} A &= \sum_{i=1}^n A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
+  \nfun{foo}{min} A &= \min \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{1 & 1 & 4} \\
+  \nfun{foo}{max} A &= \max \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{3 & 5 & 9} \\
   \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{min} A &= \min_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max_{i} A_{\nidx{foo}{i}} = \nmatrix{}{bar}{3 & 5 & 9} \\
-  \nfun{foo}{mean} A &= \frac{1}{n} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
+  \nfun{foo}{mean} A &= \frac{1}{n} \nsum{foo} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
   \nfun{foo}{var} A &= \frac{1}{n} \nsum{foo} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
 \end{align*}
-(Note that $\max$ and $\min$ are overloaded; with a single argument and an axis subscript, they are reductions; otherwise, they are elementwise.)
+The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set. (For example, in the first equation above, $\nsum{foo} A$ is a reduction over axis $\name{foo}$, while $\sum_{i=1}^n A_{\nidx{foo}{i}}$ is an elementwise sum over the set $\{A_{\nidx{foo}{i}} \mid i=1, \ldots, n\}$.)
 
-You can also write multiple names to perform the reduction over multiple axes at once.
+You can also write multiple names to perform the reduction over multiple axes at once. For example,
+\begin{equation*}
+  \nsum{foo,bar} A = \sum_i \sum_j A_{\nidx{foo}{i},\nidx{bar}{j}} = 23.
+\end{equation*}
+But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
 \subsubsection{Contraction}
 
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator, which performs elementwise multiplication, then sums along an axis. It can be used, for example, for matrix multiplication:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of this operator as elementwise multiplication followed by summing over an axis. It can be used, for example, for matrix multiplication:
 \begin{align*}
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
@@ -221,6 +225,8 @@ B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
 C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
 \end{align*}
 then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
+
+You can also write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
 
 \subsubsection{Vectors to vectors}
 
@@ -749,7 +755,7 @@ A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
 
 \section*{Acknowledgements}
 
-Thanks to Ekin Aky\"{u}rek, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, and Nishant Sinha for their input to this document (or the ideas in it).
+Thanks to Ekin Aky\"{u}rek, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it).
 
 \iffalse % hack to make this heading appear only in pandoc
 \section*{References}
