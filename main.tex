@@ -56,7 +56,7 @@ The source code for this document can be found at \url{https://github.com/namedt
 \section{Informal Overview}
 \label{sec:overview}
 
-A standard (``unnamed'') vector, matrix, or tensor is indexed by an integer or sequence of integers. For example, if
+In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. For example, if
 \begin{align*}
   A &\in \reals^{3 \times 3} \\
   A &= \begin{bmatrix}
@@ -106,194 +106,121 @@ What are good choices for axis names? We recommend meaningful \emph{words} inste
 \subsection{Named tensor operations}
 \label{sec:operations}
 
-\subsubsection{Elementwise operations}
-\label{sec:elementwise}
+Operations on named tensors are defined by taking a function on low-order tensors and extending it to higher-order tensors.
 
-Any function from scalars to scalars can be applied elementwise to a named tensor:
+\subsubsection{Elementwise operations and broadcasting}
+
+Any function from scalars to scalars can be applied elementwise to a named tensor. For example:
 \begin{equation*}
-\exp A = \nmatrix{foo}{bar}{
+\exp A = \nmatrix{height}{width}{
   \exp 3 & \exp 1 & \exp 4 \\
-  \exp 1 & \exp 5 & \exp 9
-}.
-\end{equation*}
-More elementwise unary operations:
-\[\begin{array}{cl}
-kA & \text{scalar multiplication by $k$} \\
--A & \text{negation} \\
-A^k & \text{elementwise exponentiation} \\
-\sqrt{A} &\text{elementwise square root} \\
-\exp A & \text{elementwise exponential function} \\
-\tanh A & \text{hyperbolic tangent} \\
-\sigma(A) & \text{logistic sigmoid} \\
-\text{relu}(A) & \text{rectified linear unit}
-\end{array}\]
-
-Any function or operator that takes two scalar arguments can be applied elementwise to two named tensors with the same shape. If $A$ is as above and
-\begin{equation*}
-B = \nmatrix{foo}{bar}{
-  2 & 7 & 1 \\
-  8 & 2 & 8
-}
-\end{equation*}
-then
-\begin{equation*}
-A + B = \nmatrix{foo}{bar}{
-  3+2 & 1+7 & 4+1 \\
-  1+8 & 5+2 & 9+8
+  \exp 1 & \exp 5 & \exp 9 \\
+  \exp 2 & \exp 6 & \exp 5
 }.
 \end{equation*}
 
-But things get more complicated when $A$ and $B$ don't have the same shape. If $A$ and $B$ each have an axis with the same name (and size), the two axes are \emph{aligned}, as above. But if $A$ has an axis named $\name{foo}$ and $B$ doesn't, then we do \emph{broadcasting}, which means effectively that we replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every value of axis $\name{foo}$.
+Similarly, any function or operator from two scalars to a scalar can be applied elementwise to two named tensors with the same shape.
+\begin{equation*}
+\frac1{1+\exp(-A)} = \nmatrix{height}{width}{
+  \frac1{1+\exp(-3)} & \frac1{1+\exp(-1)} & \frac1{1+\exp(-4)} \\[1ex]
+  \frac1{1+\exp(-1)} & \frac1{1+\exp(-5)} & \frac1{1+\exp(-9)} \\[1ex]
+  \frac1{1+\exp(-2)} & \frac1{1+\exp(-6)} & \frac1{1+\exp(-5)}
+}.
+\end{equation*}
+We write $\odot$ for elementwise (Hadamard) product.
+
+But if two tensors have different shapes, they are \emph{broadcast} against each other (similarly to NumPy and its derivatives). Suppose
 \begin{align*}
-A + 1 &= \nmatrix{foo}{bar}{
-  3+1 & 1+1 & 4+1 \\
-  1+1 & 5+1 & 9+1
-} \\
-A + B_{\nidx{foo}{1}} &= \nmatrix{foo}{bar}{
-  3+2 & 1+7 & 4+1 \\
-  1+2 & 5+7 & 9+1
-} \\
-A + B_{\nidx{bar}{3}} &= \nmatrix{foo}{bar}{
-  3+1 & 1+1 & 4+1 \\
-  1+8 & 5+8 & 9+8
+  B &\in \reals^{\nset{height}{3}} & C &\in \reals^{\nset{width}{3}} \\
+  B &= \nmatrix{height}{}{
+    2 \\ 7 \\ 1
+  } & 
+  C &= \nmatrix{}{width}{
+    1 & 4 & 1
+  }.
+\end{align*}
+Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\name{width}$. Likewise for $A+C$:
+\begin{align*}
+A + B &= \nmatrix{height}{width}{
+  3+2 & 1+2 & 4+2 \\
+  1+7 & 5+7 & 9+7 \\
+  2+1 & 6+1 & 5+1
+} &
+A + C &= \nmatrix{height}{width}{
+  3+1 & 1+4 & 4+1 \\
+  1+1 & 5+4 & 9+1 \\
+  2+1 & 6+4 & 5+1
 }.
 \end{align*}
-Similarly, if $B$ has an axis named $\name{foo}$ and $A$ doesn't, then we effectively replace $A$ with a new tensor $A'$ that contains a copy of $A$ for every value of axis $\name{foo}$. If you've programmed with NumPy or any of its derivatives, this should be unsurprising to you.
-
-More elementwise binary operations:
-\[\begin{array}{cl}
-A+B & \text{addition} \\
-A-B & \text{subtraction} \\
-A\odot B & \text{elementwise (Hadamard) product} \\
-\displaystyle\frac{A}{B} & \text{elementwise division} \\[1.2ex]
-\max \{A, B\} & \text{elementwise maximum} \\
-\min \{A, B\} & \text{elementwise minimum}
-\end{array}\]
 
 \subsubsection{Reductions}
 
-The same rules for alignment and broadcasting apply to functions that take tensor as arguments or return tensors. The gory details are in \S\ref{sec:tensorfunctions}, but we present the most important subcases here. The first is \emph{reductions}, which are functions from vectors to scalars. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
+The same broadcasting rules apply to functions from vectors to scalars, known as \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
-For example, using the same example tensor $A$ from above, we can sum over the $\name{foo}$ axis like this:
+For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis of $A$:
 \begin{align*}
-\nsum{foo} A &= \nmatrix{}{bar}{
-  3+1 & 1+5 & 4+9
+\nsum{height} A &= \sum_i A_{\nidx{height}{i}} = \nmatrix{}{width}{
+  3+1+2 & 1+5+6 & 4+9+5
 }
-\end{align*}
-and sum over the $\name{bar}$ axis like this:
-\begin{align*}
-\nsum{bar} A &= \nmatrix{}{foo}{
-  3+1+4 & 1+5+9
+\\
+\nsum{width} A &= \sum_j A_{\nidx{width}{j}} = \nmatrix{}{height}{
+  3+1+4 & 1+5+9 & 2+6+5
 }.
 \end{align*}
 
-More reductions: If $A$ has an axis $\nset{foo}{n}$, then
-\begin{align*}
-  \nsum{foo} A &= \sum_{i=1}^n A_{\nidx{foo}{i}} = \nmatrix{}{bar}{4 & 6 & 13} \\
-  \nfun{foo}{min} A &= \min \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{1 & 1 & 4} \\
-  \nfun{foo}{max} A &= \max \{A_{\nidx{foo}{i}} \mid 1 \leq i \leq n\} = \nmatrix{}{bar}{3 & 5 & 9} \\
-  \nfun{foo}{norm} A &= \sqrt{\nsum{foo} A^2} = \nmatrix{}{bar}{\sqrt{10} & \sqrt{26} & \sqrt{97}} \\
-  \nfun{foo}{mean} A &= \frac{1}{n} \nsum{foo} A = \nmatrix{}{bar}{2 & 3 & 6.5} \\
-  \nfun{foo}{var} A &= \frac{1}{n} \nsum{foo} (A - \nfun{foo}{mean} A)^2 = \nmatrix{}{bar}{1 & 4 & 6.25}
-\end{align*}
-The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set. (For example, in the first equation above, $\nsum{foo} A$ is a reduction over axis $\name{foo}$, while $\sum_{i=1}^n A_{\nidx{foo}{i}}$ is an elementwise sum over the set $\{A_{\nidx{foo}{i}} \mid i=1, \ldots, n\}$.)
-
 You can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
-  \nsum{foo,bar} A = \sum_i \sum_j A_{\nidx{foo}{i},\nidx{bar}{j}} = 23.
+  \nsum{height,width} A = \sum_i \sum_j A_{\nidx{height}{i},\nidx{width}{j}} = 3+1+4+1+5+9+2+6+5.
 \end{equation*}
-But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
+%But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
-\subsubsection{Contraction}
-
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of this operator as elementwise multiplication followed by summing over an axis. It can be used, for example, for matrix multiplication:
+The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of it as elementwise multiplication followed by summation:
 \begin{align*}
-C &= \nmatrix{bar}{baz}{
-  1 & -1 \\ 2 & -2 \\ 3 & -3
-} \\
-A \ndot{bar} C &= \sum_i A_{\nidx{bar}{i}} C_{\nidx{bar}{i}} = \nmatrix{foo}{baz}{
-  17 & -17 \\
-  53 & -53
-}
+%A \ndot{height} B &= \sum_i A_{\nidx{height}{i}} B_{\nidx{height}{i}} = \nmatrix{}{width}{
+%  3\cdot2 + 1\cdot7 + 2\cdot1 & 1\cdot2 + 5\cdot7 + 6\cdot1 & 4\cdot2 + 9\cdot7 + 5\cdot 1
+%} \\
+A \ndot{width} C &= \sum_j A_{\nidx{width}{j}} B_{\nidx{width}{j}} = \nmatrix{height}{}{
+  3\cdot1 + 1\cdot4 + 4\cdot1 \\
+  1\cdot1 + 5\cdot4 + 9\cdot1 \\
+  2\cdot1 + 6\cdot4 + 5\cdot1
+}.
 \end{align*}
-However, note that (like vector dot-product, but unlike matrix multiplication) this operator is commutative, but not associative! Specifically, if
-\begin{align*}
-A &\in \mathbb{R}^{\nset{foo}{m}} \\
-B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
-C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
-\end{align*}
-then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
 
-You can also write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
+Again, you can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
 
-\subsubsection{Vectors to vectors}
+\subsubsection{Vector-valued operations}
 
 A very common example of a function from vectors to vectors is the softmax:
-\begin{equation*}
-  \nfun{foo}{softmax} A = \frac{\exp A}{\nsum{foo} \exp A} \approx \nmatrix{foo}{bar}{
-    0.881 & 0.018 & 0.007 \\
-    0.119 & 0.982 & 0.993
-  }.
-\end{equation*}
-Also its ``hard'' version, which maps a vector to a one-hot vector where the maximum element becomes 1 and all other elements become 0 (breaking ties arbitrarily):
-\begin{equation*}
-  \nfun{foo}{argmax} A = \nmatrix{foo}{bar}{
-    1 & 0 & 0 \\
-    0 & 1 & 1
-  }.
-\end{equation*}
-
-Concatenation combines two vectors into one:
 \begin{align*}
-  A \ncat{foo} B &= \nmatrix{foo}{bar}{
-    3 & 1 & 4 \\
-    1 & 5 & 9 \\
-    2 & 7 & 1 \\
-    8 & 2 & 8
-  } \\
-  A \ncat{bar} B &= \nmatrix{foo}{bar}{
-    3 & 1 & 4 & 2 & 7 & 1 \\
-    1 & 5 & 9 & 8 & 2 & 8
-  }
+  \nfun{height}{softmax} A &= \frac{\exp A}{\nsum{height} \exp A} \approx \nmatrix{height}{width}{
+    0.67 & 0.00 & 0.01 \\
+    0.09 & 0.27 & 0.97 \\
+    0.24 & 0.73 & 0.02
+  }.
+%  \nfun{width}{softmax} A &= \frac{\exp A}{\nsum{width} \exp A} \approx \nmatrix{height}{width}{
+%    0.26 & 0.04 & 0.70 \\
+%    0.00 & 0.02 & 0.98 \\
+%    0.01 & 0.72 & 0.27
+%  }.
 \end{align*}
-
-\subsubsection{Renaming and reshaping}
-\label{sec:reshaping}
 
 It's also very handy to have a function that renames an axis:
 \begin{equation*}
-\nmov{bar}{baz}{A} = \nmatrix{foo}{baz}{
+\nmov{height}{height'}{A} = \nmatrix{height'}{width}{
   3 & 1 & 4 \\
-  1 & 5 & 9
-}
+  1 & 5 & 9 \\
+  2 & 6 & 5 \\
+}.
 \end{equation*}
-
-We can reshape two or more axes into one axis:
+We can also reshape two or more axes into one axis:
 \begin{equation*}
-  \nmov{(foo,bar)}{baz}{A} = \nmatrix{}{baz}{
-    3 & 1 & 4 & 1 & 5 & 9
+  \nmov{(height,width)}{layer}{A} = \nmatrix{}{layer}{
+    3 & 1 & 4 & 1 & 5 & 9 & 2 & 6 & 5
   }
 \end{equation*}
-Similarly, we can reshape one axis into two or more axes, or even multiple axes into multiple axes.
-The order of elements in the new axis or axes is undefined. If you need a particular order, you can write a more specific definition.
+%Similarly, we can reshape one axis into two or more axes, or even multiple axes into multiple axes.
+The order of elements in the new axis is undefined. If you need a particular order, you can write a more specific definition.
 
-\subsubsection{Matrices}
-
-Finally, we briefly consider functions on matrices, for which you have to give \emph{two} axis names (and the order in general matters). Let $A$ be a named tensor with shape $\nset{foo}{2} \times\nset{bar}{2} \times\nset{baz}{2}$:
-\begin{align*}
-A_{\nidx{foo}{1}} &= \nmatrix{bar}{baz}{
-  1 & 2 \\
-  3 & 4
-} \\
-A_{\nidx{foo}{2}} &= \nmatrix{bar}{baz}{
-  5 & 6 \\
-  7 & 8
-} \\
-\nfun{bar,baz}{det} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}} \\
-\nfun{baz,bar}{det} A &= \nmatrix{}{foo}{\det \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix} & \det \begin{bmatrix} 5 & 7 \\ 6 & 8 \end{bmatrix}} \\
-\nfun{foo,bar}{det} A &= \nmatrix{}{baz}{\det \begin{bmatrix} 1 & 3 \\ 5 & 7 \end{bmatrix} & \det \begin{bmatrix} 2 & 4 \\ 6 & 8 \end{bmatrix}}
-\end{align*}
-For matrix inverses, there's no easy way to put a subscript under $\mathord\cdot^{-1}$, so we recommend writing $\nfun{foo,bar}{inv}$.
 
 \section{Examples}
 \label{sec:examples}
@@ -721,27 +648,66 @@ We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and 
 \end{align*}
 (For the edge case $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
 
-\subsection{Extending functions to named tensors}
+\subsection{Named tensor operations}
 \label{sec:tensorfunctions}
 
 In \S\ref{sec:overview}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
 
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
-f &: F^{\mathcal{S} \cup \mathcal{U}} \rightarrow G^{\mathcal{T} \cup \mathcal{U}} \\
+f \colon F^{\mathcal{S} \cup \mathcal{U}} &\rightarrow G^{\mathcal{T} \cup \mathcal{U}} \\
 [f(A)]_u &= f(A_u) \qquad \text{for all $u \in \rec\mathcal{U}$.}
 \end{align*}
 
 If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{U'} = \mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
 \begin{align*}
-f &: F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} \rightarrow H^{\mathcal{U} \cup \mathcal{U'}} \\
+f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{U'}} \\
   [f(A,B)]_u &= f\left(A_{\restrict{u}{\mathcal{S'}}},B_{\restrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \rec\mathcal{U'}$.}
 \end{align*}
 
-All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
+All of the tensor operations described in \S\ref{sec:operations} can be defined in this way.
+\paragraph{Reductions}
 \begin{align*}
-\ndot{ax} &: F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} \rightarrow F \\
-A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
+  \nsum{ax} A &= \sum_{i=1}^n A_{\nidx{ax}{i}} \\
+  \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
+  \nfun{ax}{max} A &= \max \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
+  \nfun{ax}{norm} A &= \sqrt{\nsum{ax} (A \odot A)} \\
+  \nfun{ax}{mean} A &= \frac{1}{n} \nsum{ax} A \\
+  \nfun{ax}{var} A &= \frac{1}{n} \nsum{ax} (A - \nfun{ax}{mean} A)^2.
+\end{align*}
+The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set. (For example, in the first equation above, $\nsum{ax} A$ is a reduction over axis $\name{ax}$, while $\sum_{i=1}^n A_{\nidx{ax}{i}}$ is an elementwise sum over the set $\{A_{\nidx{ax}{i}} \mid i=1, \ldots, n\}$.)
+
+\paragraph{Contraction}
+\begin{align*}
+  \ndot{ax} \colon F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} &\rightarrow F \\
+  A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
+\end{align*}
+Note that, like vector dot-product, this operator is commutative, but not associative.
+Specifically, if
+\begin{align*}
+A &\in \mathbb{R}^{\nset{foo}{m}} \\
+B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
+C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
+\end{align*}
+then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
+
+\paragraph{Vector-valued functions}
+
+\begin{align*}
+  \nfun{ax}{softmax} \colon F^{\nset{ax}{n}} &\rightarrow F^{\nset{ax}{n}} \\
+  \nfun{ax}{softmax} A &= \frac{\exp A}{\nsum{ax} \exp A} \\
+  \nfun{ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{ax}{softmax} \alpha A \\
+  \nfun{ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{ax}{softmax} \alpha A \\
+  \nmov{ax}{ax'}{\cdot} \colon F^{\nset{ax}{n}} &\rightarrow F^{\nset{ax'}{n}} \\
+  \left[\nmov{ax}{ax'}{A}\right]_{\nidx{ax'}{i}} &= A_{\nidx{ax}{i}}
+\end{align*}
+
+\paragraph{Matrices}
+
+We can also define functions on order-two tensors. These have two axis names written under them, and their order in general matters (though not for these two examples).
+\begin{align*}
+\nfun{ax1,ax2}{det} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F \\
+\nfun{ax1,ax2}{inv} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F^{\nset{ax1}{n} \times \nset{ax2}{n}}.
 \end{align*}
 
 \section{Extensions}
