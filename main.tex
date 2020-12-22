@@ -213,7 +213,7 @@ The vector dot product (inner product) is a function from \emph{two} vectors to 
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
 } \\
-A \ndot{bar} C &= \nmatrix{foo}{baz}{
+A \ndot{bar} C &= \sum_i A_{\nidx{bar}{i}} C_{\nidx{bar}{i}} = \nmatrix{foo}{baz}{
   17 & -17 \\
   53 & -53
 }
@@ -321,7 +321,7 @@ If you don't like repeating the equations for fully-connected layers, you can pu
 \end{align*}
 where
 \begin{align*}
-  W^l &\in \mathbb{R}^{\nset{layer}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
+  W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
   b^l &\in \mathbb{R}^{\nset{layer}{n_l}}.
 \end{align*}
 Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}).
@@ -363,7 +363,7 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 \text{Att}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
 \end{align*}
 
-Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then it will compute multi-head attention.
+Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{heads} axis for multiple attention heads, then it will compute multi-head attention.
 
 \subsubsection{Convolution}
 
@@ -499,7 +499,7 @@ where
     0 & i \leq j\\
     -\infty & \text{otherwise}
   \end{cases} \\
-  Y &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  Y &= W^{l,O} \ndot{heads,val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
 Feedforward neural networks:
@@ -536,7 +536,6 @@ The convolution and pooling operations are defined as follows:
 \end{align*}
 where
 \begin{align*}
-|\name{channels}| &= |\name{channels'}| \\
 W^l & \in \reals^{\nset{channels'}{c_{l}} \times \nset{channels}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
 b^l &\in \reals^{\nset{channels'}{c_{l}}}
 \end{align*}
