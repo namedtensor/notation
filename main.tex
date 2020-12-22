@@ -37,19 +37,19 @@
 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
 \[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
-where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads, the notation becomes more complicated and leaves more questions unanswered. With multiple sentences in a minibatch, the notation becomes more complicated still, and most papers wisely leave this detail out.
+where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the query/key features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the query/key features. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more complicated still.
 
-Libraries for programming with neural networks \citep{numpy,pytorch} provide multidimensional arrays, called tensors (although usually without the theory associated with tensors in linear algebra and physics), and a rich array of operations on tensors. But they inherit from math the convention of identifying axes by \emph{position}, making code bug-prone. Quite a few libraries have been developed to identify axes by \emph{name} instead: Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}.
-
-Back in the realm of mathematical notation, then, we want two things: first, the flexibility of working with multidimensional arrays, and second, the perspicuity of identifying axes by name instead of by position. This document describes our proposal to do both.
+In this document, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that researchers in machine learning should be able to understand it from a few examples.
 
 As a preview, the above equation becomes
 \begin{equation*}
   \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V
 \end{equation*}
-making it unambiguous which axis each operation applies to. The same equation works with multiple heads and with minibatching.
+In this notation, the reader does not need to remember whether it is the columns or the rows of $K$ that correspond to distinct queries, since the notation makes it clear that the dot product inside the soft max is taken along the \name{key} axis, resulting in a vector in $\reals^{\name{seq}}$. The softmax operation is then applied to every element of this vector (using the whole vector for the normalization), and we take a dot product of it with $V$ along the $\name{seq}$ axis.
+The formula generalizes \emph{as written} to the case that each element is $V_{\nidx{seq}{i}}$ is itself a vector, we have multiple heads, tokens. a minibatch.
+This will correspond to adding a $\name{seq}$ axis to $Q$ (to allow for a sequence of input tokens), adding a $\name{val}$ axis to $V$,  and adding the $\name{head}$ and $\name{batch}$ axes to all input tensors.
 
-More examples of the notation are given in \S\ref{sec:examples}.
+Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, here our focus is on mathematical notation rather than code.
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
