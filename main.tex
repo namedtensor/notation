@@ -211,7 +211,7 @@ The vector dot product (inner product) is a function from \emph{two} vectors to 
 C &= \nmatrix{bar}{baz}{
   1 & -1 \\ 2 & -2 \\ 3 & -3
 } \\
-A \ndot{bar} C &= \nmatrix{foo}{baz}{
+A \ndot{bar} C &= \sum_i A_{\nidx{bar}{i}} C_{\nidx{bar}{i}} = \nmatrix{foo}{baz}{
   17 & -17 \\
   53 & -53
 }
@@ -225,6 +225,19 @@ C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
 then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
 
 You can also write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
+
+Finally, we define a version of the contraction operator that can contract two axes with different names (and the same size). The most common use case for this is applying a linear transformation from an axis to itself:
+\begin{align*}
+  T &= \nmatrix{foo}{foo'}{
+    10 & 0 \\
+    0 & 100
+  } \\
+  T \nndot{foo'}{foo} A &= \sum_i T_{\nidx{foo'}{i}} A_{\nidx{foo}{i}} = \nmatrix{foo}{bar}{
+    30 & 10 & 40 \\
+    100 & 500 & 900
+  }.
+\end{align*}
+The prime on $\name{foo'}$ acts kind of like a transpose, but you can use whatever naming convention you want (we also considered $\name{foo^\ast}$).
 
 \subsubsection{Vectors to vectors}
 
@@ -315,11 +328,11 @@ The layer sizes can be set by writing $|\name{input}| = 100$, etc. Alternatively
 
 If you don't like repeating the equations for fully-connected layers, you can put them inside a function:
 \begin{align*}
-  \text{FullConn}^l(x) &= \nmov{layer'}{layer}{\sigma\left(W^l \ndot{layer} x + b^l\right)}
+  \text{FullConn}^l(x) &= \sigma\left(W^l \nndot{layer'}{layer} x + b^l\right)
 \end{align*}
 where
 \begin{align*}
-  W^l &\in \mathbb{R}^{\nset{layer}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
+  W^l &\in \mathbb{R}^{\nset{layer}{n_{l}} \times \nset{layer'}{n_{l-1}}} \\
   b^l &\in \mathbb{R}^{\nset{layer}{n_l}}.
 \end{align*}
 Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}).
@@ -339,59 +352,55 @@ As a second example, let's define a simple (Elman) RNN. This is similar to the f
 \begin{align*}
 x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
 W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidden}| &= |\name{hidden'}| \\
-W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden'}} \\
-b &\in \mathbb{R}^{\name{hidden'}} \\
+W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden}} \\
+b &\in \mathbb{R}^{\name{hidden}} \\
 h^{0} &\in \mathbb{R}^{\name{hidden}} \\
-h^{t} &= \nmov{hidden'}{hidden}{\sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)} & t &= 1, \ldots, n
+h^{t} &= \sigma\left( W^{\text{h}} \nndot{hidden'}{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right) & t &= 1, \ldots, n
 \end{align*}
-Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($W^{\text{h}}$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
 \subsubsection{Attention}
 \label{sec:attention}
 
 In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in interpreting the equation for attention as it's usually written. In our notation, it looks like this:
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q,K,V) &= \nfun{seq'}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \nndot{seq'}{seq} V.
 \end{align*}
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
-\text{Att}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
+  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq'} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq'}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Att}(Q, K, V, M) &= \nfun{seq'}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \nndot{seq'}{seq} V.
 \end{align*}
 
-Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{head} axis for multiple attention heads, then it will compute multi-head attention.
+Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq} axis, then the above definition computes a sequence of values along the \name{seq} axis. If $Q$, $K$, and $V$ have a \name{heads} axis for multiple attention heads, then it will compute multi-head attention.
 
 \subsubsection{Convolution}
 
 A 1-dimensional convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 \begin{align*}
-\text{conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
-\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b
+\text{conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n-|\name{kernel}|+1}} \\
+\text{conv1d}(X; W, b) &= W \ndot{channels' \mid channels, kernel} U + b
 \end{align*}
 where
 \begin{align*}
-n' &= n-|\name{kernel}|+1 \\
-W &\in \reals^{\name{channels} \times \name{kernel}} \\
-U &\in \reals^{\name{channels} \times \nset{seq}{n'} \times \name{kernel}} \\
+W &\in \reals^{\name{channels'} \times \name{kernel}} \\
+U &\in \reals^{\name{channels} \times \nset{seq}{n-|\name{kernel}|+1} \times \name{kernel}} \\
 U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
 b &\in \reals.
 \end{align*} 
 
 A 2-dimensional convolution:
 \begin{align*}
-  \text{conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{channels} \times \name{kh} \times \name{kw}} \times \reals
-  &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
-  \text{conv2d}(X; W, b) &= W \ndot{channels, kh, kw} U + b
+  \text{conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}}
+  &\rightarrow \reals^{\nset{height}{h-|\name{kh}|+1} \times \nset{width}{w-|\name{kw}|+1}} \\
+  \text{conv2d}(X; W, b) &= W \ndot{channels' \mid channels, kh, kw} U + b
 \end{align*}  
 where
 \begin{align*}
-h' &= h-|\name{kh}|+1 \\
-w' &= w-|\name{kw}|+1 \\
-W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} \\
-U &\in \reals^{\name{channels} \times \nset{height}{h'} \times \nset{width}{w'} \times \name{kh} \times \name{kw}}  \\
+W &\in \reals^{\name{channels'} \times \name{kh} \times \name{kw}} \\
+U &\in \reals^{\name{channels} \times \nset{height}{h-|\name{kh}|+1} \times \nset{width}{w-|\name{kw}|+1} \times \name{kh} \times \name{kw}}  \\
 U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
 b &\in \reals.
 \end{align*}
@@ -489,15 +498,15 @@ where
 \begin{align*}
   |\name{seq}| &= |\name{seq'}| \\
   |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  Q &= W^{l,Q} \ndot{layer} X & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  K &= W^{l,K} \ndot{layer} \nmov{seq}{seq'}{X} & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   M & \in \reals^{\name{seq} \times \name{seq'}} \\
   M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
-    0 & i \leq j\\
+    0 & i \geq j\\
     -\infty & \text{otherwise}
   \end{cases} \\
-  Y &= \nsum{heads} W^{l,O} \ndot{val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  Y &= W^{l,O} \ndot{heads,val} \text{Att}(Q, K, V, M) & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
 Feedforward neural networks:
@@ -530,13 +539,12 @@ X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathb
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)}
+\text{conv}^l(X) &= \text{conv2d}(X; W^l, b^l)
 \end{align*}
 where
 \begin{align*}
-|\name{channels}| &= |\name{channels'}| \\
-W^l & \in \reals^{\nset{channels'}{c_{l}} \times \nset{channels}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{channels'}{c_{l}}}
+W^l & \in \reals^{\nset{channels}{c_{l}} \times \nset{channels'}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
+b^l &\in \reals^{\nset{channels}{c_{l}}}
 \end{align*}
 and
 \begin{align*}
@@ -640,7 +648,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 
 \begin{align*}
 \mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
-\mathcal{N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv} \Sigma \nndot{d1}{d} (X - \mu) \right) \nndot{d2}{d} (X - \mu) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det} \Sigma}}
 \end{align*}
 where
 \begin{align*}
@@ -741,14 +749,15 @@ f &: F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} 
 
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator extends the following ``named dot-product'':
 \begin{align*}
-\ndot{ax} &: F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} \rightarrow F \\
-A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
+\ndot{ax} &\colon F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} \rightarrow F \\
+A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}} \\
+\nndot{ax1}{ax2} &\colon F^{\nset{ax1}{n}} \times F^{\nset{ax2}{n}} \rightarrow F \\
+A \nndot{ax1}{ax2} B &= \sum_{i=1}^n A_{\nidx{ax1}{i}} B_{\nidx{ax2}{i}}.
 \end{align*}
 
 \section{Extensions}
 
 \input{types}
-\input{dual}
 \input{fancy}
 
 \section*{Acknowledgements}
