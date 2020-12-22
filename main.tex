@@ -322,7 +322,7 @@ If you don't like repeating the equations for fully-connected layers, you can pu
 where
 \begin{align*}
   W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
-  b^l &\in \mathbb{R}^{\nset{layer}{n_l}}.
+  b^l &\in \mathbb{R}^{\nset{layer'}{n_l}}.
 \end{align*}
 Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}).
 
@@ -641,7 +641,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 
 \begin{align*}
 \mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
-\mathcal{N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{inv}(\Sigma) \ndot{d1} \nmov{d}{d1}{X - \mu} \right) \ndot{d2} \nmov{d}{d2}{X - \mu} \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det}(\Sigma)}}
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{d1, d2}{inv} \Sigma\right) \ndot{d1,d2} \left(\nmov{d}{d1}{X - \mu} \odot \nmov{d}{d2}{X - \mu} \right) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det} \Sigma}}
 \end{align*}
 where
 \begin{align*}
