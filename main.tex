@@ -28,10 +28,9 @@
 \maketitle
 
 \begin{abstract}
-We propose a notation for tensors with named axes. Instead of writing $A \in \reals^{b\times w \times h \times c}$ for an order-4 tensor corresponding to a batch of images, we write $A \in \reals^{\name{batch} \times \name{width} \times \name{height} \times \name{channel}}$.  This tensor can be indexed using these names, as in $A_{\nidx{batch}{25},\nidx{width}{12},\nidx{height}{30},\nidx{channel}{1}}$, which is the same as $A_{\nidx{channel}{1},\nidx{width}{12},\nidx{height}{30},\nidx{batch}{25}}$.
-Named tensor notation relieves the author, reader, and future implementers from needing to keep track of the order of axes. It also makes it easier to partially index tensors, as in $A_{\nidx{batch}{17}}$, and to seamlessly extend operations on low-order tensors to higher order ones (e.g., extend an operation on images to batches of images, or extend the attention mechanism to multiple attention heads).
+We propose a notation for tensors with named axes, which relieves the author, reader, and future implementers from the burden of keeping track of the order of axes and the purpose of each. It also makes it easy to extend operations on low-order tensors to higher order ones (e.g., to extend an operation on images to minibatches of images, or extend the attention mechanism to multiple attention heads).
 
-After a brief overview of our notation, we illustrate it through several examples from modern machine learning, from building blocks like as attention and convolution to full model like Transformer and LeNet. Our proposals build on ideas from many previous papers and software libraries. We hope that this document will encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations.
+After a brief overview of our notation, we illustrate it through several examples from modern machine learning, from building blocks like attention and convolution to full models like Transformers and LeNet. Finally, we give formal definitions and describe some extensions. Our proposals build on ideas from many previous papers and software libraries. We hope that this document will encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations.
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 \end{abstract}
@@ -44,21 +43,21 @@ The source code for this document can be found at \url{https://github.com/namedt
 \section{Introduction}
 \label{sec:intro}
 
-Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is very well-suited to talking about vector spaces, but less well-suited to talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
-\[ \text{Att}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
-where $Q$, $K$, and $V$ are sequences of query, key, and value vectors packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the features. Is the softmax taken over the query sequence or the key/value sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more complicated still.
+Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is optimized for talking about vector spaces, but becomes cumbersome when talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
+\[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
+where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the features. Is the softmax taken over the query sequence or the key/value sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more complicated still.
 
 In this document, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that researchers in machine learning should be able to understand it without much effort.
 
-As a preview, in our notation, the above equation becomes
+In our notation, the above equation becomes
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{seq'} \times \name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{seq'} \times \name{val}} \\
-  \text{Att}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\name{seq'} \times \name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{seq'} \times \name{val}} \\
+  \text{Attention}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
 Here, $K$ does not have rows or columns, so the reader does not need to remember which corresponds to the keys' features and which corresponds to elements of the sequence; instead, the dot product $Q \ndot{key} K$ is explicitly over the \name{key} axis. The resulting tensor has a \name{seq} axis for the key/value sequence and a \name{seq'} axis for the query sequence, and the softmax is explicitly over $\name{seq}$, as is the dot product with~$V$.
 This formula works as written if we add a $\name{heads}$ axis for multiple attention heads, or a $\name{batch}$ axis for multiple sequences in a minibatch.
 
-Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
+Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
 
 The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
@@ -275,14 +274,14 @@ Here the axis name $\name{state}$ has to stay the same across time, and the rena
 
 In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in interpreting the equation for attention as it's usually written. In our notation, it looks like this:
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Att}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
+  \text{Attention}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
-  \text{Att} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
-\text{Att}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
+\text{Attention}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
 \end{align*}
 
 Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{heads} axis for multiple attention heads, then it will compute multi-head attention.
@@ -421,7 +420,7 @@ where
     0 & i \leq j\\
     -\infty & \text{otherwise}
   \end{cases} \\
-  Y &= W^{l,O} \ndot{heads,val} \nmov{seq'}{seq}{\text{Att}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  Y &= W^{l,O} \ndot{heads,val} \nmov{seq'}{seq}{\text{Attention}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
 Feedforward neural networks:
