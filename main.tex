@@ -7,8 +7,6 @@
 \usepackage[hidelinks]{hyperref}
 
 \usepackage{namedtensor}
-% "experimental" notation
-\newcommand{\nndot}[2]{\mathbin{\mathop{\odot}\limits_{\name{#1}|\name{#2}}}}
 
 % for formal definitions
 \DeclareMathOperator{\ind}{ind}
@@ -234,7 +232,7 @@ A feedforward neural network looks like this:
   X^2 &= \sigma(W^2 \ndot{hidden1} X^1 + b^2) & W^2 &\in \mathbb{R}^{\name{hidden2} \times \name{hidden1}} & b^2 &\in \mathbb{R}^{\name{hidden2}} \\
   X^3 &= \sigma(W^3 \ndot{hidden2} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{output} \times \name{hidden2}} & b^3 &\in \mathbb{R}^{\name{output}}
 \end{align*}
-The layer sizes can be set by writing $|\name{input}| = 100$, etc. Alternatively, we could have called the axes $\name{layer}[n_0]$, $\name{layer}[n_1]$, etc. and set the $n_l$.
+The layer sizes can be set by writing $|\name{input}| = 100$, etc.
 
 If you don't like repeating the equations for fully-connected layers, you can put them inside a function:
 \begin{align*}
@@ -245,7 +243,7 @@ where
   W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
   b^l &\in \mathbb{R}^{\nset{layer'}{n_l}}.
 \end{align*}
-Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}).
+Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Unlike before, we're now using the same axis name \name{layer} for all the layers. So $\text{FullConn}^l$ temporarily computes its output in axis \name{layer'}, then renames it back to \name{layer}.
 
 Then the network can be defined like this:
 \begin{align*}
@@ -267,7 +265,6 @@ b &\in \mathbb{R}^{\name{hidden'}} \\
 h^{0} &\in \mathbb{R}^{\name{hidden}} \\
 h^{t} &= \nmov{hidden'}{hidden}{\sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)} & t &= 1, \ldots, n
 \end{align*}
-Here the axis name $\name{state}$ has to stay the same across time, and the renaming is necessary because our notation doesn't provide a one-step way to apply a linear transformation ($W^{\text{h}}$) to one axis and put the result in the same axis. For possible solutions, see \S\ref{sec:duality}.
 
 \subsubsection{Attention}
 \label{sec:attention}
@@ -676,7 +673,6 @@ All of the tensor operations described in \S\ref{sec:operations} can be defined 
 \section{Extensions}
 
 \input{types}
-\input{dual}
 \input{fancy}
 
 \section*{Acknowledgements}
