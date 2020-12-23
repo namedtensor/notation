@@ -623,12 +623,11 @@ A \emph{named index} is a pair, written $\nidx{ax}{i}$, where $\name{ax}$ is a \
 A \emph{record} is a set of named indices $\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. 
 
 An \emph{axis} is a pair, written $\nset{ax}{I}$, where $\name{ax}$ is a name and $I$ is a set of \emph{indices}.
-
 We deal with axes of the form $\nset{ax}{[n]}$ (that is, $\nset{ax}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{ax}{n}$.
 
 In many contexts, there is only one axis with name $\name{ax}$, and so we refer to the axis simply as $\name{ax}$. The context always makes it clear whether $\name{ax}$ is a name or an axis. If $\name{ax}$ is an axis, we write $\ind(\name{ax})$ for its index set, and we write $|\name{ax}|$ as shorthand for~$|\ind(\name{ax})|$.
 
-A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. A shape defines a set of records:
+A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. We write $\emptyset$ for the empty shape. A shape defines a set of records:
 \begin{equation*}
 \rec (\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}) = \left\{\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
 \end{equation*}
@@ -643,7 +642,7 @@ Let $F$ be a field and let $\mathcal{S}$ be a shape. Then a \emph{named tensor o
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}\}$, we usually write $A_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$.
+If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}\}}$, we usually write $A_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$.
 
 We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \rec \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \rec (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
