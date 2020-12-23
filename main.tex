@@ -58,7 +58,6 @@ The source code for this document can be found at \url{https://github.com/namedt
 
 In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. For example, if
 \begin{align*}
-  A &\in \reals^{3 \times 3} \\
   A &= \begin{bmatrix}
     3 & 1 & 4 \\
     1 & 5 & 9 \\
@@ -69,7 +68,7 @@ then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same
 
 \subsection{Named tensors}
 
-In a \emph{named tensor}, we give each axis a name. For example, if the above tensor represents an image, we can name the axes as follows:
+In a \emph{named tensor}, we give each axis a name. For example, if $A$ represents an image, we can make it a named tensor like so (writing it two equivalent ways to show that the order of axes does not matter):
 \begin{align*}
   A &\in \reals^{\nset{height}{3} \times \nset{width}{3}} = \reals^{\nset{width}{3} \times \nset{height}{3}} \\
   A &= \nmatrix{height}{width}{
@@ -82,7 +81,6 @@ In a \emph{named tensor}, we give each axis a name. For example, if the above te
     4 & 9 & 5
   }.
 \end{align*}
-We wrote $A$ two equivalent ways to show that the order of axes does not matter.
 
 We access elements of $A$ using subscripts: $A_{\nidx{height}{1}, \nidx{width}{3}} = 4$.
 This notation makes partial indexing easy:
@@ -98,10 +96,7 @@ A_{\nidx{width}{3}} &= \nmatrix{}{height}{
 
 In many contexts, an axis name is used with only one size. In this case, you can simply write $\name{height}$ for the unique axis with name $\name{height}$, as in $\mathbb{R}^{\name{height} \times \name{width}}$. It's common to leave the size of an axis unspecified at first, and specify its size later (like in a section or appendix on experimental details): for example, $|\name{height}|=|\name{width}|=28$ to specify the exact size or just $|\name{height}|=|\name{width}|$ to specify that it's a square image.
 
-We use uppercase italic letters for variables standing for named tensors. We don't mind if you use another convention, but urge you not to use different styles for tensors and their elements. For example, if $\mathbf{A}$ is a tensor, then an element of $\mathbf{A}$ is written as $\mathbf{A}_{\nidx{height}{1}, \nidx{width}{3}}$ -- 
-not $A_{\nidx{height}{1},\nidx{width}{3}}$ or $a_{\nidx{height}{1},\nidx{width}{3}}$.
-
-What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we extended the example $A$ above to have red, green, and blue channels, we'd name the axis \name{channels}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we extended $A$ to have red, green, and blue channels, we'd name the axis \name{channels}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -110,16 +105,7 @@ Operations on named tensors are defined by taking a function on low-order tensor
 
 \subsubsection{Elementwise operations and broadcasting}
 
-Any function from scalars to scalars can be applied elementwise to a named tensor. For example:
-\begin{equation*}
-\exp A = \nmatrix{height}{width}{
-  \exp 3 & \exp 1 & \exp 4 \\
-  \exp 1 & \exp 5 & \exp 9 \\
-  \exp 2 & \exp 6 & \exp 5
-}.
-\end{equation*}
-
-Similarly, any function or operator from two scalars to a scalar can be applied elementwise to two named tensors with the same shape.
+Any function from a scalar to a scalar can be applied elementwise to a named tensor, and any function from two scalars to a scalar can be applied to two named tensors with the same shape. For example:
 \begin{equation*}
 \frac1{1+\exp(-A)} = \nmatrix{height}{width}{
   \frac1{1+\exp(-3)} & \frac1{1+\exp(-1)} & \frac1{1+\exp(-4)} \\[1ex]
@@ -127,9 +113,9 @@ Similarly, any function or operator from two scalars to a scalar can be applied 
   \frac1{1+\exp(-2)} & \frac1{1+\exp(-6)} & \frac1{1+\exp(-5)}
 }.
 \end{equation*}
-We write $\odot$ for elementwise (Hadamard) product.
+We write $\odot$ for the elementwise (Hadamard) product.
 
-But if two tensors have different shapes, they are \emph{broadcast} against each other (similarly to NumPy and its derivatives). Suppose
+But if we apply a binary function/operator to two tensors with different shapes, they are \emph{broadcast} against each other (similarly to NumPy and its derivatives). Suppose we have two other tensors,
 \begin{align*}
   B &\in \reals^{\nset{height}{3}} & C &\in \reals^{\nset{width}{3}} \\
   B &= \nmatrix{height}{}{
@@ -154,6 +140,7 @@ A + C &= \nmatrix{height}{width}{
 \end{align*}
 
 \subsubsection{Reductions}
+\label{sec:reductions}
 
 The same broadcasting rules apply to functions from vectors to scalars, known as \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
@@ -168,7 +155,7 @@ For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis
 }.
 \end{align*}
 
-You can also write multiple names to perform the reduction over multiple axes at once. For example,
+We can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
   \nsum{height,width} A = \sum_i \sum_j A_{\nidx{height}{i},\nidx{width}{j}} = 3+1+4+1+5+9+2+6+5.
 \end{equation*}
@@ -186,25 +173,11 @@ A \ndot{width} C &= \sum_j A_{\nidx{width}{j}} B_{\nidx{width}{j}} = \nmatrix{he
 }.
 \end{align*}
 
-Again, you can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
+Again, we can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
 
-\subsubsection{Vector-valued operations}
+\subsubsection{Renaming and reshaping}
 
-A very common example of a function from vectors to vectors is the softmax:
-\begin{align*}
-  \nfun{height}{softmax} A &= \frac{\exp A}{\nsum{height} \exp A} \approx \nmatrix{height}{width}{
-    0.67 & 0.00 & 0.01 \\
-    0.09 & 0.27 & 0.97 \\
-    0.24 & 0.73 & 0.02
-  }.
-%  \nfun{width}{softmax} A &= \frac{\exp A}{\nsum{width} \exp A} \approx \nmatrix{height}{width}{
-%    0.26 & 0.04 & 0.70 \\
-%    0.00 & 0.02 & 0.98 \\
-%    0.01 & 0.72 & 0.27
-%  }.
-\end{align*}
-
-It's also very handy to have a function that renames an axis:
+It's often useful to rename an axis (analogous to a transpose operation in standard notation):
 \begin{equation*}
 \nmov{height}{height'}{A} = \nmatrix{height'}{width}{
   3 & 1 & 4 \\
@@ -221,13 +194,37 @@ We can also reshape two or more axes into one axis:
 %Similarly, we can reshape one axis into two or more axes, or even multiple axes into multiple axes.
 The order of elements in the new axis is undefined. If you need a particular order, you can write a more specific definition.
 
-
 \section{Examples}
 \label{sec:examples}
 
 In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning.
 
 \subsection{Building blocks}
+
+\subsubsection{Some statistics}
+
+\begin{align*}
+  \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
+  \nfun{ax}{max} A &= \max \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
+  \nfun{ax}{norm} A &= \sqrt{\nsum{ax} A^2} \\
+  \nfun{ax}{mean} A &= \frac{1}{n} \nsum{ax} A \\
+  \nfun{ax}{var} A &= \frac{1}{n} \nsum{ax} (A - \nfun{ax}{mean} A)^2.
+\end{align*}
+The $\min$ and $\max$ operators are overloaded, as is the summation operator defined above (\S\ref{sec:reductions}). If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set.
+
+\subsubsection{Softmax and argmax}
+
+Most activation functions are elementwise operations (sigmoid, tanh, ReLU), so they are straightforward to use in our notation; the softmax, however, is interesting because it's defined as a function from vectors to vectors:
+\begin{align*}
+  \nfun{ax}{softmax} A &= \frac{\exp A}{\nsum{ax} \exp A}.
+\end{align*}
+As with reductions, we write an axis below the softmax operator, but this axis is retained in the output.
+
+Closely related are argmax and argmin, which we define to compute one-hot vectors with a one at the position containing the maximum or minimum value.
+\begin{align*}
+  \nfun{ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{ax}{softmax} \alpha A \\
+  \nfun{ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{ax}{softmax} \alpha A.
+\end{align*}
 
 \subsubsection{Fully-connected layers}
 
@@ -562,6 +559,13 @@ We can add a \name{batch} axis to $H$ and $S$ and the above equations will work 
 
 \subsubsection{Multivariate normal distribution}
 
+To define a multivariate normal distribution, we need some matrix operations. These have two axis names written under them, for rows and columns, respectively. Determinant and inverse have the following signatures:
+\begin{align*}
+\nfun{ax1,ax2}{det} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F \\
+\nfun{ax1,ax2}{inv} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F^{\nset{ax1}{n} \times \nset{ax2}{n}}.
+\end{align*}
+(We write $\text{inv}$ instead of $\cdot^{-1}$ because there's no way to write axis names under the latter.)
+
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*}
@@ -665,49 +669,10 @@ f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T
   [f(A,B)]_u &= f\left(A_{\restrict{u}{\mathcal{S'}}},B_{\restrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \rec\mathcal{U'}$.}
 \end{align*}
 
-All of the tensor operations described in \S\ref{sec:operations} can be defined in this way.
-\paragraph{Reductions}
-\begin{align*}
-  \nsum{ax} A &= \sum_{i=1}^n A_{\nidx{ax}{i}} \\
-  \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
-  \nfun{ax}{max} A &= \max \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
-  \nfun{ax}{norm} A &= \sqrt{\nsum{ax} (A \odot A)} \\
-  \nfun{ax}{mean} A &= \frac{1}{n} \nsum{ax} A \\
-  \nfun{ax}{var} A &= \frac{1}{n} \nsum{ax} (A - \nfun{ax}{mean} A)^2.
-\end{align*}
-The summation, $\max$, and $\min$ operators are overloaded. If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set. (For example, in the first equation above, $\nsum{ax} A$ is a reduction over axis $\name{ax}$, while $\sum_{i=1}^n A_{\nidx{ax}{i}}$ is an elementwise sum over the set $\{A_{\nidx{ax}{i}} \mid i=1, \ldots, n\}$.)
-
-\paragraph{Contraction}
+All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator can be defined as:
 \begin{align*}
   \ndot{ax} \colon F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} &\rightarrow F \\
   A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
-\end{align*}
-Note that, like vector dot-product, this operator is commutative, but not associative.
-Specifically, if
-\begin{align*}
-A &\in \mathbb{R}^{\nset{foo}{m}} \\
-B &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}} \\
-C &\in \mathbb{R}^{\nset{foo}{m} \times\nset{bar}{n}}
-\end{align*}
-then $(A \ndot{foo} B) \ndot{bar} C$ and $A \ndot{foo} (B \ndot{bar} C)$ don't even have the same shape.
-
-\paragraph{Vector-valued functions}
-
-\begin{align*}
-  \nfun{ax}{softmax} \colon F^{\nset{ax}{n}} &\rightarrow F^{\nset{ax}{n}} \\
-  \nfun{ax}{softmax} A &= \frac{\exp A}{\nsum{ax} \exp A} \\
-  \nfun{ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{ax}{softmax} \alpha A \\
-  \nfun{ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{ax}{softmax} \alpha A \\
-  \nmov{ax}{ax'}{\cdot} \colon F^{\nset{ax}{n}} &\rightarrow F^{\nset{ax'}{n}} \\
-  \left[\nmov{ax}{ax'}{A}\right]_{\nidx{ax'}{i}} &= A_{\nidx{ax}{i}}
-\end{align*}
-
-\paragraph{Matrices}
-
-We can also define functions on order-two tensors. These have two axis names written under them, and their order in general matters (though not for these two examples).
-\begin{align*}
-\nfun{ax1,ax2}{det} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F \\
-\nfun{ax1,ax2}{inv} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F^{\nset{ax1}{n} \times \nset{ax2}{n}}.
 \end{align*}
 
 \section{Extensions}
