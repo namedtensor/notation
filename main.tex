@@ -65,15 +65,7 @@ The source code for this document can be found at \url{https://github.com/namedt
 \section{Informal Overview}
 \label{sec:overview}
 
-In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. For example, if
-\begin{align*}
-  A &= \begin{bmatrix}
-    3 & 1 & 4 \\
-    1 & 5 & 9 \\
-    2 & 6 & 5
-  \end{bmatrix}
-\end{align*}
-then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same element.
+In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. If $A \in \reals^{3\times3}$, then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same element. It's up to the reader to remember what each axis of each tensor is for. We think this is a problem and propose a solution.
 
 \subsection{Named tensors}
 
@@ -91,8 +83,8 @@ In a \emph{named tensor}, we give each axis a name. For example, if $A$ represen
   }.
 \end{align*}
 
-We access elements of $A$ using subscripts: $A_{\nidx{height}{1}, \nidx{width}{3}} = 4$.
-This notation makes partial indexing easy:
+We access elements of $A$ using named indices, whose order again does not matter: $A_{\nidx{height}{1}, \nidx{width}{3}} = A_{\nidx{width}{3}, \nidx{height}{1}} = 4$.
+We also allow partial indexing:
 \begin{align*}
 A_{\nidx{height}{1}} &= \nmatrix{}{width}{
   3 & 1 & 4
@@ -103,9 +95,9 @@ A_{\nidx{width}{3}} &= \nmatrix{}{height}{
 }.
 \end{align*}
 
-In many contexts, an axis name is used with only one size. In this case, you can simply write $\name{height}$ for the unique axis with name $\name{height}$, as in $\mathbb{R}^{\name{height} \times \name{width}}$. It's common to leave the size of an axis unspecified at first, and specify its size later (like in a section or appendix on experimental details): for example, $|\name{height}|=|\name{width}|=28$ to specify the exact size or just $|\name{height}|=|\name{width}|$ to specify that it's a square image.
+In many contexts, an axis name is used with only one size. If so, we can simply write $\name{height}$ for the unique axis with name $\name{height}$, as in $\mathbb{R}^{\name{height} \times \name{width}}$. We can leave the size of an axis unspecified at first, and specify its size later (like in a section on experimental details): for example, $|\name{height}|=|\name{width}|=28$ to specify its exact size or just $|\name{height}|=|\name{width}|$ to specify that it's a square image.
 
-What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we extended $A$ to have red, green, and blue channels, we'd name the axis \name{channels}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis \name{channels}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -122,9 +114,8 @@ Any function from a scalar to a scalar can be applied elementwise to a named ten
   \frac1{1+\exp(-2)} & \frac1{1+\exp(-6)} & \frac1{1+\exp(-5)}
 }.
 \end{equation*}
-We write $\odot$ for the elementwise (Hadamard) product.
 
-But if we apply a binary function/operator to two tensors with different shapes, they are \emph{broadcast} against each other (similarly to NumPy and its derivatives). Suppose we have two other tensors,
+But if we apply a binary function/operator to tensors with different shapes, they are \emph{broadcast} against each other (similarly to NumPy and derivatives). Let
 \begin{align*}
   B &\in \reals^{\nset{height}{3}} & C &\in \reals^{\nset{width}{3}} \\
   B &= \nmatrix{height}{}{
@@ -134,7 +125,7 @@ But if we apply a binary function/operator to two tensors with different shapes,
     1 & 4 & 1
   }.
 \end{align*}
-Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\name{width}$. Likewise for $A+C$:
+(We write $B$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\name{width}$. Likewise for $A+C$:
 \begin{align*}
 A + B &= \nmatrix{height}{width}{
   3+2 & 1+2 & 4+2 \\
@@ -151,7 +142,7 @@ A + C &= \nmatrix{height}{width}{
 \subsubsection{Reductions}
 \label{sec:reductions}
 
-The same broadcasting rules apply to functions from vectors to scalars, known as \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis these functions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
+The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis reductions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
 For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis of $A$:
 \begin{align*}
@@ -170,7 +161,7 @@ We can also write multiple names to perform the reduction over multiple axes at 
 \end{equation*}
 %But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
-The vector dot product (inner product) is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of it as elementwise multiplication followed by summation:
+The vector dot-product is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of it as elementwise multiplication, then summation over one axis:
 \begin{align*}
 %A \ndot{height} B &= \sum_i A_{\nidx{height}{i}} B_{\nidx{height}{i}} = \nmatrix{}{width}{
 %  3\cdot2 + 1\cdot7 + 2\cdot1 & 1\cdot2 + 5\cdot7 + 6\cdot1 & 4\cdot2 + 9\cdot7 + 5\cdot 1
@@ -182,7 +173,7 @@ A \ndot{width} C &= \sum_j A_{\nidx{width}{j}} B_{\nidx{width}{j}} = \nmatrix{he
 }.
 \end{align*}
 
-Again, we can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication (which is why we use the same symbol for both).
+Again, we can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
 
 \subsubsection{Renaming and reshaping}
 
