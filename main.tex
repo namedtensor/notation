@@ -243,7 +243,7 @@ where
   W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
   b^l &\in \mathbb{R}^{\nset{layer'}{n_l}}.
 \end{align*}
-Now $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Unlike before, we're now using the same axis name \name{layer} for all the layers. So $\text{FullConn}^l$ temporarily computes its output in axis \name{layer'}, then renames it back to \name{layer}.
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \name{layer} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output in axis \name{layer'}, then renames it back to \name{layer}. 
 
 Then the network can be defined like this:
 \begin{align*}
@@ -275,13 +275,13 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
 
+This equation is slightly different from the one in the introduction. The previous definition computed an output sequence in axis \name{seq'}, but this definition computes a single value. If we want a sequence, we can just give $Q$ a \name{seq'} axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ \name{heads} axis for multiple attention heads, then the function will compute multi-head attention.
+
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
   \text{Attention} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
 \text{Attention}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
 \end{align*}
-
-Models often use attention to compute a sequence of values, not just a single value. If $Q$ has (say) a \name{seq'} axis, then the above definition computes a sequence of values along the \name{seq'} axis. If $Q$, $K$, and $V$ have a \name{heads} axis for multiple attention heads, then it will compute multi-head attention.
 
 \subsubsection{Convolution}
 
@@ -298,7 +298,8 @@ W &\in \reals^{\name{channels} \times \name{kernel}} \\
 U &\in \reals^{\name{channels} \times \nset{seq}{n'} \times \name{kernel}} \\
 U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
 b &\in \reals.
-\end{align*} 
+\end{align*}
+This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \name{channels'} axis (or some other name).
 
 A 2-dimensional convolution:
 \begin{align*}
