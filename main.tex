@@ -410,7 +410,7 @@ where
 \begin{align*}
   |\name{seq}| &= |\name{seq'}| \\
   |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  Q &= \left[W^{l,Q} \ndot{layer} X\right]_{\nmov{seq}{seq'}} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  Q &= W^{l,Q} \ndot{layer} X_{\nmov{seq}{seq'}} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   M & \in \reals^{\name{seq} \times \name{seq'}} \\
@@ -451,7 +451,7 @@ X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathb
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l){\nmov{channels'}{channels}}
+\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l)_{\nmov{channels'}{channels}}
 \end{align*}
 where
 \begin{align*}
