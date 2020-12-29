@@ -176,7 +176,7 @@ Again, we can write multiple names to contract multiple axes at once. An operato
 
 It's often useful to rename an axis (analogous to a transpose operation in standard notation):
 \begin{equation*}
-\nmov{height}{height'}{A} = \nmatrix{height'}{width}{
+A_{\nmov{height}{height'}} = \nmatrix{height'}{width}{
   3 & 1 & 4 \\
   1 & 5 & 9 \\
   2 & 6 & 5 \\
@@ -184,7 +184,7 @@ It's often useful to rename an axis (analogous to a transpose operation in stand
 \end{equation*}
 We can also reshape two or more axes into one axis:
 \begin{equation*}
-  \nmov{(height,width)}{layer}{A} = \nmatrix{}{layer}{
+  A_{\nmov{(height,width)}{layer}} = \nmatrix{}{layer}{
     3 & 1 & 4 & 1 & 5 & 9 & 2 & 6 & 5
   }
 \end{equation*}
@@ -236,7 +236,7 @@ The layer sizes can be set by writing $|\name{input}| = 100$, etc.
 
 If you don't like repeating the equations for fully-connected layers, you can put them inside a function:
 \begin{align*}
-  \text{FullConn}^l(x) &= \nmov{layer'}{layer}{\sigma\left(W^l \ndot{layer} x + b^l\right)}
+  \text{FullConn}^l(x) &= \sigma\left(W^l \ndot{layer} x + b^l\right)_{\nmov{layer'}{layer}}
 \end{align*}
 where
 \begin{align*}
@@ -263,7 +263,7 @@ W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidd
 W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden'}} \\
 b &\in \mathbb{R}^{\name{hidden'}} \\
 h^{0} &\in \mathbb{R}^{\name{hidden}} \\
-h^{t} &= \nmov{hidden'}{hidden}{\sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)} & t &= 1, \ldots, n
+h^{t} &= \sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)_{\nmov{hidden'}{hidden}} & t &= 1, \ldots, n
 \end{align*}
 
 \subsubsection{Attention}
@@ -410,7 +410,7 @@ where
 \begin{align*}
   |\name{seq}| &= |\name{seq'}| \\
   |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  Q &= \nmov{seq}{seq'}{W^{l,Q} \ndot{layer} X} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
+  Q &= \left[W^{l,Q} \ndot{layer} X\right]_{\nmov{seq}{seq'}} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
   V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
   M & \in \reals^{\name{seq} \times \name{seq'}} \\
@@ -418,7 +418,7 @@ where
     0 & i \leq j\\
     -\infty & \text{otherwise}
   \end{cases} \\
-  Y &= W^{l,O} \ndot{heads,val} \nmov{seq'}{seq}{\text{Attention}(Q, K, V, M)} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  Y &= W^{l,O} \ndot{heads,val} \text{Attention}(Q, K, V, M)_{\nmov{seq'}{seq}} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
 \end{align*}
 
 Feedforward neural networks:
@@ -439,7 +439,7 @@ X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_0} \times \name{height} \
 T^1 &= \text{relu}(\text{Conv}^1(X^0)) \\
 X^1 &= \text{MaxPool}^1(T^1) \\
 T^2 &= \text{relu}(\text{Conv}^2(X^1)) \\
-X^2 &= \nmov{(height,width,channels)}{layer}{\text{MaxPool}^2(T^2)} \\
+X^2 &= \text{MaxPool}^2(T^2)_{\nmov{(height,width,channels)}{layer}} \\
 X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
@@ -451,7 +451,7 @@ X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathb
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{Conv}^l(X) &= \nmov{channels'}{channels}{\text{Conv2d}(X; W^l, b^l)}
+\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l){\nmov{channels'}{channels}}
 \end{align*}
 where
 \begin{align*}
@@ -567,7 +567,7 @@ In our notation, the application of a bilinear form is more verbose than the sta
 
 \begin{align*}
 \mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
-\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{d1, d2}{inv} \Sigma\right) \ndot{d1,d2} \left(\nmov{d}{d1}{X - \mu} \odot \nmov{d}{d2}{X - \mu} \right) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det} \Sigma}}
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{d1, d2}{inv} \Sigma\right) \ndot{d1,d2} \left([X - \mu]_{\nmov{d}{d1}} \odot [X - \mu]_{\nmov{d}{d2}} \right) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det} \Sigma}}
 \end{align*}
 where
 \begin{align*}
@@ -593,7 +593,7 @@ The style file contains a small number of macros:
   \item Use \verb|\name{foo}| to write an axis name: $\name{foo}$.
   \item Use \verb|\mathbb{R}^{\nset{foo}{2}}| to write a set of tensors: $\mathbb{R}^{\nset{foo}{2}}$.
   \item Use \verb|A_{\nidx{foo}{1}}| to index a tensor: $A_{\nidx{foo}{1}}$.
-  \item Use \verb|\nmov{foo}{bar}{A}| for renaming: $\nmov{foo}{bar}{A}$.
+  \item Use \verb|A_{\nmov{foo}{bar}}| for renaming: $A_{\nmov{foo}{bar}}$.
   \end{itemize}
 \item Binary operators
   \begin{itemize}
