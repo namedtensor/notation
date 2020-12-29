@@ -288,8 +288,8 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 A 1-dimensional convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 \begin{align*}
-\text{conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
-\text{conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b
+\text{Conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
+\text{Conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b
 \end{align*}
 where
 \begin{align*}
@@ -303,9 +303,9 @@ This computes a single output channel, but we can get multiple output channels b
 
 A 2-dimensional convolution:
 \begin{align*}
-  \text{conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{channels} \times \name{kh} \times \name{kw}} \times \reals
+  \text{Conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{channels} \times \name{kh} \times \name{kw}} \times \reals
   &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
-  \text{conv2d}(X; W, b) &= W \ndot{channels, kh, kw} U + b
+  \text{Conv2d}(X; W, b) &= W \ndot{channels, kh, kw} U + b
 \end{align*}  
 where
 \begin{align*}
@@ -320,8 +320,8 @@ b &\in \reals.
 \subsubsection{Max pooling}
 
 \begin{align*}
-\text{maxpool1d}_{k} \colon \mathbb{R}^{\nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n/k}} \\
-\text{maxpool1d}_{k}(X) &= \nfun{k}{max} U
+\text{MaxPool1d}_{k} \colon \mathbb{R}^{\nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n/k}} \\
+\text{MaxPool1d}_{k}(X) &= \nfun{k}{max} U
 \end{align*}
 where
 \begin{align*}
@@ -331,8 +331,8 @@ U_{\nidx{seq}{i}, \nidx{k}{di}} & = X_{\nidx{seq}{i \times k + di -1}}.
 
 
 \begin{align*}
-\text{maxpool2d}_{kh,kw} \colon \mathbb{R}^{\nset{height}{h} \times \nset{width}{w}} &\rightarrow \mathbb{R}^{\nset{height}{h/kh} \times \nset{width}{w/kw}} \\
-\text{maxpool2d}_{kh,hw}(X) &= \nfun{kh, kw}{max} U
+\text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\nset{height}{h} \times \nset{width}{w}} &\rightarrow \mathbb{R}^{\nset{height}{h/kh} \times \nset{width}{w/kw}} \\
+\text{MaxPool2d}_{kh,hw}(X) &= \nfun{kh, kw}{max} U
 \end{align*}
 where
 \begin{align*}
@@ -348,8 +348,8 @@ by which axes are normalized.
 
 We can define a single generic normalization layer:
 \begin{align*}
-  \nfun{ax}{xnorm} \colon \mathbb{R}^{\name{ax}} &\rightarrow \mathbb{R}^{\name{ax}} \\
-  \nfun{ax}{xnorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{ax}{mean}(X)}{\sqrt{\nfun{ax}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{ax}{XNorm} \colon \mathbb{R}^{\name{ax}} &\rightarrow \mathbb{R}^{\name{ax}} \\
+  \nfun{ax}{XNorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{ax}{mean}(X)}{\sqrt{\nfun{ax}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 where
 \begin{align*}
@@ -363,9 +363,9 @@ X &\in \reals^{{\name{batch} \times \name{channels} \times \name{layer}}}
 \end{align*}
 Then the three kinds of normalization layers can be written as:
 \begin{align*}
-Y &= \nfun{batch}{xnorm}(X; \gamma, \beta) && \text{batch normalization} \\
-Y &= \nfun{layer}{xnorm}(X; \gamma, \beta) && \text{instance normalization} \\
-Y &= \nfun{layer,channels}{xnorm}(X; \gamma, \beta) && \text{layer normalization}
+Y &= \nfun{batch}{XNorm}(X; \gamma, \beta) && \text{batch normalization} \\
+Y &= \nfun{layer}{XNorm}(X; \gamma, \beta) && \text{instance normalization} \\
+Y &= \nfun{layer,channels}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
 \end{align*}
 
 \subsection{Transformer}
@@ -398,7 +398,7 @@ where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
 Layer normalization ($l = 1, 1', \ldots, L, L'$):
 \begin{align*}
   \text{LayerNorm}^l \colon \mathbb{R}^{\name{layer}} &\rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{LayerNorm}^l(X) &= \nfun{layer}{xnorm}(X; \beta^l, \gamma^l).
+  \text{LayerNorm}^l(X) &= \nfun{layer}{XNorm}(X; \beta^l, \gamma^l).
 \end{align*}
 
 We defined attention in \S\ref{sec:attention}; the Transformer uses multi-head self-attention, in which queries, keys, and values are all computed from the same sequence.
@@ -436,22 +436,22 @@ where
 
 \begin{align*}
 X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_0} \times \name{height} \times \name{width}} \\
-T^1 &= \text{relu}(\text{conv}^1(X^0)) \\
-X^1 &= \text{maxpool}^1(T^1) \\
-T^2 &= \text{relu}(\text{conv}^2(X^1)) \\
-X^2 &= \nmov{(height,width,channels)}{layer}{\text{maxpool}^2(T^2)} \\
+T^1 &= \text{relu}(\text{Conv}^1(X^0)) \\
+X^1 &= \text{MaxPool}^1(T^1) \\
+T^2 &= \text{relu}(\text{Conv}^2(X^1)) \\
+X^2 &= \nmov{(height,width,channels)}{layer}{\text{MaxPool}^2(T^2)} \\
 X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
 As an alternative to the flattening operation in the equation for $X^2$, we could have written
 \begin{align*}
-X^2 &= \text{maxpool}^2(T^2) \\
+X^2 &= \text{MaxPool}^2(T^2) \\
 X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}}.
 \end{align*}
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{conv}^l(X) &= \nmov{channels'}{channels}{\text{conv2d}(X; W^l, b^l)}
+\text{Conv}^l(X) &= \nmov{channels'}{channels}{\text{Conv2d}(X; W^l, b^l)}
 \end{align*}
 where
 \begin{align*}
@@ -460,7 +460,7 @@ b^l &\in \reals^{\nset{channels'}{c_{l}}}
 \end{align*}
 and
 \begin{align*}
-\text{maxpool}^l(X) &= \text{maxpool2d}_{ph^l,ph^l}(X).
+\text{MaxPool}^l(X) &= \text{MaxPol2d}_{ph^l,ph^l}(X).
 \end{align*}
 
 \subsection{Other examples}
@@ -484,8 +484,8 @@ p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*}
-\text{cbow} \colon \{0, 1\}^{\name{seq} \times \name{vocab}} &\rightarrow \reals^{\name{seq} \times \name{classes}} \\
-\text{cbow}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
+\text{CBOW} \colon \{0, 1\}^{\name{seq} \times \name{vocab}} &\rightarrow \reals^{\name{seq} \times \name{classes}} \\
+\text{CBOW}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
 \end{align*}
 where
 \begin{align*}
