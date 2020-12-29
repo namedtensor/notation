@@ -43,16 +43,16 @@ The source code for this document can be found at \url{https://github.com/namedt
 
 Most papers about neural networks use the notation of vectors and matrices from applied linear algebra. This notation is optimized for talking about vector spaces, but becomes cumbersome when talking about neural networks. Consider the following equation \citep{vaswani+:2017}:
 \[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
-where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? We would need to know the sizes of $Q$, $K$, and $V$ to know that it's taken over the features. Is the softmax taken over the query sequence or the key/value sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more complicated still.
+where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? It sums over columns, but there's not enough information to know what the columns represent. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more difficult still.
 
-In this document, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that researchers in machine learning should be able to understand it without much effort.
+Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort.
 
 In our notation, the above equation becomes
 \begin{align*}
   \text{Attention} \colon \mathbb{R}^{\name{seq'} \times \name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{seq'} \times \name{val}} \\
   \text{Attention}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
-Here, $K$ does not have rows or columns, so the reader does not need to remember which corresponds to the keys' features and which corresponds to elements of the sequence; instead, the dot product $Q \ndot{key} K$ is explicitly over the \name{key} axis. The resulting tensor has a \name{seq} axis for the key/value sequence and a \name{seq'} axis for the query sequence, and the softmax is explicitly over $\name{seq}$, as is the dot product with~$V$.
+The tensor $K$ has axes for the sequence (\name{seq}) and for the key features (\name{key}), instead of rows or columns, so the reader does not need to remember which is which. The dot product $Q \ndot{key} K$ is explicitly over the \name{key} axis. The resulting tensor has a \name{seq} axis for the key sequence and a \name{seq'} axis for the query sequence, and the softmax is explicitly over $\name{seq}$, as is the dot product with~$V$.
 This formula works as written if we add a $\name{heads}$ axis for multiple attention heads, or a $\name{batch}$ axis for multiple sequences in a minibatch.
 
 Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
@@ -243,7 +243,7 @@ where
   W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
   b^l &\in \mathbb{R}^{\nset{layer'}{n_l}}.
 \end{align*}
-A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \name{layer} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output in axis \name{layer'}, then renames it back to \name{layer}. 
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \name{layer} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis \name{layer'}, then renames it back to \name{layer}. 
 
 Then the network can be defined like this:
 \begin{align*}
@@ -275,7 +275,7 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence in axis \name{seq'}, but this definition computes a single value. If we want a sequence, we can just give $Q$ a \name{seq'} axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ \name{heads} axis for multiple attention heads, then the function will compute multi-head attention.
+This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis \name{seq'}, but this definition computes a single value. If we want a sequence, we can just give $Q$ a \name{seq'} axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a \name{heads} axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
@@ -443,7 +443,7 @@ X^2 &= \nmov{(height,width,channels)}{layer}{\text{maxpool}^2(T^2)} \\
 X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
-The flattening operation in the equation for $X^2$ is defined in \S{\ref{sec:reshaping}}. Alternatively, we could have written
+As an alternative to the flattening operation in the equation for $X^2$, we could have written
 \begin{align*}
 X^2 &= \text{maxpool}^2(T^2) \\
 X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}}.
