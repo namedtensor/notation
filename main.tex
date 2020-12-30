@@ -224,11 +224,11 @@ The contraction operator can be used for many multiplication-like operations.
 \end{align*}
 
 \begin{align*}
-  k &= u \ndot{ax1} v && \text{inner product} \\
-  A &= u \odot x && \text{outer product} \\
-  y &= A \ndot{ax2} x && \text{matrix-vector multiplication} \\
-  v &= u \ndot{ax1} A && \text{vector-matrix multiplication} \\
-  C &= A \ndot{ax2} B && \text{matrix-matrix multiplication}
+  u \ndot{ax1} v &= \sum_i u_{\nidx{ax1}{i}} v_{\nidx{ax1}{i}} && \text{inner product} \\
+  u \odot x &= \sum_{i,j} u_{\nidx{ax1}{i}} x_{\nidx{ax2}{j}} && \text{outer product} \\
+  A \ndot{ax2} x &= \sum_j A_{\nidx{ax2}{j}} x_{\nidx{ax2}{j}} && \text{matrix-vector multiplication} \\
+  u \ndot{ax1} A &= \sum_i u_{\nidx{ax1}{j}} A_{\nidx{ax1}{j}} && \text{vector-matrix multiplication} \\
+  A \ndot{ax2} B &= \sum_j A_{\nidx{ax2}{j}} \odot B_{\nidx{ax2}{j}} && \text{matrix-matrix multiplication}
 \end{align*}
 
 \subsubsection{Softmax and argmax}
