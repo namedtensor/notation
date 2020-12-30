@@ -151,6 +151,7 @@ For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis
   3+1+4 & 1+5+9 & 2+6+5
 }.
 \end{align*}
+See~\S\ref{sec:reductions} for more examples of reductions.
 
 We can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
@@ -169,6 +170,7 @@ A \ndot{width} C &= \sum_j A_{\nidx{width}{j}} B_{\nidx{width}{j}} = \nmatrix{he
   2\cdot1 + 6\cdot4 + 5\cdot1
 }.
 \end{align*}
+See \S\ref{sec:contractions} for more examples of what the contraction operator can do.
 
 Again, we can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
 
@@ -195,10 +197,10 @@ The order of elements in the new axis is undefined. If you need a particular ord
 \label{sec:examples}
 
 In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning.
+\subsection{More tensor operations}
 
-\subsection{Building blocks}
-
-\subsubsection{Some statistics}
+\subsubsection{Reductions}
+\label{sec:reductions}
 
 \begin{align*}
   \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
@@ -208,6 +210,26 @@ In this section we give a series of examples illustrating how to use named tenso
   \nfun{ax}{var} A &= \frac{1}{n} \nsum{ax} (A - \nfun{ax}{mean} A)^2.
 \end{align*}
 The $\min$ and $\max$ operators are overloaded, as is the summation operator defined above (\S\ref{sec:reductions}). If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set.
+
+\subsubsection{Contractions}
+\label{sec:contractions}
+
+The contraction operator can be used for many multiplication-like operations.
+
+\begin{align*}
+  u, v &\in \mathbb{R}^{\name{ax1}} \\
+  x, y &\in \mathbb{R}^{\name{ax2}} \\
+  A &\in \mathbb{R}^{\name{ax1} \times \name{ax2}} \\
+  B &\in \mathbb{R}^{\name{ax2} \times \name{ax3}}
+\end{align*}
+
+\begin{align*}
+  k &= u \ndot{ax1} v && \text{inner product} \\
+  A &= u \odot x && \text{outer product} \\
+  y &= A \ndot{ax2} x && \text{matrix-vector multiplication} \\
+  v &= u \ndot{ax1} A && \text{vector-matrix multiplication} \\
+  C &= A \ndot{ax2} B && \text{matrix-matrix multiplication}
+\end{align*}
 
 \subsubsection{Softmax and argmax}
 
@@ -222,6 +244,8 @@ Closely related are argmax and argmin, which we define to compute one-hot vector
   \nfun{ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{ax}{softmax} \alpha A \\
   \nfun{ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{ax}{softmax} \alpha A.
 \end{align*}
+
+\subsection{Building blocks}
 
 \subsubsection{Fully-connected layers}
 
