@@ -11,7 +11,7 @@
 % for formal definitions
 \DeclareMathOperator{\ind}{ind}
 \DeclareMathOperator{\rec}{rec}
-\newcommand{\restrict}[2]{\left.#1\right|_{#2}}
+\newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
 \DeclareMathOperator*{\softmax}{softmax}
@@ -654,7 +654,7 @@ A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \t
 \rec (\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}) = \left\{\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
 \end{equation*}
 
-We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nidx{ax}{I} \in \mathcal{S}$ and $\nidx{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nset{ax}{I} \in \mathcal{S}$ and $\nset{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nset{ax}{I} \in \mathcal{S}$ and $\nset{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
 
 If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
 
@@ -677,16 +677,16 @@ We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and 
 
 In \S\ref{sec:overview}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
 
-Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{U}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
+Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
-f \colon F^{\mathcal{S} \cup \mathcal{U}} &\rightarrow G^{\mathcal{T} \cup \mathcal{U}} \\
-[f(A)]_u &= f(A_u) \qquad \text{for all $u \in \rec\mathcal{U}$.}
+f \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
+[f(A)]_r &= f(A_r) \qquad \text{for all $r \in \rec\mathcal{S'}$.}
 \end{align*}
 
-If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{U'} = \mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
+If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
 \begin{align*}
-f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{U'}} \\
-  [f(A,B)]_u &= f\left(A_{\restrict{u}{\mathcal{S'}}},B_{\restrict{u}{\mathcal{T'}}}\right) \qquad \text{for all $u \in \rec\mathcal{U'}$.}
+f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{S'} \cup \mathcal{T'}} \\
+  [f(A,B)]_r &= f\left(A_{\restrict{r}{\mathcal{S'}}},B_{\restrict{r}{\mathcal{T'}}}\right) \qquad \text{for all $r \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
 \end{align*}
 
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator can be defined as:
