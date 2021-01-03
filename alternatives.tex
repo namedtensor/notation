@@ -1,0 +1,23 @@
+A very frequently asked question is why we haven't used index notation as used in physics, and the Einstein summation convention in particular. In this notation, axes are ordered, and every equation is written in terms of tensor components.
+If an index appears on both sides of an equation, then the equation must hold for each value of the index, and if an index appears twice on one side and not on the other, there is an implicit summation over that index.
+\begin{align*}
+  \text{Attention} \colon \reals^{n' \times d_k} \times \reals^{n \times d_k} \times \reals^{n \times d_v} &\rightarrow \reals^{n' \times d_v} \\
+  \left[\text{Attention}(Q, K, V)\right]_{i'k} &= \softmax_i \left( \frac{Q_{i'j} K_{ij}}{\sqrt{d_k}} \right) V_{ik}.
+\end{align*}
+Because $i'$ and $k$ appear on both sides, the equation must hold over all values of these indices. But because $j$ and $k$ occur twice on only the right-hand side, they are both summed over. We'd have to define exactly what the $i$ under softmax means ($i$ is bound inside the softmax and free outside it), and since softmax doesn't distribute over addition, we'd need to clarify that the summation over $j$ occurs inside the softmax.
+
+Other than that, this is concise and unambiguous. But it doesn't really solve the main problem we set out to solve, which is that ordered axes force the author and reader to remember the purpose of each axis. The indices do act as symbolic names for axes (indeed, in \emph{abstract} index notation, they really are symbols, not variables), but they are temporary names; they could be totally different in the next equation. It would be up to the author to choose to use consistent names, and to do so correctly.
+
+A second issue is that because it depends on repetition of indices to work, index notation can be a little bit more verbose than our notation, particularly for reductions and contractions:
+\begin{align*}
+  C &= \max_i A_i & C &=\nfun{ax}{max} A \\
+  C &= A_i B_i & C &= A \ndot{ax} B.
+\end{align*}
+
+Finally, index notation requires us to write out all indices explicitly. So if we wanted to extend attention to multiple heads and minibatches, we would write:
+\begin{gather*}
+  \text{Attention} \colon \reals^{B \times H \times n' \times d_k} \times \reals^{B \times H \times n \times d_k} \times \reals^{B \times H \times n \times d_v} \rightarrow \reals^{B \times H \times n' \times d_v} \\
+  \left[\text{Attention}(Q, K, V)\right]_{bhi'k} = \softmax_i \left( \frac{Q_{bhi'j} K_{bhij}}{\sqrt{d_k}} \right) V_{bhik}.
+\end{gather*}
+We could adopt a convention that extends a function on tensors to tensors that have extra axes to the \emph{left}, but such conventions tend to lead to messy reordering and squeezing/unsqueezing of axes. Named axes make this unnecessary.
+
