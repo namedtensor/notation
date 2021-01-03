@@ -13,7 +13,13 @@ Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative
 Then the derivative of $f$ at $x$ is the tensor with shape $\mathcal{S}' \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
 \[\left[\ddx f(x) \right]_{s',t} = \frac{\partial}{\partial x_{s'}} [f(x)]_t.\]
 
-For any shape $\mathcal{S}$, define an analogue of the identity matrix:
+The primed axis names are inconvenient, but fortunately we usually don't have to work with them explicitly.
+
+\paragraph{Rules}
+
+Below, we give some rules for computing derivatives.
+Unless otherwise indicated, $x$ has shape $\mathcal{S}$, and $u$ and $v$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
+Define $I_\mathcal{S}$, a generalization of the identity matrix:
 \begin{align*}
   I_\mathcal{S} &\in \reals^{\mathcal{S} \times \mathcal{S'}} \\
   [I_\mathcal{S}]_{s, s'} &= \begin{cases}
@@ -22,58 +28,39 @@ For any shape $\mathcal{S}$, define an analogue of the identity matrix:
   \end{cases}
 \end{align*}
 
-\paragraph{Rules}
-
-Unless otherwise indicated, $x$ has shape $\mathcal{S}$, and $u$ and $v$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
-
-The chain rule looks like this for functions of one and two variables; three or more variables are analogous.
-\begin{align*}
-  \ddx f(u) &= \frac{\partial}{\partial u} f(u) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u \\
-  \ddx f(u, v) &= \frac{\partial}{\partial u} f(u, v) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u + \frac{\partial}{\partial v} f(u, v) \ndot{\mathcal{V}' \mid \mathcal{V}} \ddx v.
-\end{align*}
-
-Here are more rules for computing derivatives; they look simpler if we build the chain rule into most of them.
 \begin{align*}
   \ddx x &= I_\mathcal{S} \\
   \ddx u &= 0 && \text{$u$ does not depend on $x$} \\
+  \ddx f(u) &= f'(u) \odot \ddx u && f \colon \reals \rightarrow \reals \\
   \ddx (u + v) &= \ddx u + \ddx v \\
   \ddx \nsum{ax} u &= \nsum{ax} \ddx u \\
   \ddx (u \odot v) &= \ddx u \odot v + u \odot \ddx v \\
   \ddx (u \ndot{ax} v) &= \ddx u \ndot{ax} v + u \ndot{ax} \ddx v \\
   \ddx \frac{u}{v} &= \frac{\ddx u \odot v - u \odot \ddx v}{v^2} \\
-  \ddx \exp u &= \exp u \odot \ddx u \\
   \ddx u_{\nmov{ax1}{ax2}} &= \left[\ddx u\right]_{\nmov{ax1}{ax2}}
 \end{align*}
 
-\paragraph{Examples}
-
-Here's an example of using these identities to derive a new one:
+Here's an example using these rules to derive a new one:
 \begin{align*}
   \ddx (\nfun{ax}{softmax} u) &= \ddx \frac{\exp u}{\nsum{ax} \exp u} \\
     &= \frac{\exp u \odot \ddx u \odot \nsum{ax} \exp u - \exp u \odot \nsum{ax} (\exp u \odot \ddx u)}{(\nsum{ax} \exp u)^2} \\
     &= \nfun{ax}{softmax} u \odot \left(\ddx u - \nfun{ax}{softmax} u \ndot{ax} \ddx u\right).
 \end{align*}
 
-\begin{align*}
-  Y &= \nfun{d1,d2}{inv} X \\
-  X \ndot{d2|d1} Y &= I_{\name{d1,d2}} \\
-  \ddX \left(X \ndot{d2|d1} Y\right) &= 0 \\
-  (I_{\name{d1,d1'}} \odot I_{\name{d2,d2'}}) \ndot{d2|d1} Y + X \ndot{d2|d1} \ddX Y &= 0 \\
-  Y \ndot{d2|d1} \left((I_{\name{d1,d1'}} \odot I_{\name{d2,d2'}}) \ndot{d2|d1} Y + X \ndot{d2|d1} \ddX Y\right) &= 0 \\
-  Y \ndot{d2|d1} (I_{\name{d1,d1'}} \odot I_{\name{d2,d2'}}) \ndot{d2|d1} Y + \ddX Y &= 0 \\
-\end{align*}
+\paragraph{Chain rule}
 
-If $A$ is a bilinear form (not depending on $x$),
+Above we gave a chain rule for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
 \begin{align*}
-  \ddx A \ndot{d_1,d_2} (x_{\nmov{d}{d_1}} \odot x_{\nmov{d}{d_2}}) 
-  &= A \ndot{d_1,d_2} ([I_{\name{d}}]_{\nmov{d}{d_1}} \odot x_{\nmov{d}{d_2}} + x_{\nmov{d}{d_1}} \odot [I_{\name{d}}]_{\nmov{d}{d_2}}).
+  \ddx f(u) &= \frac{\partial}{\partial u} f(u) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u \\
+  \ddx f(u, v) &= \frac{\partial}{\partial u} f(u, v) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u + \frac{\partial}{\partial v} f(u, v) \ndot{\mathcal{V}' \mid \mathcal{V}} \ddx v
 \end{align*}
+where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
 
 \paragraph{Broadcasting}
 
 If $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, then recall that $f$ can be extended to $\reals^{\mathcal{S} \cup \mathcal{S^+}}$ where $\mathcal{S}$ and $\mathcal{S^+}$ are orthogonal.
 
-It's more convenient to notate the derivative of $f$ as $Df$. If $f$ has two arguments, its partial derivatives are $D_1 f$ and $D_2 f$.
+It's more convenient here to notate the derivative of $f$ as $Df$. If $f$ has two arguments, its partial derivatives are $D_1 f$ and $D_2 f$.
 
 Although $Df$ extends to $\reals^{\mathcal{S} \cup \mathcal{S^+}}$ using the usual broadcasting rules, the extension of the derivative is unfortunately not the derivative of the extension. To avoid confusion, write $f^+$ for the extension:
 \begin{align*}
