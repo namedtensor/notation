@@ -14,5 +14,6 @@ pdf: main.pdf
 html: main.html
 	cp main.html index.html
 
-main.pdf main.html: main.tex types.tex dual.tex fancy.tex
+main.pdf main.html: main.tex types.tex dual.tex fancy.tex calculus.tex
+
 
