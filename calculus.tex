@@ -1,33 +1,32 @@
 \subsection{Derivatives}
 
 \newcommand{\ddx}{\frac{\partial}{\partial x}}
-\newcommand{\ddX}{\frac{\partial}{\partial X}}
-\newcommand{\ddy}{\frac{\partial}{\partial y}}
 
-Using matrix notation, taking derivatives with respect to vectors or matrices is tricky. With tensors, it's relatively easy \citep{laue+:2018}, and likewise with named tensors.
+If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $x$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $x$ could change and $n$ ``output'' axes for the change in $f(x)$.
+
+For example, the derivative of a function from vectors to vectors is a matrix (the Jacobian). But using matrix notation, there are conflicting conventions about whether the first axis is the input axis (``denominator layout'') or the output axis (``numerator layout''). The derivative of a function from vectors to matrices or matrices to vectors cannot be represented as a matrix at all, so one must resort to flattening the matrices into vectors.
+
+With tensors, taking derivatives of higher-order tensors with respect to higher-order tensors is not difficult \citep{laue+:2018}. With named tensors, we get the additional advantage of using names to distinguish input and output axes.
 
 \paragraph{Definition}
 
-Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative of $f$ adds $|\mathcal{S}|$ new axes to the return type of $f$, and they must not already be names in $\mathcal{T}$. So if $\mathcal{S} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$, then for each axis name $\name{ax\sub{i}}$, let $\name{ax\sub{i}'}$ be a new axis name, not in $\mathcal{T}$, and let $\mathcal{S'} = \name{ax_1'} \times \cdots \times \name{ax\sub{r}'}$. If $s = \{\nidx{ax_1}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, let $s' = \{\nidx{ax'_1}{i_1}, \ldots, \nidx{ax'\sub{r}}{i_r}\}$.
+Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative of $f$ (evaluated at $x$) has an input axis for each axis in $\mathcal{S}$ and an output axis for each axis in $\mathcal{T}$, and they have to have distinct names. So if $\mathcal{S} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$, then for each axis name $\name{ax\sub{i}}$, let $\name{ax\sub{i}'}$ be a new axis name, not in $\mathcal{T}$, and let $\mathcal{S'} = \name{ax_1'} \times \cdots \times \name{ax\sub{r}'}$. If $s = \{\nidx{ax_1}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, let $s' = \{\nidx{ax'_1}{i_1}, \ldots, \nidx{ax'\sub{r}}{i_r}\}$.
 
 Then the derivative of $f$ at $x$ is the tensor with shape $\mathcal{S}' \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
 \[\left[\ddx f(x) \right]_{s',t} = \frac{\partial}{\partial x_{s'}} [f(x)]_t.\]
 
-The primed axis names are inconvenient, but fortunately we usually don't have to work with them explicitly.
-
-\paragraph{Rules}
-
-Below, we give some rules for computing derivatives.
-Unless otherwise indicated, $x$ has shape $\mathcal{S}$, and $u$ and $v$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
-Define $I_\mathcal{S}$, a generalization of the identity matrix:
+We'll often make use of the following generalization of the identity matrix:
 \begin{align*}
-  I_\mathcal{S} &\in \reals^{\mathcal{S} \times \mathcal{S'}} \\
-  [I_\mathcal{S}]_{s, s'} &= \begin{cases}
-    1 & \text{if $s = s'$} \\
+  I_\mathcal{S} &\in \reals^{\mathcal{S'} \times \mathcal{S}} \\
+  [I_\mathcal{S}]_{s', s} &= \begin{cases}
+    1 & \text{if $s' = s$} \\
     0 & \text{otherwise.}
   \end{cases}
 \end{align*}
 
+\paragraph{Rules}
+
+Now we give some rules for computing derivatives. Unless otherwise indicated, $x$ has shape $\mathcal{S}$, and $u$ and $v$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
 \begin{align*}
   \ddx x &= I_\mathcal{S} \\
   \ddx u &= 0 && \text{$u$ does not depend on $x$} \\
@@ -50,7 +49,7 @@ Here's an example using these rules to derive a new one:
 
 \paragraph{Chain rule and backpropagation}
 
-Above we gave a chain rule for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
+Above, we gave a chain rule for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
 \begin{align*}
   \ddx f(u) &= \frac{\partial}{\partial u} f(u) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u \\
   \ddx f(u, v) &= \frac{\partial}{\partial u} f(u, v) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u + \frac{\partial}{\partial v} f(u, v) \ndot{\mathcal{V}' \mid \mathcal{V}} \ddx v
