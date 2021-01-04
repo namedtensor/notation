@@ -37,6 +37,7 @@ Define $I_\mathcal{S}$, a generalization of the identity matrix:
   \ddx (u \odot v) &= \ddx u \odot v + u \odot \ddx v \\
   \ddx (u \ndot{ax} v) &= \ddx u \ndot{ax} v + u \ndot{ax} \ddx v \\
   \ddx \frac{u}{v} &= \frac{\ddx u \odot v - u \odot \ddx v}{v^2} \\
+  \ddx u_r &= \left[\ddx u\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
   \ddx u_{\nmov{ax1}{ax2}} &= \left[\ddx u\right]_{\nmov{ax1}{ax2}}
 \end{align*}
 
@@ -47,7 +48,7 @@ Here's an example using these rules to derive a new one:
     &= \nfun{ax}{softmax} u \odot \left(\ddx u - \nfun{ax}{softmax} u \ndot{ax} \ddx u\right).
 \end{align*}
 
-\paragraph{Chain rule}
+\paragraph{Chain rule and backpropagation}
 
 Above we gave a chain rule for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
 \begin{align*}
@@ -55,6 +56,12 @@ Above we gave a chain rule for elementwise operations. The general chain rule lo
   \ddx f(u, v) &= \frac{\partial}{\partial u} f(u, v) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u + \frac{\partial}{\partial v} f(u, v) \ndot{\mathcal{V}' \mid \mathcal{V}} \ddx v
 \end{align*}
 where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
+
+The general chain rule is needed for backpropagation. For example, to derive the backpropagation rule for softmax:
+\begin{align*}
+  \ddx f(\nfun{ax}{softmax} x) &= f'(\nfun{ax}{softmax} x) \ndot{\mathcal{S'}|\mathcal{S}} \ddx \nfun{ax}{softmax} x \\
+    &= f'(\nfun{ax}{softmax} x) \ndot{\mathcal{S'}|\mathcal{S}} \nfun{ax}{softmax} x \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} x \ndot{ax} I_\mathcal{S}\right).
+\end{align*}
 
 \paragraph{Broadcasting}
 
