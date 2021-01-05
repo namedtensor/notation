@@ -1,7 +1,4 @@
-\subsection{Derivatives}
-
 \newcommand{\ddx}{\frac{\partial}{\partial X}}
-%\newcommand{\inp}[1]{\overline{#1}}
 \newcommand{\inp}[1]{#1^*}
 
 If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $X$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $f(X)$.
@@ -10,7 +7,7 @@ For example, the derivative of a function from vectors to vectors is a matrix (t
 
 With tensors, taking derivatives of higher-order tensors with respect to higher-order tensors is not difficult \citep{laue+:2018}. With named tensors, we get the additional advantage of using names to distinguish input and output axes.
 
-\paragraph{Definition}
+\subsection{Definition}
 
 Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative of $f$ (evaluated at $X$) has an input axis for each axis in $\mathcal{S}$ and an output axis for each axis in $\mathcal{T}$, and they have to have distinct names. So if $\mathcal{S} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$, then for each axis name $\name{ax\sub{i}}$, let $\name{\inp{ax\sub{i}}}$ be a new axis name, not in $\mathcal{T}$, and let $\inp{\mathcal{S}} = \name{\inp{ax_1}} \times \cdots \times \name{\inp{ax\sub{r}}}$. If $s = \{\nidx{ax_1}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, let $\inp{s} = \{\nidx{\inp{ax_1}}{i_1}, \ldots, \nidx{\inp{ax\sub{r}}}{i_r}\}$.
 
@@ -26,7 +23,7 @@ We'll often make use of the following generalization of the identity matrix:
   \end{cases}
 \end{align*}
 
-\paragraph{Rules}
+\subsection{Rules}
 
 Now we give some rules for computing derivatives. Unless otherwise indicated, $X$ has shape $\mathcal{S}$, and $U$ and $V$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
 \begin{align*}
@@ -49,7 +46,7 @@ The chain rule above is for elementwise operations. The general chain rule looks
 \end{align*}
 where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
 
-\paragraph{Examples}
+\subsection{Examples}
 
 Here's an example using these rules to derive the Jacobian for softmax:
 \begin{align*}
@@ -73,7 +70,7 @@ As another example, here are Jacobian and backpropagation rule for Conv1d:
   &= W_\nmov{chans}{\inp{chans}} \ndot{kernel} C_{\nmov{seq}{\inp{seq}}} \ndot{out|\inp{seq}} f'(\text{Conv1d}(X)).
 \end{align*}
 
-\paragraph{Broadcasting}
+\subsection{Broadcasting}
 
 If $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, then recall that $f$ can be extended to $\reals^{\mathcal{S} \cup \mathcal{S^+}}$ where $\mathcal{S}$ and $\mathcal{S^+}$ are orthogonal.
 

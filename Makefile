@@ -10,6 +10,7 @@
 all: pdf html
 
 pdf: main.pdf
+	cp main.pdf namedtensors.pdf
 
 html: main.html
 	cp main.html index.html
