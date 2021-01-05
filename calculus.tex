@@ -40,26 +40,34 @@ Now we give some rules for computing derivatives. Unless otherwise indicated, $x
   \ddx u_{\nmov{ax1}{ax2}} &= \left[\ddx u\right]_{\nmov{ax1}{ax2}}
 \end{align*}
 
-Here's an example using these rules to derive a new one:
-\begin{align*}
-  \ddx (\nfun{ax}{softmax} u) &= \ddx \frac{\exp u}{\nsum{ax} \exp u} \\
-    &= \frac{\exp u \odot \ddx u \odot \nsum{ax} \exp u - \exp u \odot \nsum{ax} (\exp u \odot \ddx u)}{(\nsum{ax} \exp u)^2} \\
-    &= \nfun{ax}{softmax} u \odot \left(\ddx u - \nfun{ax}{softmax} u \ndot{ax} \ddx u\right).
-\end{align*}
-
-\paragraph{Chain rule and backpropagation}
-
-Above, we gave a chain rule for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
+The chain rule above is for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
 \begin{align*}
   \ddx f(u) &= \frac{\partial}{\partial u} f(u) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u \\
   \ddx f(u, v) &= \frac{\partial}{\partial u} f(u, v) \ndot{\mathcal{U}' \mid \mathcal{U}} \ddx u + \frac{\partial}{\partial v} f(u, v) \ndot{\mathcal{V}' \mid \mathcal{V}} \ddx v
 \end{align*}
 where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
 
-The general chain rule is needed for backpropagation. For example, to derive the backpropagation rule for softmax:
+\paragraph{Examples}
+
+Here's an example using these rules to derive the rule for softmax:
+\begin{align*}
+  \ddx (\nfun{ax}{softmax} u) &= \ddx \frac{\exp u}{\nsum{ax} \exp u} \\
+    &= \frac{\exp u \odot \ddx u \odot \nsum{ax} \exp u - \exp u \odot \nsum{ax} (\exp u \odot \ddx u)}{(\nsum{ax} \exp u)^2} \\
+    &= \nfun{ax}{softmax} u \odot \left(\ddx u - \nfun{ax}{softmax} u \ndot{ax} \ddx u\right).
+\end{align*}
+To derive the backpropagation rule:
 \begin{align*}
   \ddx f(\nfun{ax}{softmax} x) &= f'(\nfun{ax}{softmax} x) \ndot{\mathcal{S'}|\mathcal{S}} \ddx \nfun{ax}{softmax} x \\
     &= f'(\nfun{ax}{softmax} x) \ndot{\mathcal{S'}|\mathcal{S}} \nfun{ax}{softmax} x \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} x \ndot{ax} I_\mathcal{S}\right).
+\end{align*}
+
+As another example, the backpropagation rule for Conv1d:
+\begin{align*}
+  \frac{\partial}{\partial X} \text{Conv1d}(X) &= [W \ndot{chans,kernel} C \ndot{seq} I_\mathcal{S}]_{\nmov{out}{seq}} \\
+  &= [W_{\nmov{chans}{chans'}} \ndot{kernel} C_\nmov{seq}{seq'}]_\nmov{out}{seq} \\
+  \frac{\partial}{\partial X} f(\text{Conv1d}(X)) &= f'(\text{Conv1d}(X)) \ndot{seq'|seq} [W_{\nmov{chans}{chans'}} \ndot{kernel} C_\nmov{seq}{seq'}]_\nmov{out}{seq} \\
+  &= f'(\text{Conv1d}(X)) \ndot{seq'|out} (W_\nmov{chans}{chans'} \ndot{kernel} C_\nmov{seq}{seq'}) \\
+  &= W_\nmov{chans}{chans'} \ndot{kernel} C_{\nmov{seq}{seq'}} \ndot{out|seq'} f'(\text{Conv1d}(X)).
 \end{align*}
 
 \paragraph{Broadcasting}
