@@ -14,6 +14,7 @@
 \newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
+\allowdisplaybreaks
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
 
@@ -94,7 +95,7 @@ A_{\nidx{width}{3}} &= \nmatrix{}{height}{
 
 In many contexts, an axis name is used with only one size. If so, we can simply write $\name{height}$ for the unique axis with name $\name{height}$, as in $\mathbb{R}^{\name{height} \times \name{width}}$. We can leave the size of an axis unspecified at first, and specify its size later (like in a section on experimental details): for example, $|\name{height}|=|\name{width}|=28$ to specify its exact size or just $|\name{height}|=|\name{width}|$ to specify that it's a square image.
 
-What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis \name{channels}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis \name{chans}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -309,36 +310,34 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 
 \subsubsection{Convolution}
 
-A 1-dimensional convolution can be easily written by unrolling a tensor and then
-applying a standard dot product.
+A 1-dimensional convolution can be written using contractions:
 \begin{align*}
-\text{Conv1d} \colon \reals^{\name{channels} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
-\text{Conv1d}(X; W, b) &= W \ndot{channels, kernel} U + b
+\text{Conv1d} \colon \reals^{\name{chans} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
+\text{Conv1d}(X; W, b) &= [W \ndot{chans,kernel} C \ndot{seq} X + b]_{\nmov{out}{seq}}
 \end{align*}
 where
 \begin{align*}
+W &\in \reals^{\name{chans} \times \name{kernel}} \\
+b &\in \reals \\
 n' &= n-|\name{kernel}|+1 \\
-W &\in \reals^{\name{channels} \times \name{kernel}} \\
-U &\in \reals^{\name{channels} \times \nset{seq}{n'} \times \name{kernel}} \\
-U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
-b &\in \reals.
+C &\in \reals^{\nset{out}{n'} \times \name{kernel} \times \nset{seq}{n}} \\
+C_{\nidx{out}{o},\nidx{kernel}{k},\nidx{seq}{i}} &= \delta(o+k-1,i).
 \end{align*}
-This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \name{channels'} axis (or some other name).
+This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \name{chans'} axis (or some other name).
 
-A 2-dimensional convolution:
+We can use the same $C$ to define a 2-dimensional convolution:
 \begin{align*}
-  \text{Conv2d} \colon \reals^{\name{channels} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{channels} \times \name{kh} \times \name{kw}} \times \reals
+  \text{Conv2d} \colon \reals^{\name{chans} \times \nset{height}{h} \times \nset{width}{w}}
   &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
-  \text{Conv2d}(X; W, b) &= W \ndot{channels, kh, kw} U + b
+  \text{Conv2d}(X; W, b) &= [W \ndot{chans, kh, kw} C^2 \ndot{height,width} X + b]_{\substack{\nmov{oh}{height}\\\nmov{ow}{width}}}
 \end{align*}  
 where
 \begin{align*}
+W &\in \reals^{\name{chans} \times \name{kh} \times \name{kw}} \\
+b &\in \reals \\
 h' &= h-|\name{kh}|+1 \\
 w' &= w-|\name{kw}|+1 \\
-W &\in \reals^{\name{channels} \times \name{kh} \times \name{kw}} \\
-U &\in \reals^{\name{channels} \times \nset{height}{h'} \times \nset{width}{w'} \times \name{kh} \times \name{kw}}  \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
-b &\in \reals.
+C^2 &= C_{\substack{\nmov{out}{oh} \\ \nmov{kernel}{kh} \\ \nmov{seq}{height}}} \odot C_{\substack{\nmov{out}{ow} \\ \nmov{kernel}{kw} \\ \nmov{seq}{width}}}.
 \end{align*}
 
 \subsubsection{Max pooling}
@@ -383,13 +382,13 @@ where
 
 Now, suppose that the input has three axes:
 \begin{align*}
-X &\in \reals^{{\name{batch} \times \name{channels} \times \name{layer}}}
+X &\in \reals^{{\name{batch} \times \name{chans} \times \name{layer}}}
 \end{align*}
 Then the three kinds of normalization layers can be written as:
 \begin{align*}
 Y &= \nfun{batch}{XNorm}(X; \gamma, \beta) && \text{batch normalization} \\
 Y &= \nfun{layer}{XNorm}(X; \gamma, \beta) && \text{instance normalization} \\
-Y &= \nfun{layer,channels}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
+Y &= \nfun{layer,chans}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
 \end{align*}
 
 \subsection{Transformer}
@@ -459,28 +458,28 @@ where
 \subsection{LeNet}
 
 \begin{align*}
-X^0 &\in \reals^{\name{batch} \times \nset{channels}{c_0} \times \name{height} \times \name{width}} \\
+X^0 &\in \reals^{\name{batch} \times \nset{chans}{c_0} \times \name{height} \times \name{width}} \\
 T^1 &= \text{relu}(\text{Conv}^1(X^0)) \\
 X^1 &= \text{MaxPool}^1(T^1) \\
 T^2 &= \text{relu}(\text{Conv}^2(X^1)) \\
-X^2 &= \text{MaxPool}^2(T^2)_{\nmov{(height,width,channels)}{layer}} \\
+X^2 &= \text{MaxPool}^2(T^2)_{\nmov{(height,width,chans)}{layer}} \\
 X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
 O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
 \end{align*}
 As an alternative to the flattening operation in the equation for $X^2$, we could have written
 \begin{align*}
 X^2 &= \text{MaxPool}^2(T^2) \\
-X^3 &= \text{relu}(W^3 \ndot{height,width,channels} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{channels}}.
+X^3 &= \text{relu}(W^3 \ndot{height,width,chans} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{chans}}.
 \end{align*}
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l)_{\nmov{channels'}{channels}}
+\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l)_{\nmov{chans'}{chans}}
 \end{align*}
 where
 \begin{align*}
-W^l & \in \reals^{\nset{channels'}{c_{l}} \times \nset{channels}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{channels'}{c_{l}}}
+W^l & \in \reals^{\nset{chans'}{c_{l}} \times \nset{chans}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
+b^l &\in \reals^{\nset{chans'}{c_{l}}}
 \end{align*}
 and
 \begin{align*}
@@ -699,6 +698,7 @@ All of the tensor operations described in \S\ref{sec:operations} can be defined 
 
 \input{types}
 \input{fancy}
+\input{calculus}
 
 \section{Alternatives}
 

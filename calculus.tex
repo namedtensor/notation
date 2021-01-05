@@ -1,0 +1,98 @@
+\subsection{Derivatives}
+
+\newcommand{\ddx}{\frac{\partial}{\partial X}}
+%\newcommand{\inp}[1]{\overline{#1}}
+\newcommand{\inp}[1]{#1^*}
+
+If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $X$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $f(X)$.
+
+For example, the derivative of a function from vectors to vectors is a matrix (the Jacobian). But using matrix notation, there are conflicting conventions about whether the first axis is the input axis (``denominator layout'') or the output axis (``numerator layout''). The derivative of a function from vectors to matrices or matrices to vectors cannot be represented as a matrix at all, so one must resort to flattening the matrices into vectors.
+
+With tensors, taking derivatives of higher-order tensors with respect to higher-order tensors is not difficult \citep{laue+:2018}. With named tensors, we get the additional advantage of using names to distinguish input and output axes.
+
+\paragraph{Definition}
+
+Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative of $f$ (evaluated at $X$) has an input axis for each axis in $\mathcal{S}$ and an output axis for each axis in $\mathcal{T}$, and they have to have distinct names. So if $\mathcal{S} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$, then for each axis name $\name{ax\sub{i}}$, let $\name{\inp{ax\sub{i}}}$ be a new axis name, not in $\mathcal{T}$, and let $\inp{\mathcal{S}} = \name{\inp{ax_1}} \times \cdots \times \name{\inp{ax\sub{r}}}$. If $s = \{\nidx{ax_1}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, let $\inp{s} = \{\nidx{\inp{ax_1}}{i_1}, \ldots, \nidx{\inp{ax\sub{r}}}{i_r}\}$.
+
+Then the derivative of $f$ at $X$ is the tensor with shape $\inp{\mathcal{S}} \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
+\[\left[\ddx f(X) \right]_{\inp{s},t} = \frac{\partial}{\partial X_s} [f(X)]_t.\]
+
+We'll often make use of the following generalization of the identity matrix:
+\begin{align*}
+  I_\mathcal{S} &\in \reals^{\inp{\mathcal{S}} \times \mathcal{S}} \\
+  [I_\mathcal{S}]_{\inp{s}, s} &= \begin{cases}
+    1 & \text{if $\inp{s} = s$} \\
+    0 & \text{otherwise.}
+  \end{cases}
+\end{align*}
+
+\paragraph{Rules}
+
+Now we give some rules for computing derivatives. Unless otherwise indicated, $X$ has shape $\mathcal{S}$, and $U$ and $V$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
+\begin{align*}
+  \ddx X &= I_\mathcal{S} \\
+  \ddx U &= 0 && \text{$U$ does not depend on $X$} \\
+  \ddx f(U) &= f'(U) \odot \ddx u && f \colon \reals \rightarrow \reals \\
+  \ddx (U + V) &= \ddx U + \ddx V \\
+  \ddx \nsum{ax} U &= \nsum{ax} \ddx U \\
+  \ddx (U \odot V) &= \ddx U \odot V + U \odot \ddx V \\
+  \ddx (U \ndot{ax} V) &= \ddx U \ndot{ax} V + U \ndot{ax} \ddx V \\
+  \ddx \frac{U}{V} &= \frac{\ddx U \odot V - U \odot \ddx V}{V^2} \\
+  \ddx U_r &= \left[\ddx U\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
+  \ddx U_{\nmov{ax1}{ax2}} &= \left[\ddx U\right]_{\nmov{ax1}{ax2}}
+\end{align*}
+
+The chain rule above is for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
+\begin{align*}
+  \ddx f(U) &= \frac{\partial}{\partial U} f(U) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U \\
+  \ddx f(U, V) &= \frac{\partial}{\partial U} f(U, V) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U + \frac{\partial}{\partial V} f(U, V) \ndot{\inp{\mathcal{V}} \mid \mathcal{V}} \ddx V
+\end{align*}
+where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
+
+\paragraph{Examples}
+
+Here's an example using these rules to derive the Jacobian for softmax:
+\begin{align*}
+  \ddx (\nfun{ax}{softmax} X) &= \ddx \frac{\exp X}{\nsum{ax} \exp X} \\
+    &= \frac{\exp X \odot \ddx X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \ddx X)}{(\nsum{ax} \exp X)^2} \\
+    &= \nfun{ax}{softmax} X \odot \left(\ddx X - \nfun{ax}{softmax} X \ndot{ax} \ddx X\right) \\
+    &= \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+\end{align*}
+To derive the backpropagation rule:
+\begin{align*}
+  \ddx f(\nfun{ax}{softmax} X) &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \ddx \nfun{ax}{softmax} X \\
+    &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+\end{align*}
+
+As another example, here are Jacobian and backpropagation rule for Conv1d:
+\begin{align*}
+  \frac{\partial}{\partial X} \text{Conv1d}(X) &= [W \ndot{chans,kernel} C \ndot{seq} I_\mathcal{S}]_{\nmov{out}{seq}} \\
+  &= [W_{\nmov{chans}{\inp{chans}}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}]_\nmov{out}{seq} \\
+  \frac{\partial}{\partial X} f(\text{Conv1d}(X)) &= f'(\text{Conv1d}(X)) \ndot{\inp{seq}|seq} [W_{\nmov{chans}{\inp{chans}}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}]_\nmov{out}{seq} \\
+  &= f'(\text{Conv1d}(X)) \ndot{\inp{seq}|out} (W_\nmov{chans}{\inp{chans}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}) \\
+  &= W_\nmov{chans}{\inp{chans}} \ndot{kernel} C_{\nmov{seq}{\inp{seq}}} \ndot{out|\inp{seq}} f'(\text{Conv1d}(X)).
+\end{align*}
+
+\paragraph{Broadcasting}
+
+If $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, then recall that $f$ can be extended to $\reals^{\mathcal{S} \cup \mathcal{S^+}}$ where $\mathcal{S}$ and $\mathcal{S^+}$ are orthogonal.
+
+It's more convenient here to notate the derivative of $f$ as $Df$. If $f$ has two arguments, its partial derivatives are $D_1 f$ and $D_2 f$.
+
+Although $Df$ extends to $\reals^{\mathcal{S} \cup \mathcal{S^+}}$ using the usual broadcasting rules, the extension of the derivative is unfortunately not the derivative of the extension. To avoid confusion, write $f^+$ for the extension:
+\begin{align*}
+  f^+ \colon \reals^{\mathcal{S} \cup \mathcal{S^+}} &\rightarrow \reals^{\mathcal{T} \cup \mathcal{S^+}} \\
+  f^+(X)_r &= f(X_r).
+\end{align*}
+Then the derivative of $f^+$ is:
+\begin{align*}
+  Df^+ \colon \reals^{\inp{\mathcal{S}} \cup \inp{\mathcal{{S^+}}} \cup \mathcal{T} \cup \mathcal{S^+}} &\rightarrow \reals^{\mathcal{T} \cup \mathcal{S^+}} \\
+  Df^+(X) &= Df(X) \odot I_{\mathcal{S}^+}.
+\end{align*}  
+
+Similarly, if $f \colon \reals^\mathcal{S} \times \reals^\mathcal{T} \rightarrow \reals^\mathcal{U}$, we can extend $f$ to $f^+ \colon \reals^\mathcal{S \cup S^+} \times \reals^\mathcal{T \cup T^+} \rightarrow \reals^\mathcal{U \cup S^+ \cup T^+}$. Then
+\begin{align*}
+  D_1 f^+(X, Y) &= D_1 f(X, Y) \odot I_{\mathcal{S}^+} \\
+  D_2 f^+(X, Y) &= D_2 f(X, Y) \odot I_{\mathcal{T}^+}.
+\end{align*}
+
