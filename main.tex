@@ -14,13 +14,16 @@
 \newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
+% ugly hack to get non-sans-serif into names
+\newcommand{\sub}[1]{_\text{$#1$}}
+
 \allowdisplaybreaks
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
 
 \title{\bf Named Tensor Notation}
 \author{David Chiang \\ \small University of Notre Dame \and Sasha Rush \\ \small Cornell University \and Boaz Barak \\ \small Harvard University}
-\date{Version 0.2}
+\date{Version 0.3}
 
 \begin{document}
 
@@ -633,9 +636,6 @@ The style file contains a small number of macros:
 
 \section{Formal Definitions}
 \label{sec:definitions}
-
-% ugly hack to get non-sans-serif into names
-\newcommand{\sub}[1]{_\text{$#1$}}
 
 \subsection{Records and shapes}
 
