@@ -61,7 +61,7 @@ To derive the backpropagation rule:
     &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
 \end{align*}
 
-As another example, here are Jacobian and backpropagation rule for Conv1d:
+As another example, here are the Jacobian and backpropagation rule for Conv1d:
 \begin{align*}
   \frac{\partial}{\partial X} \text{Conv1d}(X) &= [W \ndot{chans,kernel} C \ndot{seq} I_\mathcal{S}]_{\nmov{out}{seq}} \\
   &= [W_{\nmov{chans}{\inp{chans}}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}]_\nmov{out}{seq} \\
