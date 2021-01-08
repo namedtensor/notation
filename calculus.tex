@@ -1,4 +1,4 @@
-\newcommand{\ddx}{\frac{\partial}{\partial X}}
+\newcommand{\ddx}[1]{\frac{\partial #1}{\partial X}}
 \newcommand{\inp}[1]{#1^*}
 
 If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $X$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $f(X)$.
@@ -29,20 +29,20 @@ Now we give some rules for computing derivatives. Unless otherwise indicated, $X
 \begin{align*}
   \ddx X &= I_\mathcal{S} \\
   \ddx U &= 0 && \text{$U$ does not depend on $X$} \\
-  \ddx f(U) &= f'(U) \odot \ddx U && f \colon \reals \rightarrow \reals \\
-  \ddx (U + V) &= \ddx U + \ddx V \\
-  \ddx \nsum{ax} U &= \nsum{ax} \ddx U \\
-  \ddx (U \odot V) &= \ddx U \odot V + U \odot \ddx V \\
-  \ddx (U \ndot{ax} V) &= \ddx U \ndot{ax} V + U \ndot{ax} \ddx V \\
-  \ddx \frac{U}{V} &= \frac{\ddx U \odot V - U \odot \ddx V}{V^2} \\
-  \ddx U_r &= \left[\ddx U\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
-  \ddx U_{\nmov{ax1}{ax2}} &= \left[\ddx U\right]_{\nmov{ax1}{ax2}}
+  \ddx{f(U)} &= f'(U) \odot \ddx U && f \colon \reals \rightarrow \reals \\
+  \ddx{} (U + V) &= \ddx U + \ddx V \\
+  \ddx{} \nsum{ax} U &= \nsum{ax} \ddx U \\
+  \ddx{} (U \odot V) &= \ddx U \odot V + U \odot \ddx V \\
+  \ddx{} (U \ndot{ax} V) &= \ddx U \ndot{ax} V + U \ndot{ax} \ddx V \\
+  \ddx{} \frac{U}{V} &= \frac{\ddx U \odot V - U \odot \ddx V}{V^2} \\
+  \ddx{U_r} &= \left[\ddx U\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
+  \ddx{U_{\nmov{ax1}{ax2}}} &= \left[\ddx U\right]_{\nmov{ax1}{ax2}}
 \end{align*}
 
 The chain rule above is for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
 \begin{align*}
-  \ddx f(U) &= \frac{\partial}{\partial U} f(U) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U \\
-  \ddx f(U, V) &= \frac{\partial}{\partial U} f(U, V) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U + \frac{\partial}{\partial V} f(U, V) \ndot{\inp{\mathcal{V}} \mid \mathcal{V}} \ddx V
+  \ddx{f(U)} &= \frac{\partial f(U)}{\partial U} \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U \\
+  \ddx{f(U, V)} &= \frac{\partial f(U, V)}{\partial U} \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U + \frac{\partial f(U, V)}{\partial V} \ndot{\inp{\mathcal{V}} \mid \mathcal{V}} \ddx V
 \end{align*}
 where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
 
@@ -50,15 +50,15 @@ where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax
 
 Here's an example using these rules to derive the Jacobian for softmax:
 \begin{align*}
-  \ddx (\nfun{ax}{softmax} X) &= \ddx \frac{\exp X}{\nsum{ax} \exp X} \\
+  \ddx{} \nfun{ax}{softmax} X  &= \ddx{} \frac{\exp X}{\nsum{ax} \exp X} \\
     &= \frac{\exp X \odot \ddx X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \ddx X)}{(\nsum{ax} \exp X)^2} \\
     &= \nfun{ax}{softmax} X \odot \left(\ddx X - \nfun{ax}{softmax} X \ndot{ax} \ddx X\right) \\
     &= \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
 \end{align*}
 To derive the backpropagation rule:
 \begin{align*}
-  \ddx f(\nfun{ax}{softmax} X) &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \ddx \nfun{ax}{softmax} X \\
-    &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+  \ddx{} f(\nfun{ax}{softmax} X) &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \ddx{} \nfun{ax}{softmax} X \\
+    &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \left(\nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right)\right).
 \end{align*}
 
 As another example, here are the Jacobian and backpropagation rule for Conv1d:
