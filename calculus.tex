@@ -1,5 +1,10 @@
-\newcommand{\ddx}{\frac{\partial}{\partial X}}
+- input and output axes disjoint
+- differential notation
+- for scalar functions, no renaming needed
+
 \newcommand{\inp}[1]{#1^*}
+\newcommand{\ddx}[1]{\frac{\partial #1}{\partial X}}
+\newcommand{\ddxr}[1]{\frac{\partial #1}{\partial X_{\nmov{\mathcal{S}}{\inp{\mathcal{S}}}}}}
 
 If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $X$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $f(X)$.
 
@@ -9,56 +14,60 @@ With tensors, taking derivatives of higher-order tensors with respect to higher-
 
 \subsection{Definition}
 
-Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The derivative of $f$ (evaluated at $X$) has an input axis for each axis in $\mathcal{S}$ and an output axis for each axis in $\mathcal{T}$, and they have to have distinct names. So if $\mathcal{S} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$, then for each axis name $\name{ax\sub{i}}$, let $\name{\inp{ax\sub{i}}}$ be a new axis name, not in $\mathcal{T}$, and let $\inp{\mathcal{S}} = \name{\inp{ax_1}} \times \cdots \times \name{\inp{ax\sub{r}}}$. If $s = \{\nidx{ax_1}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, let $\inp{s} = \{\nidx{\inp{ax_1}}{i_1}, \ldots, \nidx{\inp{ax\sub{r}}}{i_r}\}$.
+Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, where $\mathcal{S}$ and $\mathcal{T}$ are orthogonal. Then the derivative of $f$ at $X$ is the tensor with shape $\mathcal{S} \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
+\[\left[\ddx{f(X)} \right]_{s,t} = \frac{\partial f(X)_t}{\partial X_s}.\]
 
-Then the derivative of $f$ at $X$ is the tensor with shape $\inp{\mathcal{S}} \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
-\[\left[\ddx f(X) \right]_{\inp{s},t} = \frac{\partial}{\partial X_s} [f(X)]_t.\]
-
-We'll often make use of the following generalization of the identity matrix:
-\begin{align*}
-  I_\mathcal{S} &\in \reals^{\inp{\mathcal{S}} \times \mathcal{S}} \\
-  [I_\mathcal{S}]_{\inp{s}, s} &= \begin{cases}
-    1 & \text{if $\inp{s} = s$} \\
-    0 & \text{otherwise.}
-  \end{cases}
-\end{align*}
+What if $\mathcal{S}$ and $\mathcal{T}$ are not orthogonal? We rename $X$ to a shape $\inp{\mathcal{S}}$ that is orthogonal to $\mathcal{T}$, and take the derivative with respect to the renamed $X$ instead:
+\[\left[\ddxr{f(X)} \right]_{\inp{s},t} = \frac{\partial f(X)_t}{\partial X_s}.\]
 
 \subsection{Rules}
 
-Now we give some rules for computing derivatives. Unless otherwise indicated, $X$ has shape $\mathcal{S}$, and $U$ and $V$ are dependent on $x$ and have shapes $\mathcal{U}$ and $\mathcal{V}$, respectively.
+To compute the derivative of an expression $U$ with shape $\mathcal{T}$ with respect to a variable $X$ with shape $\mathcal{S}$, we use the method of differentials \citep{magnus+neudecker:1985}. The differential of $U$, written $\partial U$, is a tensor with the same shape as $U$, computed using rules like the following:
 \begin{align*}
-  \ddx X &= I_\mathcal{S} \\
-  \ddx U &= 0 && \text{$U$ does not depend on $X$} \\
-  \ddx f(U) &= f'(U) \odot \ddx U && f \colon \reals \rightarrow \reals \\
-  \ddx (U + V) &= \ddx U + \ddx V \\
-  \ddx \nsum{ax} U &= \nsum{ax} \ddx U \\
-  \ddx (U \odot V) &= \ddx U \odot V + U \odot \ddx V \\
-  \ddx (U \ndot{ax} V) &= \ddx U \ndot{ax} V + U \ndot{ax} \ddx V \\
-  \ddx \frac{U}{V} &= \frac{\ddx U \odot V - U \odot \ddx V}{V^2} \\
-  \ddx U_r &= \left[\ddx U\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
-  \ddx U_{\nmov{ax1}{ax2}} &= \left[\ddx U\right]_{\nmov{ax1}{ax2}}
+  \partial f(U) &= f'(U) \odot \partial U && f \colon \reals \rightarrow \reals \\
+  \partial (U + V) &= \partial U + \partial V \\
+  \partial \nsum{ax} U &= \nsum{ax} \partial U \\
+  \partial (U \odot V) &= \partial U \odot V + U \odot \partial V \\
+  \partial (U \ndot{ax} V) &= \partial U \ndot{ax} V + U \ndot{ax} \partial V \\
+  \partial \left(\frac{U}{V}\right) &= \frac{\partial U \odot V - U \odot \partial V}{V^2} \\
+  \partial U_r &= \left[\partial U\right]_r && r \in \rec \mathcal{R}, \mathcal{R} \subseteq \mathcal{U} \\
+  \partial U_{\nmov{ax1}{ax2}} &= \left[\partial U\right]_{\nmov{ax1}{ax2}}
 \end{align*}
-
-The chain rule above is for elementwise operations. The general chain rule looks like this for functions of one and two variables; three or more variables are analogous.
-\begin{align*}
-  \ddx f(U) &= \frac{\partial}{\partial U} f(U) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U \\
-  \ddx f(U, V) &= \frac{\partial}{\partial U} f(U, V) \ndot{\inp{\mathcal{U}} \mid \mathcal{U}} \ddx U + \frac{\partial}{\partial V} f(U, V) \ndot{\inp{\mathcal{V}} \mid \mathcal{V}} \ddx V
-\end{align*}
-where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax2}$ in the right operand: $A \ndot{ax1|ax2} B = \sum_i A_{\nidx{ax1}{i}} \odot B_{\nidx{ax2}{i}}$.
+If we obtain an equation of the form
+\begin{equation*}
+  \partial U = A \ndot{\inp{\mathcal{S}}} \partial X_\nmov{\mathcal{S}}{\inp{\mathcal{S}}} + \text{(terms not depending on $\partial X$)}
+\end{equation*}
+where $\inp{\mathcal{S}}$ is orthogonal to $\mathcal{T}$, then
+\begin{equation*}
+  \ddxr{U} = A.
+\end{equation*}
 
 \subsection{Examples}
 
-Here's an example using these rules to derive the Jacobian for softmax:
+Let's find the differential of the softmax operator.
 \begin{align*}
-  \ddx (\nfun{ax}{softmax} X) &= \ddx \frac{\exp X}{\nsum{ax} \exp X} \\
-    &= \frac{\exp X \odot \ddx X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \ddx X)}{(\nsum{ax} \exp X)^2} \\
-    &= \nfun{ax}{softmax} X \odot \left(\ddx X - \nfun{ax}{softmax} X \ndot{ax} \ddx X\right) \\
-    &= \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+  Y &= \nfun{ax}{softmax} X \\
+  \partial Y &= \partial \frac{\exp X}{\nsum{ax} \exp X} \\
+    &= \frac{\exp X \odot \partial X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \partial X)}{(\nsum{ax} \exp X)^2} \\
+  &= Y \odot (\partial X - Y \ndot{ax} \partial X).
 \end{align*}
-To derive the backpropagation rule:
+
+To get the Jacobian, use the fact that $\partial X = I_\name{ax,\inp{ax}} \ndot{\inp{ax}} \partial X_\nmov{ax}{\inp{ax}}$:
 \begin{align*}
-  \ddx f(\nfun{ax}{softmax} X) &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \ddx \nfun{ax}{softmax} X \\
-    &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+  \partial Y &= Y \odot (I_\name{ax,\inp{ax}} \ndot{\inp{ax}} \partial X_\nmov{ax}{\inp{ax}} - Y_\nmov{ax}{\inp{ax}} \ndot{\inp{ax}} \partial X_\nmov{ax}{\inp{ax}}) \\
+  &= (Y \odot (I_\name{ax,\inp{ax}} - Y_\nmov{ax}{\inp{ax}})) \ndot{\inp{ax}} \partial X_\nmov{ax}{\inp{ax}} \\
+  \ddx{Y} &= Y \odot (I_\name{ax,\inp{ax}} - Y_\nmov{ax}{\inp{ax}}).
+\end{align*}
+
+To derive the rule for backpropagation, we assume a function $f \colon \reals^\name{ax} \rightarrow \reals$ and differentiate $f(Y)$.
+\begin{align*}
+  \partial f(Y) &= f'(Y) \ndot{ax} \partial Y \\
+  &= f'(Y) \ndot{ax} (Y \odot (\partial X - Y \ndot{ax} \partial X)) \\
+  &= \nsum{ax} (f'(Y) \odot Y \odot (\partial X - \nsum{ax} (Y \odot \partial X))) \\
+  &= (f'(Y) \odot Y) \ndot{ax} \partial X - (f'(Y) \ndot{ax} Y) \odot \nsum{ax} (Y \odot \partial X) \\
+  &= (f'(Y) \odot Y) \ndot{ax} \partial X - ((f'(Y) \ndot{ax} Y) \odot Y) \ndot{ax} \partial X \\
+  &= ((f'(Y) - f'(Y) \ndot{ax} Y) \odot Y) \ndot{ax} \partial X \\
+  \ddx{f(Y)} &= (f'(Y) - f'(Y) \ndot{ax} Y) \odot Y.
 \end{align*}
 
 As another example, here are the Jacobian and backpropagation rule for Conv1d:
