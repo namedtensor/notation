@@ -50,15 +50,20 @@ where $\ndot{ax1|ax2}$ contracts $\name{ax1}$ in the left operand with $\name{ax
 
 Here's an example using these rules to derive the Jacobian for softmax:
 \begin{align*}
-  \ddx{} \nfun{ax}{softmax} X  &= \ddx{} \frac{\exp X}{\nsum{ax} \exp X} \\
+  Y &= \nfun{ax}{softmax} X \\
+  \ddx Y &= \ddx{} \frac{\exp X}{\nsum{ax} \exp X} \\
     &= \frac{\exp X \odot \ddx X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \ddx X)}{(\nsum{ax} \exp X)^2} \\
-    &= \nfun{ax}{softmax} X \odot \left(\ddx X - \nfun{ax}{softmax} X \ndot{ax} \ddx X\right) \\
-    &= \nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right).
+    &= Y \odot \left(\ddx X - Y \ndot{ax} \ddx X\right) \\
+    &= Y \odot (I_\name{ax} - Y \ndot{ax} I_\name{ax}) \\
+    &= Y \odot (I_\name{ax} - Y_\nmov{ax}{\inp{ax}}).
 \end{align*}
 To derive the backpropagation rule:
 \begin{align*}
-  \ddx{} f(\nfun{ax}{softmax} X) &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \ddx{} \nfun{ax}{softmax} X \\
-    &= f'(\nfun{ax}{softmax} X) \ndot{\inp{\mathcal{S}}|\mathcal{S}} \left(\nfun{ax}{softmax} X \odot \left(I_\mathcal{S} - \nfun{ax}{softmax} X \ndot{ax} I_\mathcal{S}\right)\right).
+  \ddx{f(Y)} &= f'(Y) \ndot{\inp{ax}|ax} \ddx Y \\
+  &= f'(Y) \ndot{\inp{ax}|ax} (Y \odot (I_\name{ax} - Y_\nmov{ax}{\inp{ax}})) \\
+  &= f'(Y) \ndot{\inp{ax}|ax} (Y \odot I_\name{ax} - f'(Y) \ndot{\inp{ax}|ax} (Y \odot Y_\nmov{ax}{\inp{ax}}) \\
+  &= f'(Y) \odot Y_\nmov{ax}{\inp{ax}} - (f'(Y) \ndot{\inp{ax}} Y_\nmov{ax}{\inp{ax}}) \odot Y_\nmov{ax}{\inp{ax}} \\
+  &= (f'(Y) - f'(Y) \ndot{\inp{ax}} Y_\nmov{ax}{\inp{ax}}) \odot Y_\nmov{ax}{\inp{ax}}.
 \end{align*}
 
 As another example, here are the Jacobian and backpropagation rule for Conv1d:
