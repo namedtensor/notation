@@ -1,6 +1,6 @@
 \newcommand{\inp}[1]{#1^*}
 \newcommand{\ddx}[1]{\frac{\partial #1}{\partial X}}
-\newcommand{\ddxr}[1]{\frac{\partial #1}{\partial X_{\nmov{\mathcal{S}}{\inp{\mathcal{S}}}}}}
+\newcommand{\ddxr}[1]{\frac{\partial #1}{\partial X_{\nmov{\mathcal{S}}{\mathcal{S}'}}}}
 
 If $f$ is a function from order-$m$ tensors to order-$n$ tensors, the partial derivatives of $f$ (evaluated on a tensor $X$) form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $f(X)$.
 
@@ -11,10 +11,10 @@ With tensors, taking derivatives of higher-order tensors with respect to higher-
 \subsection{Definition}
 
 Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, where $\mathcal{S}$ and $\mathcal{T}$ are orthogonal. Then the derivative of $f$ at $X$ is the tensor with shape $\mathcal{S} \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
-\[\left[\ddx{f(X)} \right]_{s,t} = \frac{\partial f(X)_t}{\partial X_s}.\]
-
-What if $\mathcal{S}$ and $\mathcal{T}$ are not orthogonal? We rename $X$ to a shape $\inp{\mathcal{S}}$ that is orthogonal to $\mathcal{T}$, and take the derivative with respect to the renamed $X$ instead:
-\[\left[\ddxr{f(X)} \right]_{\inp{s},t} = \frac{\partial f(X)_t}{\partial X_s}.\]
+\begin{equation*}
+  \left[\ddx{f(X)} \right]_{s,t} = \frac{\partial f(X)_t}{\partial X_s}.
+\end{equation*}
+If $X$ and $Y$'s shapes are not orthogonal, we have to rename them so that they are.
 
 \subsection{Rules}
 
@@ -31,12 +31,31 @@ To compute the derivative of an expression $U$ with shape $\mathcal{T}$ with res
 \end{align*}
 If we obtain an equation of the form
 \begin{equation*}
-  \partial U = A \ndot{\inp{\mathcal{S}}} \partial X_\nmov{\mathcal{S}}{\inp{\mathcal{S}}} + \text{(terms not depending on $\partial X$)}
+  \partial U = A \ndot{\mathcal{S}} \partial X + \text{(terms not depending on $\partial X$)}
 \end{equation*}
-where $\inp{\mathcal{S}}$ is orthogonal to $\mathcal{T}$, then
+where $\mathcal{S}$ is orthogonal to $\mathcal{T}$, then
 \begin{equation*}
-  \ddxr{U} = A.
+  \ddx{U} = A.
 \end{equation*}
+Either $U$ or $X$ could have renamings applied to them:
+\begin{align*}
+  \partial U = A \ndot{\mathcal{S}} \partial X_\nmov{\mathcal{S}}{\mathcal{S'}} + \cdots &\Rightarrow \ddxr{U} = A \\
+  \partial U_\nmov{\mathcal{T}}{\mathcal{T'}} = A \ndot{\mathcal{S}} \partial X + \cdots &\Rightarrow \ddx{U_\nmov{\mathcal{T}}{\mathcal{T'}}} = A.
+\end{align*}
+The choice between renaming the denominator or numerator of the derivative is analogous between the choice between numerator or denominator layout (respectively) in matrix calculus. But the way we write the derivative always makes it clear what convention is being used.
+
+A very common case is where we end up with an equation of the form
+\begin{equation*}
+  \partial U = A \odot \partial X + \cdots.
+\end{equation*}
+Define $I_\name{ax,ax'}$ to be the generalization of the identity matrix such that $[I_\name{ax,ax'}]_{\nidx{ax}{i},\nidx{ax'}{j}} = \delta(i,j)$. Then
+\begin{align*}
+  \partial U &= A \odot \partial X & \partial U_\nmov{\mathcal{T}}{\mathcal{T'}} &= A_\nmov{\mathcal{T}}{\mathcal{T'}} \odot \partial X_\nmov{\mathcal{T}}{\mathcal{T'}} \\
+  &= A \odot (I_{\mathcal{S},\mathcal{S'}} \ndot{\mathcal{S'}} \partial X_\nmov{\mathcal{S}}{\mathcal{S'}}) &&= A_\nmov{\mathcal{T}}{\mathcal{T'}} \odot (I_{\mathcal{T},\mathcal{T'}} \ndot{\mathcal{T}} \partial X) \\
+  &= (A \odot I_{\mathcal{S},\mathcal{S'}}) \ndot{\mathcal{S'}} \partial X_\nmov{\mathcal{S}}{\mathcal{S'}} &&= (A_\nmov{\mathcal{T}}{\mathcal{T'}} \odot I_{\mathcal{T},\mathcal{T'}}) \ndot{\mathcal{T}} \partial X \\
+  \ddxr{A} &= A \odot I_{\mathcal{S},\mathcal{S'}} & \ddx{U_\nmov{\mathcal{T}}{\mathcal{T'}}} &= A_\nmov{\mathcal{T}}{\mathcal{T'}} \odot I_{\mathcal{T},\mathcal{T'}}.
+\end{align*}
+assuming that, in the left column, $U$'s shape is orthogonal to $\mathcal{S'}$, and in the right column, to $\mathcal{T'}$.
 
 \subsection{Examples}
 
@@ -48,14 +67,14 @@ Let's find the differential of the softmax operator.
   &= Y \odot (\partial X - Y \ndot{ax} \partial X).
 \end{align*}
 
-To get the Jacobian, $X$ and $Y$ have the same shape so we have to rename one of them. We choose $Y$:
+To get the Jacobian, $X$ and $Y$ have the same shape, so we have to rename one of them -- we choose $Y$. Then we manipulate it until it's a contraction with $\partial X$.
 \begin{align*}
   \partial Y_\nmov{ax}{ax'} &= [Y \odot (\partial X - Y \ndot{ax} \partial X)]_\nmov{ax}{ax'} \\
   &= Y_\nmov{ax}{ax'} \odot (I_\name{ax',ax} \ndot{ax} \partial X - Y \ndot{ax} \partial X) \\
   \ddx {Y_\nmov{ax}{ax'}} &= Y_\nmov{ax}{ax'} \odot (I_\name{ax',ax} - Y).
 \end{align*}
 
-To derive the rule for backpropagation, we assume a function $f \colon \reals^\name{ax} \rightarrow \reals$ and differentiate $f(Y)$.
+To derive the rule for backpropagation, we assume a function $f \colon \reals^\name{ax} \rightarrow \reals$ and differentiate $f(Y)$. Since $f$ is scalar-valued, there is no name overlap, so no renaming is needed.
 \begin{align*}
   \partial f(Y) &= f'(Y) \ndot{ax} \partial Y \\
   &= f'(Y) \ndot{ax} (Y \odot (\partial X - Y \ndot{ax} \partial X)) \\
