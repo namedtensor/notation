@@ -313,34 +313,36 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 
 \subsubsection{Convolution}
 
-A 1-dimensional convolution can be written using contractions:
+A 1-dimensional convolution can be easily written by unrolling a tensor and then
+applying a standard dot product.
 \begin{align*}
 \text{Conv1d} \colon \reals^{\name{chans} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
-\text{Conv1d}(X; W, b) &= [W \ndot{chans,kernel} C \ndot{seq} X + b]_{\nmov{out}{seq}}
+\text{Conv1d}(X; W, b) &= W \ndot{chans, kernel} U + b
 \end{align*}
 where
 \begin{align*}
-W &\in \reals^{\name{chans} \times \name{kernel}} \\
-b &\in \reals \\
 n' &= n-|\name{kernel}|+1 \\
-C &\in \reals^{\nset{out}{n'} \times \name{kernel} \times \nset{seq}{n}} \\
-C_{\nidx{out}{o},\nidx{kernel}{k},\nidx{seq}{i}} &= \delta(o+k-1,i).
+W &\in \reals^{\name{chans} \times \name{kernel}} \\
+U &\in \reals^{\name{chans} \times \nset{seq}{n'} \times \name{kernel}} \\
+U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
+b &\in \reals.
 \end{align*}
 This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \name{chans'} axis (or some other name).
 
-We can use the same $C$ to define a 2-dimensional convolution:
+A 2-dimensional convolution:
 \begin{align*}
-  \text{Conv2d} \colon \reals^{\name{chans} \times \nset{height}{h} \times \nset{width}{w}}
+  \text{Conv2d} \colon \reals^{\name{chans} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{chans} \times \name{kh} \times \name{kw}} \times \reals
   &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
-  \text{Conv2d}(X; W, b) &= [W \ndot{chans, kh, kw} C^2 \ndot{height,width} X + b]_{\substack{\nmov{oh}{height}\\\nmov{ow}{width}}}
+  \text{Conv2d}(X; W, b) &= W \ndot{chans, kh, kw} U + b
 \end{align*}  
 where
 \begin{align*}
-W &\in \reals^{\name{chans} \times \name{kh} \times \name{kw}} \\
-b &\in \reals \\
 h' &= h-|\name{kh}|+1 \\
 w' &= w-|\name{kw}|+1 \\
-C^2 &= C_{\substack{\nmov{out}{oh} \\ \nmov{kernel}{kh} \\ \nmov{seq}{height}}} \odot C_{\substack{\nmov{out}{ow} \\ \nmov{kernel}{kw} \\ \nmov{seq}{width}}}.
+W &\in \reals^{\name{chans} \times \name{kh} \times \name{kw}} \\
+U &\in \reals^{\name{chans} \times \nset{height}{h'} \times \nset{width}{w'} \times \name{kh} \times \name{kw}}  \\
+U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
+b &\in \reals.
 \end{align*}
 
 \subsubsection{Max pooling}
@@ -486,7 +488,7 @@ b^l &\in \reals^{\nset{chans'}{c_{l}}}
 \end{align*}
 and
 \begin{align*}
-\text{MaxPool}^l(X) &= \text{MaxPol2d}_{ph^l,ph^l}(X).
+\text{MaxPool}^l(X) &= \text{MaxPool2d}_{ph^l,ph^l}(X).
 \end{align*}
 
 \subsection{Other examples}

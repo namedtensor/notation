@@ -68,11 +68,16 @@ To derive the backpropagation rule:
 
 As another example, here are the Jacobian and backpropagation rule for Conv1d:
 \begin{align*}
-  \frac{\partial}{\partial X} \text{Conv1d}(X) &= [W \ndot{chans,kernel} C \ndot{seq} I_\mathcal{S}]_{\nmov{out}{seq}} \\
-  &= [W_{\nmov{chans}{\inp{chans}}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}]_\nmov{out}{seq} \\
-  \frac{\partial}{\partial X} f(\text{Conv1d}(X)) &= f'(\text{Conv1d}(X)) \ndot{\inp{seq}|seq} [W_{\nmov{chans}{\inp{chans}}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}]_\nmov{out}{seq} \\
-  &= f'(\text{Conv1d}(X)) \ndot{\inp{seq}|out} (W_\nmov{chans}{\inp{chans}} \ndot{kernel} C_\nmov{seq}{\inp{seq}}) \\
-  &= W_\nmov{chans}{\inp{chans}} \ndot{kernel} C_{\nmov{seq}{\inp{seq}}} \ndot{out|\inp{seq}} f'(\text{Conv1d}(X)).
+  Y &= \text{Conv1d}(X; W) \\
+  \frac{\partial Y}{\partial X} &= W \ndot{chans,kern} \frac{\partial U}{\partial X} \\
+  \frac{\partial U_{\nidx{seq}{i},\nidx{kern}{j}}}{\partial X_{\nidx{seq^*}{k}}} &= \delta(i+j-1,k) \\
+  \frac{\partial f(Y)}{\partial X} &= f'(Y) \ndot{seq^*|seq} \left(W \ndot{chans,kern} \frac{\partial U}{\partial X}\right) \\
+  &= \left(W \ndot{chans,kern} \frac{\partial U}{\partial X}\right) \ndot{seq|seq^*} f'(Y) \\
+  &= W \ndot{chans,kern} \left( \frac{\partial U}{\partial X} \ndot{seq|seq^*} f'(Y) \right) \\
+  &= W \ndot{chans,kern} V \\
+  V &= \frac{\partial U}{\partial X} \ndot{seq|seq^*} f'(Y) \\
+  V_{\nidx{seq^*}{k},\nidx{kern}{j}} &= \sum_j \delta(i+j-1,k) f'(Y)_{\nidx{seq^*}{j}} \\
+  &= f'(Y)_{\nidx{seq^*}{k-i+1}}.
 \end{align*}
 
 \subsection{Broadcasting}
