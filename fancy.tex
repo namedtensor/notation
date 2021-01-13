@@ -30,9 +30,9 @@ where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{\iota^1, \ldots, \io
   [A_{\iota^1, \ldots, \iota^D}]_s &= A_{\iota^1_{\restrict{s}{\mathcal{S}_1}}, \ldots, \iota^D_{\restrict{s}{\mathcal{S}_D}}}.
 \end{align*}
 
-Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\batch(B) \times \sent(N) \times \emb(E)}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\batch(B) \times \subseq(M) \times \emb(E)}$.
+Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\batch[B] \times \sent[N] \times \emb[E]}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\batch[B] \times \subseq[M] \times \emb[E]}$.
 
-We create a indexer for the $\sent$ axis: $\iota \in [N]^{\batch(B) \times \subseq(M)}$ that selects the desired tokens. Also define the function
+We create a indexer for the $\sent$ axis: $\iota \in [N]^{\batch[B] \times \subseq[M]}$ that selects the desired tokens. Also define the function
 \begin{align*}
   \nfun{\ax}{arange}(I) &\in I^{\ax[I]} \\
   \left[\nfun{\ax}{arange}(I)\right]_{\ax(i)} &= i
