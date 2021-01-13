@@ -18,32 +18,17 @@
 \ndef{\dd}{d}
 \ndef{\layer}{layer}
 \ndef{\seq}{seq}
-\ndef{\key}{key}
-\ndef{\val}{val}
+\ndef{\key}{key} \ndef{\val}{val}
 \ndef{\heads}{heads}
 \ndef{\batch}{batch}
-\ndef{\inp}{input}
-\ndef{\hidden}{hidden}
-\ndef{\out}{out}
-\ndef{\height}{height}
-\ndef{\width}{width}
-\ndef{\chans}{chans}
-\ndef{\kernel}{kernel}
-\ndef{\pool}{k}
-\ndef{\kh}{kh} \ndef{\kw}{kw}
-\ndef{\sent}{sent}
-\ndef{\subseq}{span}
+\ndef{\inp}{input} \ndef{\hidden}{hidden} \ndef{\out}{out}
+\ndef{\height}{height} \ndef{\width}{width} \ndef{\chans}{chans}
+\ndef{\kernel}{kernel} \ndef{\kh}{kh} \ndef{\kw}{kw}
+\ndef{\pool}{pool}     \ndef{\ph}{ph} \ndef{\pw}{pw}
 \ndef{\vocab}{vocab}
 \ndef{\classes}{classes}
-\ndef{\avar}{A}
-\ndef{\bvar}{B}
-\ndef{\assign}{assign}
-\ndef{\clusters}{clusters}
-\ndef{\beam}{beam}
 \ndef{\state}{state}
-\ndef{\kk}{k}
 \ndef{\emb}{emb}
-\ndef{\spc}{space}
 
 \allowdisplaybreaks
 \DeclareMathOperator*{\softmax}{softmax}
@@ -375,7 +360,7 @@ b &\in \reals.
 
 \begin{align*}
 \text{MaxPool1d}_{k} \colon \mathbb{R}^{\seq[n]} &\rightarrow \mathbb{R}^{\seq[n/k]} \\
-\text{MaxPool1d}_{k}(X) &= \nfun{\kk}{max} U
+\text{MaxPool1d}_{k}(X) &= \nfun{\name{k}}{max} U
 \end{align*}
 where
 \begin{align*}
@@ -386,12 +371,12 @@ U_{\seq(i), \pool(di)} & = X_{\seq(i \times k + di -1)}.
 
 \begin{align*}
 \text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\height[h] \times \width[w]} &\rightarrow \mathbb{R}^{\height[h/kh] \times \width[w/kw]} \\
-\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\kh, \kw}{max} U
+\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\ph, \pw}{max} U
 \end{align*}
 where
 \begin{align*}
-U &\in \reals^{\height[h / kh] \times \width[w / kw] \times \kh[kh] \times \kw[kw]} \\
-U_{\height(i), \width(j), \kh(di), \kw(dj)} & = X_{\height(i \times kh + di -1), \width(j \times kw + dj -1)}.
+U &\in \reals^{\height[h / kh] \times \width[w / kw] \times \ph[kh] \times \pw[kw]} \\
+U_{\height(i), \width(j), \ph(di), \pw(dj)} & = X_{\height(i \times kh + di -1), \width(j \times kw + dj -1)}.
 \end{align*}
 
 \subsubsection{Normalization layers}
@@ -521,16 +506,16 @@ and
 
 \subsubsection{Discrete random variables}
 
-Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\avar$ and $\bvar$ are random variables, we can treat $p(\bvar \mid \avar)$ and $p(\avar)$ as tensors:
+Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*}
-p(\bvar \mid \avar) &\in [0, 1]^{\avar \times \bvar} & \nsum{\bvar} p(\bvar \mid \avar) &= 1 \\
-p(\avar) &\in [0, 1]^{\avar} & \nsum{\avar} p(\avar) &= 1
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{\name{B}} p(\name{B} \mid \name{A}) &= 1 \\
+p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{\name{A}} p(\name{A}) &= 1
 \end{align*}
 Then many common operations on probability distributions can be expressed in terms of tensor operations:
 \begin{align*}
-p(\avar, \bvar) &= p(\bvar \mid \avar) \odot p(\avar) && \text{chain rule}\\
-p(\bvar) &= \nsum{\avar} p(\avar, \bvar) = p(\bvar \mid \avar) \ndot{\avar} p(\avar) && \text{marginalization} \\
-p(\avar \mid \bvar) &= \frac{p(\avar, \bvar)}{p(\bvar)} = \frac{p(\bvar \mid \avar) \odot p(\avar)}{p(\bvar \mid \avar) \ndot{\avar} p(\avar)}. && \text{Bayes' rule}
+p(\name{A}, \name{B}) &= p(\name{B} \mid \name{A}) \odot p(\name{A}) && \text{chain rule}\\
+p(\name{B}) &= \nsum{\name{A}} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A}) && \text{marginalization} \\
+p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A})}. && \text{Bayes' rule}
 \end{align*}
 
 \subsubsection{Continuous bag of words}
@@ -550,6 +535,8 @@ W &\in \reals^{\classes \times \hidden}.
 Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsubsection{Sudoku ILP}
+
+\ndef{\assign}{assign}
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
@@ -571,14 +558,16 @@ Y_{\height'(h'), \height(h), \width'(w'), \width(w)} &= X_{\height(3h' + h-1), \
 
 \subsubsection{$K$-means clustering}
 
+\ndef{\clusters}{clusters}
+
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*}
-  X &\in \reals^{\batch \times \spc} \\
-C &\in \reals^{\clusters \times \spc}
+  X &\in \reals^{\batch \times \dd} \\
+C &\in \reals^{\clusters \times \dd}
 \end{align*}
 we repeat the following update: Compute cluster assignments
 \begin{align*}
-Q &= \nfun{\clusters}{argmin} \nfun{\spc}{norm}(C-X)
+Q &= \nfun{\clusters}{argmin} \nfun{\dd}{norm}(C-X)
 \end{align*}
 then recompute the cluster centers:
 \begin{equation*}
@@ -586,6 +575,8 @@ C \leftarrow \nsum{\batch} \frac{Q \odot X}{Q}.
 \end{equation*}
 
 \subsubsection{Beam search}
+
+\ndef{\beam}{beam}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 \begin{align*} 
@@ -601,12 +592,12 @@ S &\leftarrow \nfun{\state,\beam}{argmaxk} H'
 \end{align*}
 where
 \begin{align*}
-\nfun{\ax,\kk}{maxk} \colon \reals^{\ax} &\rightarrow \reals^{\kk} \\
-\nfun{\ax,\kk}{argmaxk} \colon \reals^{\ax} &\rightarrow \{0,1\}^{\ax,\kk}
+\nfun{\ax,\name{k}}{maxk} \colon \reals^{\ax} &\rightarrow \reals^{\name{k}} \\
+\nfun{\ax,\name{k}}{argmaxk} \colon \reals^{\ax} &\rightarrow \{0,1\}^{\ax,\name{k}}
 \end{align*}
-are defined such that $[\nfun{\ax,k}{maxk} A]_{\kk(i)}$ is the $i$-th largest value along axis $\ax$ and $A \ndot{\ax} (\nfun{\ax,k}{argmaxk}{A}) = \nfun{\ax,k}{max} A$.
+are defined such that $[\nfun{\ax,\name{k}}{maxk} A]_{\name{k}(i)}$ is the $i$-th largest value along axis $\ax$ and $A \ndot{\ax} (\nfun{\ax,\name{k}}{argmaxk}{A}) = \nfun{\ax,\name{k}}{max} A$.
 
-We can add a \batch axis to $H$ and $S$ and the above equations will work unchanged.
+We can add a $\batch$ axis to $H$ and $S$ and the above equations will work unchanged.
 
 \subsubsection{Multivariate normal distribution}
 
