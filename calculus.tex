@@ -92,9 +92,8 @@ Finding the differential of $Y$ is easy:
 \end{align*}
 But although $f'$ extends to $X$ using the usual broadcasting rules, it's not the case that $\ddx Y = f'(X)$, which would have the wrong shape. The reason is that the contraction is only over $\mathcal{S}$, not $\mathcal{S}\cup\mathcal{U}$. To get this into the form (\ref{eq:canonical}):
 \begin{align*}
-  \partial Y_\nmov{\mathcal{U}}{\mathcal{U'}} &= \nsum{\mathcal{S}} f'(X) \odot \partial X_\nmov{\mathcal{U}}{\mathcal{U'}} \\
-  &= \nsum{\mathcal{S}} f'(X) \odot \nsum{\mathcal{U}} I_{\mathcal{U},\mathcal{U'}} \odot \partial X \\
-  &= \nsum{\mathcal{S},\mathcal{U}} f'(X) \odot I_{\mathcal{U},\mathcal{U'}} \odot \partial X \\
-  \ddx{Y_\nmov{\mathcal{U}}{\mathcal{U'}}} &= f'(X) \odot I_{\mathcal{U},\mathcal{U'}}.
+  \partial Y_\nmov{\mathcal{U}}{\mathcal{U'}} &= \nsum{\mathcal{S}} [f'(X) \odot \partial X]_\nmov{\mathcal{U}}{\mathcal{U'}} \\
+  &= \nsum{\mathcal{S}} \nsum{\mathcal{U}} I_{\mathcal{U},\mathcal{U'}} \odot f'(X) \odot \partial X \\
+  \ddx{Y_\nmov{\mathcal{U}}{\mathcal{U'}}} &= I_{\mathcal{U},\mathcal{U'}} \odot f'(X).
 \end{align*}
 In general, then, when we extend a function to new axes, we extend its derivative by multiplying by the identity matrix for those axes.
