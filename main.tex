@@ -155,7 +155,7 @@ For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis
   3+1+4 & 1+5+9 & 2+6+5
 }.
 \end{align*}
-See~\S\ref{sec:reductions} for more examples of reductions.
+See~\S\ref{sec:morereductions} for more examples of reductions.
 
 We can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
@@ -204,7 +204,7 @@ In this section we give a series of examples illustrating how to use named tenso
 \subsection{More tensor operations}
 
 \subsubsection{Reductions}
-\label{sec:reductions}
+\label{sec:morereductions}
 
 \begin{align*}
   \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
@@ -219,14 +219,12 @@ The $\min$ and $\max$ operators are overloaded, as is the summation operator def
 \label{sec:contractions}
 
 The contraction operator can be used for many multiplication-like operations.
-
 \begin{align*}
   u, v &\in \mathbb{R}^{\name{ax1}} \\
   x, y &\in \mathbb{R}^{\name{ax2}} \\
   A &\in \mathbb{R}^{\name{ax1} \times \name{ax2}} \\
   B &\in \mathbb{R}^{\name{ax2} \times \name{ax3}}
 \end{align*}
-
 \begin{align*}
   u \ndot{ax1} v &= \sum_i u_{\nidx{ax1}{i}} v_{\nidx{ax1}{i}} && \text{inner product} \\
   u \odot x &= \sum_{i,j} u_{\nidx{ax1}{i}} x_{\nidx{ax2}{j}} && \text{outer product} \\
