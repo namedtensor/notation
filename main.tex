@@ -640,12 +640,12 @@ Many of the \LaTeX{} macros used in this document are available in the style fil
 \end{quote}
 in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article}| but before \verb|\begin{document}|).
 
-The style file contains a small number of macros:
+We write axis names in sans-serif font. To make this easier, \verb|\ndef{\ax}{ax}| defines a macro \verb|\ax| that looks like this: $\ax$.
+
 \begin{itemize}
 \item Binary operators
   \begin{itemize}
-  \item Use \verb|A \ndot{\ax} B| for contraction: $A \ndot{\ax} B$.
-  \item Use \verb|A \ncat{\ax} B| for concatenation: $A \ncat{\ax} B$.
+  \item Use \verb|A \ndot{\ax} B| for contraction: $A \ndot{\ax} B$. You can use \verb|\\| to stack up several names.
   \item In general, you can use \verb|\nbin| to make a new binary operator with a name under it: \verb|A \nbin{\ax}{\star} B| gives you $A \nbin{\ax}{\star} B$.
   \end{itemize}
 \item Functions
