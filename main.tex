@@ -279,10 +279,10 @@ If you don't like repeating the equations for fully-connected layers, you can pu
 \end{align*}
 where
 \begin{align*}
-  W^l &\in \mathbb{R}^{\layer'[n_{l]} \times \layer[n_{l-1]}} \\
+  W^l &\in \mathbb{R}^{\layer'[n_l] \times \layer[n_{l-1}]} \\
   b^l &\in \mathbb{R}^{\layer'[n_l]}.
 \end{align*}
-A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis \layer', then renames it back to \layer. 
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer{} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis \layer', then renames it back to \layer. 
 
 Then the network can be defined like this:
 \begin{align*}
@@ -314,7 +314,7 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis \seq', but this definition computes a single value. If we want a sequence, we can just give $Q$ a \seq' axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a \heads axis for multiple attention heads, then the function will compute multi-head attention.
+This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis \seq', but this definition computes a single value. If we want a sequence, we can just give $Q$ a \seq' axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a \heads{} axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
@@ -494,8 +494,8 @@ The convolution and pooling operations are defined as follows:
 \end{align*}
 where
 \begin{align*}
-W^l & \in \reals^{\chans'[c_{l]} \times \chans[c_{l-1]} \times \kh[kh_l] \times \kw[kw_l]} \\
-b^l &\in \reals^{\chans'[c_{l]}}
+W^l & \in \reals^{\chans'[c_l] \times \chans[c_{l-1}] \times \kh[kh_l] \times \kw[kw_l]} \\
+b^l &\in \reals^{\chans'[c_l]}
 \end{align*}
 and
 \begin{align*}
