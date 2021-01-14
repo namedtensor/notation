@@ -111,7 +111,7 @@ A_{\width(3)} &= \nmatrix{}{\height}{
 
 In many contexts, an axis name is used with only one size. If so, we can simply write $\height$ for the unique axis with name $\height$, as in $\mathbb{R}^{\height \times \width}$. We can leave the size of an axis unspecified at first, and specify its size later (like in a section on experimental details): for example, $|\height|=|\width|=28$ to specify its exact size or just $|\height|=|\width|$ to specify that it's a square image.
 
-What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis \chans, and if we wanted to represent a minibatch of images, we'd name the axis \batch. Please see \S\ref{sec:examples} for more examples.
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis $\chans$, and if we wanted to represent a minibatch of images, we'd name the axis $\batch$. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -172,7 +172,7 @@ See~\S\ref{sec:morereductions} for more examples of reductions.
 
 We can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
-  \nsum{\height,\width} A = \sum_i \sum_j A_{\height(i),\width(j)} = 3+1+4+1+5+9+2+6+5.
+  \nsum{\height \\ \width} A = \sum_i \sum_j A_{\height(i),\width(j)} = 3+1+4+1+5+9+2+6+5.
 \end{equation*}
 %But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
@@ -282,7 +282,7 @@ where
   W^l &\in \mathbb{R}^{\layer'[n_l] \times \layer[n_{l-1}]} \\
   b^l &\in \mathbb{R}^{\layer'[n_l]}.
 \end{align*}
-A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer{} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis \layer', then renames it back to \layer. 
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer{} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis $\layer'$, then renames it back to \layer. 
 
 Then the network can be defined like this:
 \begin{align*}
@@ -314,7 +314,7 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis \seq', but this definition computes a single value. If we want a sequence, we can just give $Q$ a \seq' axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a \heads{} axis for multiple attention heads, then the function will compute multi-head attention.
+This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis $\seq'$, but this definition computes a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
@@ -338,7 +338,7 @@ U &\in \reals^{\chans \times \seq[n'] \times \kernel} \\
 U_{\seq(i), \kernel(j)} & = X_{\seq(i+j - 1)} \\
 b &\in \reals.
 \end{align*}
-This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \chans' axis (or some other name).
+This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a $\chans'$ axis (or some other name).
 
 A 2-dimensional convolution:
 \begin{align*}
