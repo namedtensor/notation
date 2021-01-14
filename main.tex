@@ -12,10 +12,23 @@
 \DeclareMathOperator{\ind}{ind}
 \DeclareMathOperator{\rec}{rec}
 \newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
-\newcommand{\nmatrix}[3]{\name{#1}\begin{array}[b]{@{}c@{}}\name{#2}\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
+\newcommand{\nmatrix}[3]{#1\begin{array}[b]{@{}c@{}}#2\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
 
-% ugly hack to get non-sans-serif into names
-\newcommand{\sub}[1]{_\text{$#1$}}
+\ndef{\ax}{ax}
+\ndef{\dd}{d}
+\ndef{\layer}{layer}
+\ndef{\seq}{seq}
+\ndef{\key}{key} \ndef{\val}{val}
+\ndef{\heads}{heads}
+\ndef{\batch}{batch}
+\ndef{\inp}{input} \ndef{\hidden}{hidden} \ndef{\out}{out}
+\ndef{\height}{height} \ndef{\width}{width} \ndef{\chans}{chans}
+\ndef{\kernel}{kernel} \ndef{\kh}{kh} \ndef{\kw}{kw}
+\ndef{\pool}{pool}     \ndef{\ph}{ph} \ndef{\pw}{pw}
+\ndef{\vocab}{vocab}
+\ndef{\classes}{classes}
+\ndef{\state}{state}
+\ndef{\emb}{emb}
 
 \allowdisplaybreaks
 \DeclareMathOperator*{\softmax}{softmax}
@@ -53,11 +66,11 @@ Here, we propose mathematical notation for tensors with \emph{named axes}. The n
 
 In our notation, the above equation becomes
 \begin{align*}
-  \text{Attention} \colon \mathbb{R}^{\name{seq'} \times \name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{seq'} \times \name{val}} \\
-  \text{Attention}(Q,K,V) = \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\seq' \times \key} \times \mathbb{R}^{\seq \times \key} \times \mathbb{R}^{\seq \times\val} &\rightarrow \mathbb{R}^{\seq' \times \val} \\
+  \text{Attention}(Q,K,V) = \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
-The tensor $K$ has axes for the sequence (\name{seq}) and for the key features (\name{key}), instead of rows or columns, so the reader does not need to remember which is which. The dot product $Q \ndot{key} K$ is explicitly over the \name{key} axis. The resulting tensor has a \name{seq} axis for the key sequence and a \name{seq'} axis for the query sequence, and the softmax is explicitly over $\name{seq}$, as is the dot product with~$V$.
-This formula works as written if we add a $\name{heads}$ axis for multiple attention heads, or a $\name{batch}$ axis for multiple sequences in a minibatch.
+The tensor $K$ has axes for the sequence (\seq) and for the key features (\key), instead of rows or columns, so the reader does not need to remember which is which. The dot product $Q \ndot{\key} K$ is explicitly over the \key axis. The resulting tensor has a $\seq$ axis for the key sequence and a $\seq'$ axis for the query sequence, and the softmax is explicitly over $\seq$, as is the dot product with~$V$.
+This formula works as written if we add a $\heads$ axis for multiple attention heads, or a $\batch$ axis for multiple sequences in a minibatch.
 
 Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
 
@@ -72,33 +85,33 @@ In standard notation, a vector, matrix, or tensor is indexed by an integer or se
 
 In a \emph{named tensor}, we give each axis a name. For example, if $A$ represents an image, we can make it a named tensor like so (writing it two equivalent ways to show that the order of axes does not matter):
 \begin{align*}
-  A &\in \reals^{\nset{height}{3} \times \nset{width}{3}} = \reals^{\nset{width}{3} \times \nset{height}{3}} \\
-  A &= \nmatrix{height}{width}{
+  A &\in \reals^{\height[3] \times \width[3]} = \reals^{\width[3] \times \height[3]} \\
+  A &= \nmatrix{\height}{\width}{
     3 & 1 & 4 \\
     1 & 5 & 9 \\
     2 & 6 & 5
-  } = \nmatrix{width}{height}{
+  } = \nmatrix{\width}{\height}{
     3 & 1 & 2 \\
     1 & 5 & 6 \\
     4 & 9 & 5
   }.
 \end{align*}
 
-We access elements of $A$ using named indices, whose order again does not matter: $A_{\nidx{height}{1}, \nidx{width}{3}} = A_{\nidx{width}{3}, \nidx{height}{1}} = 4$.
+We access elements of $A$ using named indices, whose order again does not matter: $A_{\height(1), \width(3)} = A_{\width(3), \height(1)} = 4$.
 We also allow partial indexing:
 \begin{align*}
-A_{\nidx{height}{1}} &= \nmatrix{}{width}{
+A_{\height(1)} &= \nmatrix{}{\width}{
   3 & 1 & 4
 }
 &
-A_{\nidx{width}{3}} &= \nmatrix{}{height}{
+A_{\width(3)} &= \nmatrix{}{\height}{
   4 & 9 & 5
 }.
 \end{align*}
 
-In many contexts, an axis name is used with only one size. If so, we can simply write $\name{height}$ for the unique axis with name $\name{height}$, as in $\mathbb{R}^{\name{height} \times \name{width}}$. We can leave the size of an axis unspecified at first, and specify its size later (like in a section on experimental details): for example, $|\name{height}|=|\name{width}|=28$ to specify its exact size or just $|\name{height}|=|\name{width}|$ to specify that it's a square image.
+In many contexts, an axis name is used with only one size. If so, we can simply write $\height$ for the unique axis with name $\height$, as in $\mathbb{R}^{\height \times \width}$. We can leave the size of an axis unspecified at first, and specify its size later (like in a section on experimental details): for example, $|\height|=|\width|=28$ to specify its exact size or just $|\height|=|\width|$ to specify that it's a square image.
 
-What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis \name{chans}, and if we wanted to represent a minibatch of images, we'd name the axis \name{batch}. Please see \S\ref{sec:examples} for more examples.
+What are good choices for axis names? We recommend meaningful \emph{words} instead of single letters, and we recommend words that describe a \emph{whole} rather than its parts. For example, if we wanted $A$ to have red, green, and blue channels, we'd name the axis $\chans$, and if we wanted to represent a minibatch of images, we'd name the axis $\batch$. Please see \S\ref{sec:examples} for more examples.
 
 \subsection{Named tensor operations}
 \label{sec:operations}
@@ -109,7 +122,7 @@ Operations on named tensors are defined by taking a function on low-order tensor
 
 Any function from a scalar to a scalar can be applied elementwise to a named tensor, and any function from two scalars to a scalar can be applied to two named tensors with the same shape. For example:
 \begin{equation*}
-\frac1{1+\exp(-A)} = \nmatrix{height}{width}{
+\frac1{1+\exp(-A)} = \nmatrix{\height}{\width}{
   \frac1{1+\exp(-3)} & \frac1{1+\exp(-1)} & \frac1{1+\exp(-4)} \\[1ex]
   \frac1{1+\exp(-1)} & \frac1{1+\exp(-5)} & \frac1{1+\exp(-9)} \\[1ex]
   \frac1{1+\exp(-2)} & \frac1{1+\exp(-6)} & \frac1{1+\exp(-5)}
@@ -118,22 +131,22 @@ Any function from a scalar to a scalar can be applied elementwise to a named ten
 
 But if we apply a binary function/operator to tensors with different shapes, they are \emph{broadcast} against each other (similarly to NumPy and derivatives). Let
 \begin{align*}
-  B &\in \reals^{\nset{height}{3}} & C &\in \reals^{\nset{width}{3}} \\
-  B &= \nmatrix{height}{}{
+  B &\in \reals^{\height[3]} & C &\in \reals^{\width[3]} \\
+  B &= \nmatrix{\height}{}{
     2 \\ 7 \\ 1
   } & 
-  C &= \nmatrix{}{width}{
+  C &= \nmatrix{}{\width}{
     1 & 4 & 1
   }.
 \end{align*}
-(We write $B$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\name{width}$. Likewise for $A+C$:
+(We write $B$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\width$. Likewise for $A+C$:
 \begin{align*}
-A + B &= \nmatrix{height}{width}{
+A + B &= \nmatrix{\height}{\width}{
   3+2 & 1+2 & 4+2 \\
   1+7 & 5+7 & 9+7 \\
   2+1 & 6+1 & 5+1
 } &
-A + C &= \nmatrix{height}{width}{
+A + C &= \nmatrix{\height}{\width}{
   3+1 & 1+4 & 4+1 \\
   1+1 & 5+4 & 9+1 \\
   2+1 & 6+4 & 5+1
@@ -145,13 +158,13 @@ A + C &= \nmatrix{height}{width}{
 
 The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis reductions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
 
-For example, we can sum over the $\name{height}$ axis or the $\name{width}$ axis of $A$:
+For example, we can sum over the $\height$ axis or the $\width$ axis of $A$:
 \begin{align*}
-\nsum{height} A &= \sum_i A_{\nidx{height}{i}} = \nmatrix{}{width}{
+\nsum{\height} A &= \sum_i A_{\height(i)} = \nmatrix{}{\width}{
   3+1+2 & 1+5+6 & 4+9+5
 }
 \\
-\nsum{width} A &= \sum_j A_{\nidx{width}{j}} = \nmatrix{}{height}{
+\nsum{\width} A &= \sum_j A_{\width(j)} = \nmatrix{}{\height}{
   3+1+4 & 1+5+9 & 2+6+5
 }.
 \end{align*}
@@ -159,16 +172,16 @@ See~\S\ref{sec:morereductions} for more examples of reductions.
 
 We can also write multiple names to perform the reduction over multiple axes at once. For example,
 \begin{equation*}
-  \nsum{height,width} A = \sum_i \sum_j A_{\nidx{height}{i},\nidx{width}{j}} = 3+1+4+1+5+9+2+6+5.
+  \nsum{\height \\ \width} A = \sum_i \sum_j A_{\height(i),\width(j)} = 3+1+4+1+5+9+2+6+5.
 \end{equation*}
 %But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
 
 The vector dot-product is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of it as elementwise multiplication, then summation over one axis:
 \begin{align*}
-%A \ndot{height} B &= \sum_i A_{\nidx{height}{i}} B_{\nidx{height}{i}} = \nmatrix{}{width}{
+%A \ndot{\height} B &= \sum_i A_{\height(i)} B_{\height(i)} = \nmatrix{}{\width}{
 %  3\cdot2 + 1\cdot7 + 2\cdot1 & 1\cdot2 + 5\cdot7 + 6\cdot1 & 4\cdot2 + 9\cdot7 + 5\cdot 1
 %} \\
-A \ndot{width} C &= \sum_j A_{\nidx{width}{j}} C_{\nidx{width}{j}} = \nmatrix{height}{}{
+A \ndot{\width} C &= \sum_j A_{\width(j)} C_{\width(j)} = \nmatrix{\height}{}{
   3\cdot1 + 1\cdot4 + 4\cdot1 \\
   1\cdot1 + 5\cdot4 + 9\cdot1 \\
   2\cdot1 + 6\cdot4 + 5\cdot1
@@ -182,7 +195,7 @@ Again, we can write multiple names to contract multiple axes at once. An operato
 
 It's often useful to rename an axis (analogous to a transpose operation in standard notation):
 \begin{equation*}
-A_{\nmov{height}{height'}} = \nmatrix{height'}{width}{
+A_{\height\rightarrow\height'} = \nmatrix{\height'}{\width}{
   3 & 1 & 4 \\
   1 & 5 & 9 \\
   2 & 6 & 5 \\
@@ -190,7 +203,7 @@ A_{\nmov{height}{height'}} = \nmatrix{height'}{width}{
 \end{equation*}
 We can also reshape two or more axes into one axis:
 \begin{equation*}
-  A_{\nmov{(height,width)}{layer}} = \nmatrix{}{layer}{
+  A_{(\height,\width)\rightarrow\layer} = \nmatrix{}{\layer}{
     3 & 1 & 4 & 1 & 5 & 9 & 2 & 6 & 5
   }
 \end{equation*}
@@ -207,11 +220,11 @@ In this section we give a series of examples illustrating how to use named tenso
 \label{sec:morereductions}
 
 \begin{align*}
-  \nfun{ax}{min} A &= \min \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
-  \nfun{ax}{max} A &= \max \{A_{\nidx{ax}{i}} \mid 1 \leq i \leq n\} \\
-  \nfun{ax}{norm} A &= \sqrt{\nsum{ax} A^2} \\
-  \nfun{ax}{mean} A &= \frac{1}{n} \nsum{ax} A \\
-  \nfun{ax}{var} A &= \frac{1}{n} \nsum{ax} (A - \nfun{ax}{mean} A)^2.
+  \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
+  \nfun{\ax}{max} A &= \max \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
+  \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
+  \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A \\
+  \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2.
 \end{align*}
 The $\min$ and $\max$ operators are overloaded, as is the summation operator defined above (\S\ref{sec:reductions}). If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set.
 
@@ -220,31 +233,31 @@ The $\min$ and $\max$ operators are overloaded, as is the summation operator def
 
 The contraction operator can be used for many multiplication-like operations.
 \begin{align*}
-  u, v &\in \mathbb{R}^{\name{ax1}} \\
-  x, y &\in \mathbb{R}^{\name{ax2}} \\
-  A &\in \mathbb{R}^{\name{ax1} \times \name{ax2}} \\
-  B &\in \mathbb{R}^{\name{ax2} \times \name{ax3}}
+  u, v &\in \mathbb{R}^{\ax_1} \\
+  x, y &\in \mathbb{R}^{\ax_2} \\
+  A &\in \mathbb{R}^{\ax_1 \times \ax_2} \\
+  B &\in \mathbb{R}^{\ax_2 \times \ax_3}
 \end{align*}
 \begin{align*}
-  u \ndot{ax1} v &= \sum_i u_{\nidx{ax1}{i}} v_{\nidx{ax1}{i}} && \text{inner product} \\
-  u \odot x &= \sum_{i,j} u_{\nidx{ax1}{i}} x_{\nidx{ax2}{j}} && \text{outer product} \\
-  A \ndot{ax2} x &= \sum_j A_{\nidx{ax2}{j}} x_{\nidx{ax2}{j}} && \text{matrix-vector multiplication} \\
-  u \ndot{ax1} A &= \sum_i u_{\nidx{ax1}{j}} A_{\nidx{ax1}{j}} && \text{vector-matrix multiplication} \\
-  A \ndot{ax2} B &= \sum_j A_{\nidx{ax2}{j}} \odot B_{\nidx{ax2}{j}} && \text{matrix-matrix multiplication}
+  u \ndot{\ax_1} v &= \sum_i u_{\ax_1(i)} v_{\ax_1(i)} && \text{inner product} \\
+  u \odot x &= \sum_{i,j} u_{\ax_1(i)} x_{\ax_2(j)} && \text{outer product} \\
+  A \ndot{\ax_2} x &= \sum_j A_{\ax_2(j)} x_{\ax_2(j)} && \text{matrix-vector multiplication} \\
+  u \ndot{\ax_1} A &= \sum_i u_{\ax_1(j)} A_{\ax_1(j)} && \text{vector-matrix multiplication} \\
+  A \ndot{\ax_2} B &= \sum_j A_{\ax_2(j)} \odot B_{\ax_2(j)} && \text{matrix-matrix multiplication}
 \end{align*}
 
 \subsubsection{Softmax and argmax}
 
 Most activation functions are elementwise operations (sigmoid, tanh, ReLU), so they are straightforward to use in our notation; the softmax, however, is interesting because it's defined as a function from vectors to vectors:
 \begin{align*}
-  \nfun{ax}{softmax} A &= \frac{\exp A}{\nsum{ax} \exp A}.
+  \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A}.
 \end{align*}
 As with reductions, we write an axis below the softmax operator, but this axis is retained in the output.
 
 Closely related are argmax and argmin, which we define to compute one-hot vectors with a one at the position containing the maximum or minimum value.
 \begin{align*}
-  \nfun{ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{ax}{softmax} \alpha A \\
-  \nfun{ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{ax}{softmax} \alpha A.
+  \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A \\
+  \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A.
 \end{align*}
 
 \subsection{Building blocks}
@@ -253,27 +266,27 @@ Closely related are argmax and argmin, which we define to compute one-hot vector
 
 A feedforward neural network looks like this:
 \begin{align*}
-  X^0 &\in \mathbb{R}^{\name{input}} \\
-  X^1 &= \sigma(W^1 \ndot{input} X^0 + b^1) & W^1 &\in \mathbb{R}^{\name{hidden1} \times \name{input}} & b^1 &\in \mathbb{R}^{\name{hidden1}} \\
-  X^2 &= \sigma(W^2 \ndot{hidden1} X^1 + b^2) & W^2 &\in \mathbb{R}^{\name{hidden2} \times \name{hidden1}} & b^2 &\in \mathbb{R}^{\name{hidden2}} \\
-  X^3 &= \sigma(W^3 \ndot{hidden2} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{output} \times \name{hidden2}} & b^3 &\in \mathbb{R}^{\name{output}}
+  X^0 &\in \mathbb{R}^{\inp} \\
+  X^1 &= \sigma(W^1 \ndot{\inp} X^0 + b^1) & W^1 &\in \mathbb{R}^{\hidden_1 \times \inp} & b^1 &\in \mathbb{R}^{\hidden_1} \\
+  X^2 &= \sigma(W^2 \ndot{\hidden_1} X^1 + b^2) & W^2 &\in \mathbb{R}^{\hidden_2 \times \hidden_1} & b^2 &\in \mathbb{R}^{\hidden_2} \\
+  X^3 &= \sigma(W^3 \ndot{\hidden_2} X^2 + b^3) & W^3 &\in \mathbb{R}^{\out \times \hidden_2} & b^3 &\in \mathbb{R}^{\out}
 \end{align*}
-The layer sizes can be set by writing $|\name{input}| = 100$, etc.
+The layer sizes can be set by writing $|\inp| = 100$, etc.
 
 If you don't like repeating the equations for fully-connected layers, you can put them inside a function:
 \begin{align*}
-  \text{FullConn}^l(x) &= \sigma\left(W^l \ndot{layer} x + b^l\right)_{\nmov{layer'}{layer}}
+  \text{FullConn}^l(x) &= \sigma\left(W^l \ndot{\layer} x + b^l\right)_{\layer'\rightarrow\layer}
 \end{align*}
 where
 \begin{align*}
-  W^l &\in \mathbb{R}^{\nset{layer'}{n_{l}} \times \nset{layer}{n_{l-1}}} \\
-  b^l &\in \mathbb{R}^{\nset{layer'}{n_l}}.
+  W^l &\in \mathbb{R}^{\layer'[n_l] \times \layer[n_{l-1}]} \\
+  b^l &\in \mathbb{R}^{\layer'[n_l]}.
 \end{align*}
-A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \name{layer} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis \name{layer'}, then renames it back to \name{layer}. 
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer{} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis $\layer'$, then renames it back to \layer. 
 
 Then the network can be defined like this:
 \begin{align*}
-  X^0 &\in \mathbb{R}^{\nset{layer}{n_0}} \\
+  X^0 &\in \mathbb{R}^{\layer[n_0]} \\
   X^1 &= \text{FullConn}^1(X^0) \\
   X^2 &= \text{FullConn}^2(X^1) \\
   X^3 &= \text{FullConn}^3(X^2).
@@ -284,12 +297,12 @@ Then the network can be defined like this:
 
 As a second example, let's define a simple (Elman) RNN. This is similar to the feedforward network, except that the number of timesteps is variable and they all share parameters.
 \begin{align*}
-x^{t} &\in \mathbb{R}^{\name{input}} & t &= 1, \ldots, n \\
-W^{\text{h}} &\in \mathbb{R}^{\name{hidden} \times \name{hidden'}} & |\name{hidden}| &= |\name{hidden'}| \\
-W^{\text{i}} &\in \mathbb{R}^{\name{input} \times \name{hidden'}} \\
-b &\in \mathbb{R}^{\name{hidden'}} \\
-h^{0} &\in \mathbb{R}^{\name{hidden}} \\
-h^{t} &= \sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{input} x^{t} + b \right)_{\nmov{hidden'}{hidden}} & t &= 1, \ldots, n
+x^{t} &\in \mathbb{R}^{\inp} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\hidden \times \hidden'} & |\hidden| &= |\hidden'| \\
+W^{\text{i}} &\in \mathbb{R}^{\inp \times \hidden'} \\
+b &\in \mathbb{R}^{\hidden'} \\
+h^{0} &\in \mathbb{R}^{\hidden} \\
+h^{t} &= \sigma\left( W^{\text{h}} \ndot{\hidden} h^{t-1} + W^{\text{i}} \ndot{\inp} x^{t} + b \right)_{\hidden'\rightarrow\hidden} & t &= 1, \ldots, n
 \end{align*}
 
 \subsubsection{Attention}
@@ -297,16 +310,16 @@ h^{t} &= \sigma\left( W^{\text{h}} \ndot{hidden} h^{t-1} + W^{\text{i}} \ndot{in
 
 In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in interpreting the equation for attention as it's usually written. In our notation, it looks like this:
 \begin{align*}
-  \text{Attention} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} &\rightarrow \mathbb{R}^{\name{val}} \\
-  \text{Attention}(Q,K,V) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\key} \times \mathbb{R}^{\seq \times\key} \times \mathbb{R}^{\seq \times\val} &\rightarrow \mathbb{R}^{\val} \\
+  \text{Attention}(Q,K,V) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis \name{seq'}, but this definition computes a single value. If we want a sequence, we can just give $Q$ a \name{seq'} axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a \name{heads} axis for multiple attention heads, then the function will compute multi-head attention.
+This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis $\seq'$, but this definition computes a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
-  \text{Attention} \colon \mathbb{R}^{\name{key}} \times \mathbb{R}^{\name{seq} \times\name{key}} \times \mathbb{R}^{\name{seq} \times\name{val}} \times \mathbb{R}^{\name{seq}} &\rightarrow \mathbb{R}^{\name{val}} \\
-\text{Attention}(Q, K, V, M) &= \nfun{seq}{softmax} \left( \frac{Q \ndot{key} K}{\sqrt{|\name{key}|}} + M \right) \ndot{seq} V.
+  \text{Attention} \colon \mathbb{R}^{\key} \times \mathbb{R}^{\seq \times\key} \times \mathbb{R}^{\seq \times\val} \times \mathbb{R}^{\seq} &\rightarrow \mathbb{R}^{\val} \\
+\text{Attention}(Q, K, V, M) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} + M \right) \ndot{\seq} V.
 \end{align*}
 
 \subsubsection{Convolution}
@@ -314,56 +327,56 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 A 1-dimensional convolution can be easily written by unrolling a tensor and then
 applying a standard dot product.
 \begin{align*}
-\text{Conv1d} \colon \reals^{\name{chans} \times \nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n'}} \\
-\text{Conv1d}(X; W, b) &= W \ndot{chans, kernel} U + b
+\text{Conv1d} \colon \reals^{\chans \times \seq[n]} &\rightarrow \mathbb{R}^{\seq[n']} \\
+\text{Conv1d}(X; W, b) &= W \ndot{\chans \\ \kernel} U + b
 \end{align*}
 where
 \begin{align*}
-n' &= n-|\name{kernel}|+1 \\
-W &\in \reals^{\name{chans} \times \name{kernel}} \\
-U &\in \reals^{\name{chans} \times \nset{seq}{n'} \times \name{kernel}} \\
-U_{\nidx{seq}{i}, \nidx{kernel}{j}} & = X_{\nidx{seq}{i+j - 1}} \\
+n' &= n-|\kernel|+1 \\
+W &\in \reals^{\chans \times \kernel} \\
+U &\in \reals^{\chans \times \seq[n'] \times \kernel} \\
+U_{\seq(i), \kernel(j)} & = X_{\seq(i+j - 1)} \\
 b &\in \reals.
 \end{align*}
-This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a \name{chans'} axis (or some other name).
+This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a $\chans'$ axis (or some other name).
 
 A 2-dimensional convolution:
 \begin{align*}
-  \text{Conv2d} \colon \reals^{\name{chans} \times \nset{height}{h} \times \nset{width}{w}} %\times \reals^{\name{chans} \times \name{kh} \times \name{kw}} \times \reals
-  &\rightarrow \reals^{\nset{height}{h'} \times \nset{width}{w'}} \\
-  \text{Conv2d}(X; W, b) &= W \ndot{chans, kh, kw} U + b
+  \text{Conv2d} \colon \reals^{\chans \times \height[h] \times \width[w]} %\times \reals^{\chans \times \kh \times \kw} \times \reals
+  &\rightarrow \reals^{\height[h'] \times \width[w']} \\
+  \text{Conv2d}(X; W, b) &= W \ndot{\chans \\ \kh, \kw} U + b
 \end{align*}  
 where
 \begin{align*}
-h' &= h-|\name{kh}|+1 \\
-w' &= w-|\name{kw}|+1 \\
-W &\in \reals^{\name{chans} \times \name{kh} \times \name{kw}} \\
-U &\in \reals^{\name{chans} \times \nset{height}{h'} \times \nset{width}{w'} \times \name{kh} \times \name{kw}}  \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{ki}, \nidx{kw}{kj}} &= X_{\nidx{height}{i+ki-1}, \nidx{width}{j+kj-1}} \\
+h' &= h-|\kh|+1 \\
+w' &= w-|\kw|+1 \\
+W &\in \reals^{\chans \times \kh \times \kw} \\
+U &\in \reals^{\chans \times \height[h'] \times \width[w'] \times \kh \times \kw}  \\
+U_{\height(i), \width(j), \kh(ki), \kw(kj)} &= X_{\height(i+ki-1), \width(j+kj-1)} \\
 b &\in \reals.
 \end{align*}
 
 \subsubsection{Max pooling}
 
 \begin{align*}
-\text{MaxPool1d}_{k} \colon \mathbb{R}^{\nset{seq}{n}} &\rightarrow \mathbb{R}^{\nset{seq}{n/k}} \\
-\text{MaxPool1d}_{k}(X) &= \nfun{k}{max} U
+\text{MaxPool1d}_{k} \colon \mathbb{R}^{\seq[n]} &\rightarrow \mathbb{R}^{\seq[n/k]} \\
+\text{MaxPool1d}_{k}(X) &= \nfun{\pool}{max} U
 \end{align*}
 where
 \begin{align*}
-U &\in \reals^{\nset{seq}{n / k} \times \nset{k}{k}} \\
-U_{\nidx{seq}{i}, \nidx{k}{di}} & = X_{\nidx{seq}{i \times k + di -1}}.
+U &\in \reals^{\seq[n / k] \times \pool[k]} \\
+U_{\seq(i), \pool(di)} & = X_{\seq(i \times k + di -1)}.
 \end{align*}
 
 
 \begin{align*}
-\text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\nset{height}{h} \times \nset{width}{w}} &\rightarrow \mathbb{R}^{\nset{height}{h/kh} \times \nset{width}{w/kw}} \\
-\text{MaxPool2d}_{kh,hw}(X) &= \nfun{kh, kw}{max} U
+\text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\height[h] \times \width[w]} &\rightarrow \mathbb{R}^{\height[h/kh] \times \width[w/kw]} \\
+\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\ph, \pw}{max} U
 \end{align*}
 where
 \begin{align*}
-U &\in \reals^{\nset{height}{h / kh} \times \nset{width}{w / kw} \times \nset{kh}{kh} \times \nset{kw}{kw}} \\
-U_{\nidx{height}{i}, \nidx{width}{j}, \nidx{kh}{di}, \nidx{kw}{dj}} & = X_{\nidx{height}{i \times kh + di -1}, \nidx{width}{j \times kw + dj -1}}.
+U &\in \reals^{\height[h / kh] \times \width[w / kw] \times \ph[kh] \times \pw[kw]} \\
+U_{\height(i), \width(j), \ph(di), \pw(dj)} & = X_{\height(i \times kh + di -1), \width(j \times kw + dj -1)}.
 \end{align*}
 
 \subsubsection{Normalization layers}
@@ -374,24 +387,24 @@ by which axes are normalized.
 
 We can define a single generic normalization layer:
 \begin{align*}
-  \nfun{ax}{XNorm} \colon \mathbb{R}^{\name{ax}} &\rightarrow \mathbb{R}^{\name{ax}} \\
-  \nfun{ax}{XNorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{ax}{mean}(X)}{\sqrt{\nfun{ax}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{\ax}{XNorm} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
+  \nfun{\ax}{XNorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{\ax}{mean}(X)}{\sqrt{\nfun{\ax}{var}(X)} + \epsilon} \odot \gamma + \beta
 \end{align*}
 where
 \begin{align*}
-  \gamma, \beta &\in \mathbb{R}^{\name{ax}} \\
+  \gamma, \beta &\in \mathbb{R}^{\ax} \\
   \epsilon &> 0.
 \end{align*}
 
 Now, suppose that the input has three axes:
 \begin{align*}
-X &\in \reals^{{\name{batch} \times \name{chans} \times \name{layer}}}
+X &\in \reals^{{\batch \times \chans \times \layer}}
 \end{align*}
 Then the three kinds of normalization layers can be written as:
 \begin{align*}
-Y &= \nfun{batch}{XNorm}(X; \gamma, \beta) && \text{batch normalization} \\
-Y &= \nfun{layer}{XNorm}(X; \gamma, \beta) && \text{instance normalization} \\
-Y &= \nfun{layer,chans}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
+Y &= \nfun{\batch}{XNorm}(X; \gamma, \beta) && \text{batch normalization} \\
+Y &= \nfun{\layer}{XNorm}(X; \gamma, \beta) && \text{instance normalization} \\
+Y &= \nfun{\layer,\chans}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
 \end{align*}
 
 \subsection{Transformer}
@@ -400,12 +413,12 @@ Y &= \nfun{layer,chans}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
 We define a Transformer used autoregressively as a language model.
 The input is a sequence of one-hot vectors, from which we compute word embeddings and positional encodings:
 \begin{align*}
-  I &\in \{0, 1\}^{\name{seq} \times \name{vocab}} & \nsum{vocab} I &= 1 \\
-  W &= (E \ndot{vocab} I)\sqrt{|\name{layer}|} & E &\in \reals^{\name{vocab} \times \name{layer}} \\
-  P &\in \reals^{\name{seq} \times \name{layer}} \\
-  P_{\nidx{seq}{p}, \nidx{layer}{i}} &= \begin{cases}
-    \sin((p-1) / 10000^{(i-1) / |\name{layer}|}) & \text{$i$ odd} \\ 
-    \cos((p-1) / 10000^{(i-2) / |\name{layer}|}) & \text{$i$ even.}
+  I &\in \{0, 1\}^{\seq \times \vocab} & \nsum{\vocab} I &= 1 \\
+  W &= (E \ndot{\vocab} I)\sqrt{|\layer|} & E &\in \reals^{\vocab \times \layer} \\
+  P &\in \reals^{\seq \times \layer} \\
+  P_{\seq(p), \layer(i)} &= \begin{cases}
+    \sin((p-1) / 10000^{(i-1) / |\layer|}) & \text{$i$ odd} \\ 
+    \cos((p-1) / 10000^{(i-2) / |\layer|}) & \text{$i$ even.}
   \end{cases}
 \end{align*}
 
@@ -417,72 +430,72 @@ X^1 &= \text{LayerNorm}^{1'}(\text{FFN}^1(T^1)) + T^1\\
 &\vdotswithin{=} \\
 T^{L} &= \text{LayerNorm}^L(\text{SelfAtt}^L(X^{L-1})) + X^{L-1}\\
 X^{L} &= \text{LayerNorm}^{L'}(\text{FFN}^L(T^L)) + T^L\\
-O &= \nfun{vocab}{softmax}(E \ndot{layer} X^L)
+O &= \nfun{\vocab}{softmax}(E \ndot{\layer} X^L)
 \end{align*}
 where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
 
 Layer normalization ($l = 1, 1', \ldots, L, L'$):
 \begin{align*}
-  \text{LayerNorm}^l \colon \mathbb{R}^{\name{layer}} &\rightarrow \mathbb{R}^{\name{layer}} \\
-  \text{LayerNorm}^l(X) &= \nfun{layer}{XNorm}(X; \beta^l, \gamma^l).
+  \text{LayerNorm}^l \colon \mathbb{R}^{\layer} &\rightarrow \mathbb{R}^{\layer} \\
+  \text{LayerNorm}^l(X) &= \nfun{\layer}{XNorm}(X; \beta^l, \gamma^l).
 \end{align*}
 
 We defined attention in \S\ref{sec:attention}; the Transformer uses multi-head self-attention, in which queries, keys, and values are all computed from the same sequence.
 \begin{align*}
-  \text{SelfAtt}^l \colon \mathbb{R}^{\name{seq} \times \name{layer}} &\rightarrow \mathbb{R}^{\name{seq} \times \name{layer}} \\
+  \text{SelfAtt}^l \colon \mathbb{R}^{\seq \times \layer} &\rightarrow \mathbb{R}^{\seq \times \layer} \\
   \text{SelfAtt}^l(X) &= Y
 \end{align*}
 where
 \begin{align*}
-  |\name{seq}| &= |\name{seq'}| \\
-  |\name{key}| = |\name{val}| &= |\name{layer}|/|\name{heads}| \\
-  Q &= W^{l,Q} \ndot{layer} X_{\nmov{seq}{seq'}} & W^{l,Q} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  K &= W^{l,K} \ndot{layer} X & W^{l,K} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{key}} \\
-  V &= W^{l,V} \ndot{layer} X & W^{l,V} &\in \mathbb{R}^{\name{heads} \times \name{layer} \times \name{val}} \\
-  M & \in \reals^{\name{seq} \times \name{seq'}} \\
-  M_{\nidx{seq}{i}, \nidx{seq'}{j}} &= \begin{cases}
+  |\seq| &= |\seq'| \\
+  |\key| = |\val| &= |\layer|/|\heads| \\
+  Q &= W^{l,Q} \ndot{\layer} X_{\seq\rightarrow\seq'} & W^{l,Q} &\in \mathbb{R}^{\heads \times \layer \times \key} \\
+  K &= W^{l,K} \ndot{\layer} X & W^{l,K} &\in \mathbb{R}^{\heads \times \layer \times \key} \\
+  V &= W^{l,V} \ndot{\layer} X & W^{l,V} &\in \mathbb{R}^{\heads \times \layer \times \val} \\
+  M & \in \reals^{\seq \times \seq'} \\
+  M_{\seq(i), \seq'(j)} &= \begin{cases}
     0 & i \leq j\\
     -\infty & \text{otherwise}
   \end{cases} \\
-  Y &= W^{l,O} \ndot{heads,val} \text{Attention}(Q, K, V, M)_{\nmov{seq'}{seq}} & W^{l,O} &\in \mathbb{R}^{\name{heads} \times \name{val} \times \name{layer}}
+  Y &= W^{l,O} \ndot{\heads \\ \val} \text{Attention}(Q, K, V, M)_{\seq'\rightarrow\seq} & W^{l,O} &\in \mathbb{R}^{\heads \times \val \times \layer}
 \end{align*}
 
 Feedforward neural networks:
 \begin{align*}
-  \text{FFN}^l \colon \mathbb{R}^{\name{layer}} &\rightarrow \mathbb{R}^{\name{layer}} \\
+  \text{FFN}^l \colon \mathbb{R}^{\layer} &\rightarrow \mathbb{R}^{\layer} \\
   \text{FFN}^l(X) &= X^2
 \end{align*}
 where
 \begin{align*}
-  X^1 &= \text{relu}(W^{l,1} \ndot{layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^{l,1} &\in \mathbb{R}^{\name{hidden}} \\
-  X^2 &= \text{relu}(W^{l,2} \ndot{hidden} X^1 + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\name{layer} \times \name{hidden}} & b^{l,2} &\in \mathbb{R}^{\name{hidden}}.
+  X^1 &= \text{relu}(W^{l,1} \ndot{\layer} X + b^{l,1}) & W^{l,1} &\in \mathbb{R}^{\hidden \times \layer} & b^{l,1} &\in \mathbb{R}^{\hidden} \\
+  X^2 &= \text{relu}(W^{l,2} \ndot{\hidden} X^1 + b^{l,2}) & W^{l,2} &\in \mathbb{R}^{\layer \times \hidden} & b^{l,2} &\in \mathbb{R}^{\hidden}.
 \end{align*}
 
 \subsection{LeNet}
 
 \begin{align*}
-X^0 &\in \reals^{\name{batch} \times \nset{chans}{c_0} \times \name{height} \times \name{width}} \\
+X^0 &\in \reals^{\batch \times \chans[c_0] \times \height \times \width} \\
 T^1 &= \text{relu}(\text{Conv}^1(X^0)) \\
 X^1 &= \text{MaxPool}^1(T^1) \\
 T^2 &= \text{relu}(\text{Conv}^2(X^1)) \\
-X^2 &= \text{MaxPool}^2(T^2)_{\nmov{(height,width,chans)}{layer}} \\
-X^3 &= \text{relu}(W^3 \ndot{layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{layer}} & b^3 &\in \mathbb{R}^{\name{hidden}} \\
-O &= \nfun{classes}{softmax} (W^4 \ndot{hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\name{classes} \times \name{hidden}} & b^4 &\in \mathbb{R}^{\name{classes}}
+X^2 &= \text{MaxPool}^2(T^2)_{(\height,\width,\chans)\rightarrow\layer} \\
+X^3 &= \text{relu}(W^3 \ndot{\layer} X^2 + b^3) & W^3 &\in \mathbb{R}^{\hidden \times \layer} & b^3 &\in \mathbb{R}^{\hidden} \\
+O &= \nfun{\classes}{softmax} (W^4 \ndot{\hidden} X^3 + b^4) & W^4 &\in \mathbb{R}^{\classes \times \hidden} & b^4 &\in \mathbb{R}^{\classes}
 \end{align*}
 As an alternative to the flattening operation in the equation for $X^2$, we could have written
 \begin{align*}
 X^2 &= \text{MaxPool}^2(T^2) \\
-X^3 &= \text{relu}(W^3 \ndot{height,width,chans} X^2 + b^3) & W^3 &\in \mathbb{R}^{\name{hidden} \times \name{height} \times \name{width} \times \name{chans}}.
+X^3 &= \text{relu}(W^3 \ndot{\height \\ \width \\ \chans} X^2 + b^3) & W^3 &\in \mathbb{R}^{\hidden \times \height \times \width \times \chans}.
 \end{align*}
 
 The convolution and pooling operations are defined as follows:
 \begin{align*}
-\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l)_{\nmov{chans'}{chans}}
+\text{Conv}^l(X) &= \text{Conv2d}(X; W^l, b^l)_{\chans'\rightarrow\chans}
 \end{align*}
 where
 \begin{align*}
-W^l & \in \reals^{\nset{chans'}{c_{l}} \times \nset{chans}{c_{l-1}} \times \nset{kh}{kh_l} \times \nset{kw}{kw_l}} \\
-b^l &\in \reals^{\nset{chans'}{c_{l}}}
+W^l & \in \reals^{\chans'[c_l] \times \chans[c_{l-1}] \times \kh[kh_l] \times \kw[kw_l]} \\
+b^l &\in \reals^{\chans'[c_l]}
 \end{align*}
 and
 \begin{align*}
@@ -495,14 +508,14 @@ and
 
 Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
 \begin{align*}
-p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{B} p(\name{B}\mid \name{A}) &= 1 \\
-p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{A} p(\name{A}) &= 1
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{\name{B}} p(\name{B} \mid \name{A}) &= 1 \\
+p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{\name{A}} p(\name{A}) &= 1
 \end{align*}
 Then many common operations on probability distributions can be expressed in terms of tensor operations:
 \begin{align*}
 p(\name{A}, \name{B}) &= p(\name{B} \mid \name{A}) \odot p(\name{A}) && \text{chain rule}\\
-p(\name{B}) &= \nsum{A} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A}) \ndot{A} p(\name{A}) && \text{marginalization} \\
-p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{A} p(\name{A})}. && \text{Bayes' rule}
+p(\name{B}) &= \nsum{\name{A}} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A}) && \text{marginalization} \\
+p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A})}. && \text{Bayes' rule}
 \end{align*}
 
 \subsubsection{Continuous bag of words}
@@ -510,96 +523,102 @@ p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p
 A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
 
 \begin{align*}
-\text{CBOW} \colon \{0, 1\}^{\name{seq} \times \name{vocab}} &\rightarrow \reals^{\name{seq} \times \name{classes}} \\
-\text{CBOW}(X; E, W) &= \nfun{class}{softmax} (W \ndot{hidden} E \ndot{vocab} X)
+\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\seq \times \classes} \\
+\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} (W \ndot{\hidden} E \ndot{\vocab} X)
 \end{align*}
 where
 \begin{align*}
-\nsum{vocab} X &= 1 \\
-E &\in \reals^{\name{vocab} \times \name{hidden}} \\
-W &\in \reals^{\name{classes} \times \name{hidden}}.
+\nsum{\vocab} X &= 1 \\
+E &\in \reals^{\vocab \times \hidden} \\
+W &\in \reals^{\classes \times \hidden}.
 \end{align*}
 Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsubsection{Sudoku ILP}
+
+\ndef{\assign}{assign}
 
 Sudoku puzzles can be represented as  binary tiled tensors.
 Given a grid we can check that it is valid by converting it to a grid of grids. 
 Constraints then ensure that there is one digit per row, per column and per sub-box.
 
 \begin{align*}
-\text{check} \colon \{0, 1\}^{\nset{height}{9} \times \nset{width}{9} \times \nset{assign}{9}} &\rightarrow \{0, 1\} \\
+\text{check} \colon \{0, 1\}^{\height[9] \times \width[9] \times \assign[9]} &\rightarrow \{0, 1\} \\
 \text{check}(X) &=
 \mathbb{I}\left[\begin{aligned}
-\nsum{assign} X = 1 &\land \nsum{height, width} Y = 1 \land {} \\
-\nsum{height} X = 1 &\land \nsum{width} X = 1
+\nsum{\assign} X = 1 &\land \nsum{\height \\ \width} Y = 1 \land {} \\
+\nsum{\height} X = 1 &\land \nsum{\width} X = 1
 \end{aligned}\right]
 \end{align*}
 where
 \begin{align*}
-Y &\in \{0, 1\}^{\nset{height'}{3} \times \nset{width'}{3} \times \nset{height}{3} \times \nset{width}{3} \times \nset{assign}{9}}  \\
-Y_{\nidx{height'}{h'}, \nidx{height}{h}, \nidx{width'}{w'}, \nidx{width}{w}} &= X_{\nidx{height}{3h' + h-1}, \nidx{width}{3 w' + w-1}}.
+Y &\in \{0, 1\}^{\height'[3] \times \width'[3] \times \height[3] \times \width[3] \times \assign[9]}  \\
+Y_{\height'(h'), \height(h), \width'(w'), \width(w)} &= X_{\height(3h' + h-1), \width(3 w' + w-1)}.
 \end{align*} 
 
 \subsubsection{$K$-means clustering}
 
+\ndef{\clusters}{clusters}
+
 The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
 \begin{align*}
-  X &\in \reals^{\name{batch} \times \name{space}} \\
-C &\in \reals^{\name{clusters} \times \name{space}}
+  X &\in \reals^{\batch \times \dd} \\
+C &\in \reals^{\clusters \times \dd}
 \end{align*}
 we repeat the following update: Compute cluster assignments
 \begin{align*}
-Q &= \nfun{clusters}{argmin} \nfun{space}{norm}(C-X)
+Q &= \nfun{\clusters}{argmin} \nfun{\dd}{norm}(C-X)
 \end{align*}
 then recompute the cluster centers:
 \begin{equation*}
-C \leftarrow \nsum{batch} \frac{Q \odot X}{Q}.
+C \leftarrow \nsum{\batch} \frac{Q \odot X}{Q}.
 \end{equation*}
 
 \subsubsection{Beam search}
 
+\ndef{\beam}{beam}
+
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
 \begin{align*} 
-H &\in \reals^{\name{beam}} \\
-S &\in \{0, 1\}^{\name{beam} \times \name{state}} & \nsum{state} S &= 1 \\
-f &\colon \{0, 1\}^{\name{state}} \rightarrow \reals^{\name{state}} \\
+H &\in \reals^{\beam} \\
+S &\in \{0, 1\}^{\beam \times \state} & \nsum{\state} S &= 1 \\
+f &\colon \{0, 1\}^{\state} \rightarrow \reals^{\state} \\
 \end{align*}
 Then we repeat the following update:
 \begin{align*}
-H' &= \nfun{beam}{max} (H \odot f(S)) \\
-H &\leftarrow \nfun{state,beam}{maxk} H' \\
-S &\leftarrow \nfun{state,beam}{argmaxk} H'
+H' &= \nfun{\beam}{max} (H \odot f(S)) \\
+H &\leftarrow \nfun{\state,\beam}{maxk} H' \\
+S &\leftarrow \nfun{\state,\beam}{argmaxk} H'
 \end{align*}
 where
 \begin{align*}
-\nfun{ax,k}{maxk} \colon \reals^{\name{ax}} &\rightarrow \reals^{\name{k}} \\
-\nfun{ax,k}{argmaxk} \colon \reals^{\name{ax}} &\rightarrow \{0,1\}^{\name{ax},\name{k}}
+\nfun{\ax,\name{k}}{maxk} \colon \reals^{\ax} &\rightarrow \reals^{\name{k}} \\
+\nfun{\ax,\name{k}}{argmaxk} \colon \reals^{\ax} &\rightarrow \{0,1\}^{\ax,\name{k}}
 \end{align*}
-are defined such that $[\nfun{ax,k}{maxk} A]_{\nidx{k}{i}}$ is the $i$-th largest value along axis $\name{ax}$ and $A \ndot{ax} (\nfun{ax,k}{argmaxk}{A}) = \nfun{ax,k}{max} A$.
+are defined such that $[\nfun{\ax,\name{k}}{maxk} A]_{\name{k}(i)}$ is the $i$-th largest value along axis $\ax$ and $A \ndot{\ax} (\nfun{\ax,\name{k}}{argmaxk}{A}) = \nfun{\ax,\name{k}}{max} A$.
 
-We can add a \name{batch} axis to $H$ and $S$ and the above equations will work unchanged.
+We can add a $\batch$ axis to $H$ and $S$ and the above equations will work unchanged.
 
 \subsubsection{Multivariate normal distribution}
 
 To define a multivariate normal distribution, we need some matrix operations. These have two axis names written under them, for rows and columns, respectively. Determinant and inverse have the following signatures:
 \begin{align*}
-\nfun{ax1,ax2}{det} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F \\
-\nfun{ax1,ax2}{inv} \colon F^{\nset{ax1}{n} \times \nset{ax2}{n}} &\rightarrow F^{\nset{ax1}{n} \times \nset{ax2}{n}}.
+\nfun{\ax_1,\ax_2}{det} \colon F^{\ax_1[n] \times \ax_2[n]} &\rightarrow F \\
+\nfun{\ax_1,\ax_2}{inv} \colon F^{\ax_1[n] \times \ax_2[n]} &\rightarrow F^{\ax_1[n] \times \ax_2[n]}.
 \end{align*}
 (We write $\text{inv}$ instead of $\cdot^{-1}$ because there's no way to write axis names under the latter.)
 
 In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
 \begin{align*}
-\mathcal{N} \colon \reals^{\name{d}} &\rightarrow \reals \\
-\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{d1, d2}{inv} \Sigma\right) \ndot{d1,d2} \left([X - \mu]_{\nmov{d}{d1}} \odot [X - \mu]_{\nmov{d}{d2}} \right) \right)}{\sqrt{(2 \pi)^{|\name{d}|} \nfun{d1, d2}{det} \Sigma}}
+\mathcal{N} \colon \reals^{\dd} &\rightarrow \reals \\
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{\dd_1, \dd_2}{inv} \Sigma\right) \ndot{\dd_1,\dd_2} \left([X - \mu]_{\dd\rightarrow\dd_1} \odot [X - \mu]_{\dd\rightarrow\dd_2} \right) \right)}{\sqrt{(2 \pi)^{|\dd|} \nfun{\dd_1, \dd_2}{det} \Sigma}}
 \end{align*}
 where
 \begin{align*}
-|\name{d}| &= |\name{d1}| = |\name{d2}| \\
-\mu &\in \reals^{\name{d}} \\
-\Sigma & \in \reals^{\name{d1} \times \name{d2}}.
+|\dd| &= |\dd_1| = |\dd_2| \\
+\mu &\in \reals^{\dd} \\
+\Sigma & \in \reals^{\dd_1 \times \dd_2}.
 \end{align*}
 
 \section{\LaTeX{} Macros}
@@ -612,25 +631,18 @@ Many of the \LaTeX{} macros used in this document are available in the style fil
 \end{quote}
 in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article}| but before \verb|\begin{document}|).
 
-The style file contains a small number of macros:
+We write axis names in sans-serif font. To make this easier, \verb|\ndef{\ax}{ax}| defines a macro \verb|\ax| that looks like this: $\ax$.
+
 \begin{itemize}
-\item Basics
-  \begin{itemize}
-  \item Use \verb|\name{foo}| to write an axis name: $\name{foo}$.
-  \item Use \verb|\mathbb{R}^{\nset{foo}{2}}| to write a set of tensors: $\mathbb{R}^{\nset{foo}{2}}$.
-  \item Use \verb|A_{\nidx{foo}{1}}| to index a tensor: $A_{\nidx{foo}{1}}$.
-  \item Use \verb|A_{\nmov{foo}{bar}}| for renaming: $A_{\nmov{foo}{bar}}$.
-  \end{itemize}
 \item Binary operators
   \begin{itemize}
-  \item Use \verb|A \ndot{foo} B| for contraction: $A \ndot{foo} B$.
-  \item Use \verb|A \ncat{foo} B| for concatenation: $A \ncat{foo} B$.
-  \item In general, you can use \verb|\nbin| to make a new binary operator with a name under it: \verb|A \nbin{foo}{\star} B| gives you $A \nbin{foo}{\star} B$.
+  \item Use \verb|A \ndot{\ax} B| for contraction: $A \ndot{\ax} B$. You can use \verb|\\| to stack up several names.
+  \item In general, you can use \verb|\nbin| to make a new binary operator with a name under it: \verb|A \nbin{\ax}{\star} B| gives you $A \nbin{\ax}{\star} B$.
   \end{itemize}
 \item Functions
   \begin{itemize}
-  \item Use \verb|\nsum{foo} A| for summation: $\nsum{foo} A$.
-  \item In general, you can use \verb|\nfun| to make a function with a name under it: \verb|\nfun{foo}{qux} A| gives you $\nfun{foo}{qux} A$.
+  \item Use \verb|\nsum{\ax} A| for summation: $\nsum{\ax} A$.
+  \item In general, you can use \verb|\nfun| to make a function with a name under it: \verb|\nfun{\ax}{qux} A| gives you $\nfun{\ax}{qux} A$.
   \end{itemize}
 \end{itemize}
 
@@ -639,21 +651,21 @@ The style file contains a small number of macros:
 
 \subsection{Records and shapes}
 
-A \emph{named index} is a pair, written $\nidx{ax}{i}$, where $\name{ax}$ is a \emph{name} and $i$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
+A \emph{named index} is a pair, written $\ax(i)$, where $\ax$ is a \emph{name} and $i$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
 
-A \emph{record} is a set of named indices $\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. 
+A \emph{record} is a set of named indices $\{\ax_1(i_1), \ldots, \ax_r(i_r)\}$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. 
 
-An \emph{axis} is a pair, written $\nset{ax}{I}$, where $\name{ax}$ is a name and $I$ is a set of \emph{indices}.
-We deal with axes of the form $\nset{ax}{[n]}$ (that is, $\nset{ax}{\{1, \ldots, n\}}$) so frequently that we abbreviate this as~$\nset{ax}{n}$.
+An \emph{axis} is a pair, written $\ax[I]$, where $\ax$ is a name and $I$ is a set of \emph{indices}.
+We deal with axes of the form $\ax[[n]]$ (that is, $\ax[\{1, \ldots, n\}]$) so frequently that we abbreviate this as~$\ax[n]$.
 
-In many contexts, there is only one axis with name $\name{ax}$, and so we refer to the axis simply as $\name{ax}$. The context always makes it clear whether $\name{ax}$ is a name or an axis. If $\name{ax}$ is an axis, we write $\ind(\name{ax})$ for its index set, and we write $|\name{ax}|$ as shorthand for~$|\ind(\name{ax})|$.
+In many contexts, there is only one axis with name $\ax$, and so we refer to the axis simply as $\ax$. The context always makes it clear whether $\ax$ is a name or an axis. If $\ax$ is an axis, we write $\ind(\ax)$ for its index set, and we write $|\ax|$ as shorthand for~$|\ind(\ax)|$.
 
-A \emph{shape} is a set of axes, written $\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}$, where $\name{ax\sub{1}}, \ldots \name{ax\sub{r}}$ are pairwise distinct names. We write $\emptyset$ for the empty shape. A shape defines a set of records:
+A \emph{shape} is a set of axes, written $\ax_1[I_1] \times \cdots \times \ax_r[I_r]$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. We write $\emptyset$ for the empty shape. A shape defines a set of records:
 \begin{equation*}
-\rec (\nset{ax\sub{1}}{I_1} \times \cdots \times \nset{ax\sub{r}}{I_r}) = \left\{\{\nidx{ax\sub{1}}{i_1}, \ldots, \nidx{ax\sub{r}}{i_r}\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
+\rec (\ax_1[I_1] \times \cdots \times \ax_r[I_r]) = \left\{\{\ax_1(i_1), \ldots, \ax_r(i_r)\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
 \end{equation*}
 
-We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\nset{ax}{I} \in \mathcal{S}$ and $\nset{ax}{J} \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\name{ax}$ such that $\nset{ax}{I} \in \mathcal{S}$ and $\nset{ax}{J} \in \mathcal{T}$ for any $I$, $J$.
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\ax$ such that $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$ for any $I$, $J$.
 
 If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
 
@@ -663,7 +675,7 @@ Let $F$ be a field and let $\mathcal{S}$ be a shape. Then a \emph{named tensor o
 
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
-If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}\}}$, we usually write $A_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\nidx{ax\sub{1}}{x_1}, \ldots, \nidx{ax\sub{r}}{x_r}}$.
+If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\ax_1(i_1), \ldots, \ax_r(i_r)\}}$, we usually write $A_{\ax_1(i_1), \ldots, \ax_r(x_r)}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\ax_1(i_1), \ldots, \ax_r(x_r)}$.
 
 We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and $s \in \rec \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $A_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \rec (\mathcal{T} \setminus \mathcal{S})$,
 \begin{align*}
@@ -690,8 +702,8 @@ f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T
 
 All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator can be defined as:
 \begin{align*}
-  \ndot{ax} \colon F^{\nset{ax}{n}} \times F^{\nset{ax}{n}} &\rightarrow F \\
-  A \ndot{ax} B &= \sum_{i=1}^n A_{\nidx{ax}{i}} B_{\nidx{ax}{i}}.
+  \ndot{\ax} \colon F^{\ax[n]} \times F^{\ax[n]} &\rightarrow F \\
+  A \ndot{\ax} B &= \sum_{i=1}^n A_{\ax(i)} B_{\ax(i)}.
 \end{align*}
 
 \section{Differentiation}

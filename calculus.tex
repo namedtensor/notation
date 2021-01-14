@@ -13,9 +13,9 @@ Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, where $\mathca
   \left[\ddx Y \right]_{s,t} = \frac{\partial Y_t}{\partial X_s}.
 \end{equation*}
 
-If $X$ and $Y$'s shapes are not orthogonal, we take the derivative of $Y_\nmov{\mathcal{T}}{\mathcal{T'}}$ instead. (It's also possible to rename $X$, but we think it's easier to think about renaming $Y$, so that's what we'll do.) Assume $\mathcal{T} = \name{ax_1} \times \cdots \times \name{ax\sub{r}}$. Then for each $\name{ax\sub{i}}$, choose a new name $\name{ax\sub{i}'}$ not in either $\mathcal{S}$ or $\mathcal{T}$, and let $\mathcal{T'} = \name{ax_1'} \times \cdots \times \name{ax\sub{r}'}$. Then we seek the tensor of partial derivatives
+If $X$ and $Y$'s shapes are not orthogonal, we take the derivative of $Y_{\mathcal{T}\rightarrow\mathcal{T'}}$ instead. (It's also possible to rename $X$, but we think it's easier to think about renaming $Y$, so that's what we'll do.) Assume $\mathcal{T} = \ax_1 \times \cdots \times \ax_r$. Then for each $\ax_i$, choose a new name $\ax_i'$ not in either $\mathcal{S}$ or $\mathcal{T}$, and let $\mathcal{T'} = \ax_1' \times \cdots \times \ax_r'$. Then we seek the tensor of partial derivatives
 \begin{equation*}
-  \left[\ddx{Y_\nmov{\mathcal{T}}{\mathcal{T'}}} \right]_{s,t'} = \frac{\partial Y_t}{\partial X_s}.
+  \left[\ddx{Y_{\mathcal{T}\rightarrow\mathcal{T'}}} \right]_{s,t'} = \frac{\partial Y_t}{\partial X_s}.
 \end{equation*}
 
 \subsection{Rules}
@@ -24,12 +24,12 @@ To compute derivatives, we use the method of differentials \citep{magnus+neudeck
 \begin{align*}
   \partial f(U) &= f'(U) \ndot{\mathcal{U}} \partial U && f \colon \reals^\mathcal{U} \rightarrow \reals^{\mathcal{V}} \\
   \partial (U + V) &= \partial U + \partial V \\
-  \partial \nsum{ax} U &= \nsum{ax} \partial U \\
+  \partial \nsum{\ax} U &= \nsum{\ax} \partial U \\
   \partial (U \odot V) &= \partial U \odot V + U \odot \partial V \\
-  \partial (U \ndot{ax} V) &= \partial U \ndot{ax} V + U \ndot{ax} \partial V \\
+  \partial (U \ndot{\ax} V) &= \partial U \ndot{\ax} V + U \ndot{\ax} \partial V \\
   \partial \left(\frac{U}{V}\right) &= \frac{\partial U \odot V - U \odot \partial V}{V^2} \\
   \partial U_r &= \left[\partial U\right]_r \\
-  \partial U_{\nmov{ax1}{ax2}} &= \left[\partial U\right]_{\nmov{ax1}{ax2}}
+  \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}
 \end{align*}
 If we obtain an equation of the form
 \begin{equation}
@@ -42,41 +42,41 @@ where $\mathcal{S}$ is orthogonal to $\mathcal{T}$ and ``const'' stands for term
 \end{equation*}
 
 In order to get equations into the form (\ref{eq:canonical}), some tricks are useful. First, contractions can be easier to reason about if rewritten as sums of elementwise products:
-\[ A \ndot{ax} B = \nsum{ax} A \odot B. \]
+\[ A \ndot{\ax} B = \nsum{\ax} A \odot B. \]
 Second, renaming can be thought of as contraction with an identity matrix:
 \begin{align*}
-[I_\name{ax,ax'}]_{\nidx{ax}{i},\nidx{ax'}{j}} &= \begin{cases} 1 & i = j \\ 0 & i \neq j \end{cases} \\
-A_\nmov{ax}{ax'} &= \nsum{ax} I_{\name{ax},\name{ax'}} \odot A.
+[I_{\ax,\ax'}]_{\ax(i),\ax'(j)} &= \begin{cases} 1 & i = j \\ 0 & i \neq j \end{cases} \\
+A_{\ax\rightarrow\ax'} &= \nsum{\ax} I_{\ax,\ax'} \odot A.
 \end{align*}
 
 \subsection{Example}
 
 Let's find the differential of the softmax operator.
 \begin{align*}
-  Y &= \nfun{ax}{softmax} X \\
-  \partial Y &= \partial \biggl(\frac{\exp X}{\nsum{ax} \exp X}\biggr) \\
-    &= \frac{\exp X \odot \partial X \odot \nsum{ax} \exp X - \exp X \odot \nsum{ax} (\exp X \odot \partial X)}{\bigl(\nsum{ax} \exp X\bigr)^2} \\
-  &= Y \odot (\partial X - Y \ndot{ax} \partial X).
+  Y &= \nfun{\ax}{softmax} X \\
+  \partial Y &= \partial \biggl(\frac{\exp X}{\nsum{\ax} \exp X}\biggr) \\
+    &= \frac{\exp X \odot \partial X \odot \nsum{\ax} \exp X - \exp X \odot \nsum{\ax} (\exp X \odot \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
+  &= Y \odot (\partial X - Y \ndot{\ax} \partial X).
 \end{align*}
 
 Next, use this to find the Jacobian, $\ddx Y$. Since $X$ and $Y$ have the same shape, we rename $Y$:
 \begin{align*}
-  \partial Y_\nmov{ax}{ax'} &= [Y \odot (\partial X - \nsum{ax} Y \odot \partial X)]_\nmov{ax}{ax'} \\
-  &= Y_\nmov{ax}{ax'} \odot (\partial X_\nmov{ax}{ax'} - \nsum{ax} Y \odot \partial X) \\
-  &= Y_\nmov{ax}{ax'} \odot \left(\nsum{ax} I_\name{ax',ax} \odot \partial X - \nsum{ax} Y \odot \partial X\right) \\
-  &= \nsum{ax} Y_\nmov{ax}{ax'} \odot (I_\name{ax',ax} - Y) \odot \partial X \\
-  \ddx {Y_\nmov{ax}{ax'}} &= Y_\nmov{ax}{ax'} \odot (I_\name{ax',ax} - Y).
+  \partial Y_{\ax\rightarrow\ax'} &= [Y \odot (\partial X - \nsum{\ax} Y \odot \partial X)]_{\ax\rightarrow\ax'} \\
+  &= Y_{\ax\rightarrow\ax'} \odot (\partial X_{\ax\rightarrow\ax'} - \nsum{\ax} Y \odot \partial X) \\
+  &= Y_{\ax\rightarrow\ax'} \odot \left(\nsum{\ax} I_{\ax',\ax} \odot \partial X - \nsum{\ax} Y \odot \partial X\right) \\
+  &= \nsum{\ax} Y_{\ax\rightarrow\ax'} \odot (I_{\ax',\ax} - Y) \odot \partial X \\
+  \ddx {Y_{\ax\rightarrow\ax'}} &= Y_{\ax\rightarrow\ax'} \odot (I_{\ax',\ax} - Y).
 \end{align*}
 
-To derive the rule for backpropagation, we assume a function $f \colon \reals^\name{ax} \rightarrow \reals$ and differentiate $f(Y)$. Since $f$ is scalar-valued, there is no name overlap, so no renaming is needed.
+To derive the rule for backpropagation, we assume a function $f \colon \reals^\ax \rightarrow \reals$ and differentiate $f(Y)$. Since $f$ is scalar-valued, there is no name overlap, so no renaming is needed.
 \begin{align*}
-  \partial f(Y) &= \nsum{ax} f'(Y) \odot \partial Y \\
-  &= \nsum{ax} f'(Y) \odot Y \odot (\partial X - \nsum{ax} Y \odot \partial X) \\
-  %&= f'(Y) \ndot{ax} (Y \odot (\partial X - Y \ndot{ax} \partial X)) \\
-  &= \nsum{ax} f'(Y) \odot Y \odot \partial X - \nsum{ax} f'(Y) \odot Y \odot \nsum{ax} Y \odot \partial X \\
-  &= \nsum{ax} f'(Y) \odot Y \odot \partial X - \nsum{ax} \left(\nsum{ax} f'(Y) \odot Y\right) \odot Y \odot \partial X \\
-  &= \nsum{ax} Y \odot (f'(Y) - \nsum{ax} f'(Y) \odot Y) \odot \partial X \\
-  \ddx{f(Y)} &= Y \odot (f'(Y) - f'(Y) \ndot{ax} Y).
+  \partial f(Y) &= \nsum{\ax} f'(Y) \odot \partial Y \\
+  &= \nsum{\ax} f'(Y) \odot Y \odot (\partial X - \nsum{\ax} Y \odot \partial X) \\
+  %&= f'(Y) \ndot{\ax} (Y \odot (\partial X - Y \ndot{\ax} \partial X)) \\
+  &= \nsum{\ax} f'(Y) \odot Y \odot \partial X - \nsum{\ax} f'(Y) \odot Y \odot \nsum{\ax} Y \odot \partial X \\
+  &= \nsum{\ax} f'(Y) \odot Y \odot \partial X - \nsum{\ax} \left(\nsum{\ax} f'(Y) \odot Y\right) \odot Y \odot \partial X \\
+  &= \nsum{\ax} Y \odot (f'(Y) - \nsum{\ax} f'(Y) \odot Y) \odot \partial X \\
+  \ddx{f(Y)} &= Y \odot (f'(Y) - f'(Y) \ndot{\ax} Y).
 \end{align*}
 
 \subsection{Broadcasting}
@@ -92,8 +92,8 @@ Finding the differential of $Y$ is easy:
 \end{align*}
 But although $f'$ extends to $X$ using the usual broadcasting rules, it's not the case that $\ddx Y = f'(X)$, which would have the wrong shape. The reason is that the contraction is only over $\mathcal{S}$, not $\mathcal{S}\cup\mathcal{U}$. To get this into the form (\ref{eq:canonical}):
 \begin{align*}
-  \partial Y_\nmov{\mathcal{U}}{\mathcal{U'}} &= \nsum{\mathcal{S}} [f'(X) \odot \partial X]_\nmov{\mathcal{U}}{\mathcal{U'}} \\
+  \partial Y_{\mathcal{U}\rightarrow\mathcal{U'}} &= \nsum{\mathcal{S}} [f'(X) \odot \partial X]_{\mathcal{U}\rightarrow\mathcal{U'}} \\
   &= \nsum{\mathcal{S}} \nsum{\mathcal{U}} I_{\mathcal{U},\mathcal{U'}} \odot f'(X) \odot \partial X \\
-  \ddx{Y_\nmov{\mathcal{U}}{\mathcal{U'}}} &= I_{\mathcal{U},\mathcal{U'}} \odot f'(X).
+  \ddx{Y_{\mathcal{U}\rightarrow\mathcal{U'}}} &= I_{\mathcal{U},\mathcal{U'}} \odot f'(X).
 \end{align*}
 In general, then, when we extend a function to new axes, we extend its derivative by multiplying by the identity matrix for those axes.
