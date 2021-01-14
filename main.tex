@@ -324,60 +324,53 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 
 \subsubsection{Convolution}
 
-A 1-dimensional convolution can be easily written by unrolling a tensor and then
-applying a standard dot product.
+Convolutions can be easily written by unrolling a tensor and then
+applying a standard dot product. First, we define the unrolling operation:
+\begin{align*}
+  \nfun{\seq \\ \kernel}{unroll} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n-|\kernel|+1], \kernel} \\
+  [\nfun{\seq \\ \kernel}{unroll} X]_{\seq(i), \kernel(j)} &= X_{\seq(i+j - 1)}.
+\end{align*}
+
+Then we can define convolutions as:
 \begin{align*}
 \text{Conv1d} \colon \reals^{\chans \times \seq[n]} &\rightarrow \mathbb{R}^{\seq[n']} \\
-\text{Conv1d}(X; W, b) &= W \ndot{\chans \\ \kernel} U + b
+\text{Conv1d}(X; W, b) &= W \ndot{\chans \\ \kernel} \nfun{\seq \\ \kernel}{unroll} X + b
 \end{align*}
 where
 \begin{align*}
-n' &= n-|\kernel|+1 \\
 W &\in \reals^{\chans \times \kernel} \\
-U &\in \reals^{\chans \times \seq[n'] \times \kernel} \\
-U_{\seq(i), \kernel(j)} & = X_{\seq(i+j - 1)} \\
-b &\in \reals.
+b &\in \reals \\
 \end{align*}
 This computes a single output channel, but we can get multiple output channels by giving $W$ and $b$ a $\chans'$ axis (or some other name).
 
 A 2-dimensional convolution:
 \begin{align*}
-  \text{Conv2d} \colon \reals^{\chans \times \height[h] \times \width[w]} %\times \reals^{\chans \times \kh \times \kw} \times \reals
+  \text{Conv2d} \colon \reals^{\chans \times \height[h] \times \width[w]}
   &\rightarrow \reals^{\height[h'] \times \width[w']} \\
-  \text{Conv2d}(X; W, b) &= W \ndot{\chans \\ \kh, \kw} U + b
+  \text{Conv2d}(X; W, b) &= W \ndot{\chans \\ \kh, \kw} \nfun{\height \\ \kh}{unroll} \nfun{\width\\\kw}{unroll} X + b
 \end{align*}  
 where
 \begin{align*}
-h' &= h-|\kh|+1 \\
-w' &= w-|\kw|+1 \\
 W &\in \reals^{\chans \times \kh \times \kw} \\
-U &\in \reals^{\chans \times \height[h'] \times \width[w'] \times \kh \times \kw}  \\
-U_{\height(i), \width(j), \kh(ki), \kw(kj)} &= X_{\height(i+ki-1), \width(j+kj-1)} \\
 b &\in \reals.
 \end{align*}
 
 \subsubsection{Max pooling}
 
+We first define an operation to reshape an axis:
+\begin{align*}
+\nfun{\seq,\pool}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\pool|],\pool} \\
+[\nfun{\seq,\pool}{pool}]_{\seq(i), \pool(di)} &= X_{\seq(i \times k + di -1)}.
+\end{align*}
+
+Then we can define:
 \begin{align*}
 \text{MaxPool1d}_{k} \colon \mathbb{R}^{\seq[n]} &\rightarrow \mathbb{R}^{\seq[n/k]} \\
-\text{MaxPool1d}_{k}(X) &= \nfun{\pool}{max} U
-\end{align*}
-where
-\begin{align*}
-U &\in \reals^{\seq[n / k] \times \pool[k]} \\
-U_{\seq(i), \pool(di)} & = X_{\seq(i \times k + di -1)}.
-\end{align*}
-
-
-\begin{align*}
+\text{MaxPool1d}_{k}(X) &= \nfun{\pool}{max} \nfun{\seq,\pool[k]}{pool} X \\
 \text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\height[h] \times \width[w]} &\rightarrow \mathbb{R}^{\height[h/kh] \times \width[w/kw]} \\
-\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\ph, \pw}{max} U
+\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\ph,\pw}{max} \nfun{\height,\ph[kh]}{pool} \nfun{\width,\pw[kw]}{pool} X.
 \end{align*}
-where
-\begin{align*}
-U &\in \reals^{\height[h / kh] \times \width[w / kw] \times \ph[kh] \times \pw[kw]} \\
-U_{\height(i), \width(j), \ph(di), \pw(dj)} & = X_{\height(i \times kh + di -1), \width(j \times kw + dj -1)}.
-\end{align*}
+Other pooling functions could be defined similarly.
 
 \subsubsection{Normalization layers}
 
