@@ -69,7 +69,7 @@ In our notation, the above equation becomes
   \text{Attention} \colon \mathbb{R}^{\seq' \times \key} \times \mathbb{R}^{\seq \times \key} \times \mathbb{R}^{\seq \times\val} &\rightarrow \mathbb{R}^{\seq' \times \val} \\
   \text{Attention}(Q,K,V) = \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
-The tensor $K$ has axes for the sequence (\seq) and for the key features (\key), instead of rows or columns, so the reader does not need to remember which is which. The dot product $Q \ndot{\key} K$ is explicitly over the \key axis. The resulting tensor has a $\seq$ axis for the key sequence and a $\seq'$ axis for the query sequence, and the softmax is explicitly over $\seq$, as is the dot product with~$V$.
+The tensor $K$ has axes for the sequence (\seq) and for the key features (\key), instead of rows or columns, so the reader does not need to remember which is which. The dot product $Q \ndot{\key} K$ is explicitly over the $\key$ axis. The resulting tensor has a $\seq$ axis for the key sequence and a $\seq'$ axis for the query sequence, and the softmax is explicitly over $\seq$, as is the dot product with~$V$.
 This formula works as written if we add a $\heads$ axis for multiple attention heads, or a $\batch$ axis for multiple sequences in a minibatch.
 
 Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
@@ -131,22 +131,22 @@ Any function from a scalar to a scalar can be applied elementwise to a named ten
 
 But if we apply a binary function/operator to tensors with different shapes, they are \emph{broadcast} against each other (similarly to NumPy and derivatives). Let
 \begin{align*}
-  B &\in \reals^{\height[3]} & C &\in \reals^{\width[3]} \\
-  B &= \nmatrix{\height}{}{
+  x &\in \reals^{\height[3]} & y &\in \reals^{\width[3]} \\
+  x &= \nmatrix{\height}{}{
     2 \\ 7 \\ 1
   } & 
-  C &= \nmatrix{}{\width}{
+  y &= \nmatrix{}{\width}{
     1 & 4 & 1
   }.
 \end{align*}
-(We write $B$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+B$, we effectively replace $B$ with a new tensor $B'$ that contains a copy of $B$ for every index of axis $\width$. Likewise for $A+C$:
+(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor $x'$ that contains a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
 \begin{align*}
-A + B &= \nmatrix{\height}{\width}{
+A + x &= \nmatrix{\height}{\width}{
   3+2 & 1+2 & 4+2 \\
   1+7 & 5+7 & 9+7 \\
   2+1 & 6+1 & 5+1
 } &
-A + C &= \nmatrix{\height}{\width}{
+A + y &= \nmatrix{\height}{\width}{
   3+1 & 1+4 & 4+1 \\
   1+1 & 5+4 & 9+1 \\
   2+1 & 6+4 & 5+1
@@ -156,9 +156,9 @@ A + C &= \nmatrix{\height}{\width}{
 \subsubsection{Reductions}
 \label{sec:reductions}
 
-The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. Unlike with functions on scalars, we always have to specify which axis reductions apply to, using a subscript. (This is equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch.)
+The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. We always specify which axis a reduction applies to using a subscript (equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch).
 
-For example, we can sum over the $\height$ axis or the $\width$ axis of $A$:
+See~\S\ref{sec:commonops} for some common reductions. Here we take summation as an example.
 \begin{align*}
 \nsum{\height} A &= \sum_i A_{\height(i)} = \nmatrix{}{\width}{
   3+1+2 & 1+5+6 & 4+9+5
@@ -168,28 +168,35 @@ For example, we can sum over the $\height$ axis or the $\width$ axis of $A$:
   3+1+4 & 1+5+9 & 2+6+5
 }.
 \end{align*}
-See~\S\ref{sec:morereductions} for more examples of reductions.
 
-We can also write multiple names to perform the reduction over multiple axes at once. For example,
+We can also write multiple names to sum over multiple axes:
 \begin{equation*}
   \nsum{\height \\ \width} A = \sum_i \sum_j A_{\height(i),\width(j)} = 3+1+4+1+5+9+2+6+5.
 \end{equation*}
-%But unlike in NumPy and its derivatives, a reduction with no axis under it is performed over zero axes (which in most cases does nothing).
+But a summation with an index variable (like $i$ or $j$ above) is a standard summation over values of that variable, and a summation with no subscript is a standard summation over a set.
 
 The vector dot-product is a function from \emph{two} vectors to a scalar, which generalizes to named tensors to give the ubiquitous \emph{contraction} operator. You can think of it as elementwise multiplication, then summation over one axis:
 \begin{align*}
-%A \ndot{\height} B &= \sum_i A_{\height(i)} B_{\height(i)} = \nmatrix{}{\width}{
+%A \ndot{\height} x &= \sum_i A_{\height(i)} x_{\height(i)} = \nmatrix{}{\width}{
 %  3\cdot2 + 1\cdot7 + 2\cdot1 & 1\cdot2 + 5\cdot7 + 6\cdot1 & 4\cdot2 + 9\cdot7 + 5\cdot 1
 %} \\
-A \ndot{\width} C &= \sum_j A_{\width(j)} C_{\width(j)} = \nmatrix{\height}{}{
+A \ndot{\width} y &= \sum_j A_{\width(j)} \, y_{\width(j)} = \nmatrix{\height}{}{
   3\cdot1 + 1\cdot4 + 4\cdot1 \\
   1\cdot1 + 5\cdot4 + 9\cdot1 \\
   2\cdot1 + 6\cdot4 + 5\cdot1
 }.
 \end{align*}
-See \S\ref{sec:contractions} for more examples of what the contraction operator can do.
 
-Again, we can write multiple names to contract multiple axes at once. An operator $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
+Again, we can write multiple names to contract multiple axes at once. A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
+
+The contraction operator can be used for many multiplication-like operations:
+\begin{align*}
+  x \ndot{\height} x &= \sum_i x_{\height(i)} \, x_{\height(i)} && \text{inner product} \\
+  x \odot y &= \sum_{i,j} x_{\height(i)} \, y_{\width(j)} && \text{outer product} \\
+  A \ndot{\width} y &= \sum_i A_{\width(i)} \, y_{\width(i)} && \text{matrix-vector product} \\
+  x \ndot{\height} A &= \sum_i x_{\height(i)} \, A_{\height(i)} && \text{vector-matrix product} \\
+  A \ndot{\width} B &= \sum_i A_{\width(i)} \odot B_{\width(i)} && \text{matrix-matrix product}~(B \in \reals^{\width \times \width'})
+\end{align*}
 
 \subsubsection{Renaming and reshaping}
 
@@ -213,56 +220,11 @@ The order of elements in the new axis is undefined. If you need a particular ord
 \section{Examples}
 \label{sec:examples}
 
-In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning.
-\subsection{More tensor operations}
-
-\subsubsection{Reductions}
-\label{sec:morereductions}
-
-\begin{align*}
-  \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
-  \nfun{\ax}{max} A &= \max \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
-  \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
-  \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A \\
-  \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2.
-\end{align*}
-The $\min$ and $\max$ operators are overloaded, as is the summation operator defined above (\S\ref{sec:reductions}). If the operator is applied to a tensor and has an axis under it, then it's a reduction performed over the axis. But if it is applied to a set of tensors and has no axis under it, then it's an elementwise operation performed over the set.
-
-\subsubsection{Contractions}
-\label{sec:contractions}
-
-The contraction operator can be used for many multiplication-like operations.
-\begin{align*}
-  u, v &\in \mathbb{R}^{\ax_1} \\
-  x, y &\in \mathbb{R}^{\ax_2} \\
-  A &\in \mathbb{R}^{\ax_1 \times \ax_2} \\
-  B &\in \mathbb{R}^{\ax_2 \times \ax_3}
-\end{align*}
-\begin{align*}
-  u \ndot{\ax_1} v &= \sum_i u_{\ax_1(i)} v_{\ax_1(i)} && \text{inner product} \\
-  u \odot x &= \sum_{i,j} u_{\ax_1(i)} x_{\ax_2(j)} && \text{outer product} \\
-  A \ndot{\ax_2} x &= \sum_j A_{\ax_2(j)} x_{\ax_2(j)} && \text{matrix-vector multiplication} \\
-  u \ndot{\ax_1} A &= \sum_i u_{\ax_1(j)} A_{\ax_1(j)} && \text{vector-matrix multiplication} \\
-  A \ndot{\ax_2} B &= \sum_j A_{\ax_2(j)} \odot B_{\ax_2(j)} && \text{matrix-matrix multiplication}
-\end{align*}
-
-\subsubsection{Softmax and argmax}
-
-Most activation functions are elementwise operations (sigmoid, tanh, ReLU), so they are straightforward to use in our notation; the softmax, however, is interesting because it's defined as a function from vectors to vectors:
-\begin{align*}
-  \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A}.
-\end{align*}
-As with reductions, we write an axis below the softmax operator, but this axis is retained in the output.
-
-Closely related are argmax and argmin, which we define to compute one-hot vectors with a one at the position containing the maximum or minimum value.
-\begin{align*}
-  \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A \\
-  \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A.
-\end{align*}
+In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning. Many of these examples use functions that the reader can probably guess the meaning of; if not, please see \S\ref{sec:commonops} for definitions.
 
 \subsection{Building blocks}
 
-\subsubsection{Fully-connected layers}
+\subsubsection{Feedforward neural networks}
 
 A feedforward neural network looks like this:
 \begin{align*}
@@ -282,7 +244,7 @@ where
   W^l &\in \mathbb{R}^{\layer'[n_l] \times \layer[n_{l-1}]} \\
   b^l &\in \mathbb{R}^{\layer'[n_l]}.
 \end{align*}
-A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name \layer{} for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis $\layer'$, then renames it back to \layer. 
+A couple of things are new here. First, $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters (analogous to what TensorFlow and PyTorch call \emph{modules}). Second, we chose to use the same axis name $\layer$ for all the layers (with different sizes $n_l$). So $\text{FullConn}^l$ temporarily computes its output over axis $\layer'$, then renames it back to $\layer$. 
 
 Then the network can be defined like this:
 \begin{align*}
@@ -700,11 +662,38 @@ f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T
   [f(A,B)]_r &= f\left(A_{\restrict{r}{\mathcal{S'}}},B_{\restrict{r}{\mathcal{T'}}}\right) \qquad \text{for all $r \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
 \end{align*}
 
-All of the tensor operations described in \S\ref{sec:operations} can be defined in this way. For example, the contraction operator can be defined as:
+\subsection{Common operations}
+\label{sec:commonops}
+
+All the tensor operations described in \S\ref{sec:operations} can be defined in this way, and others listed below.
+
+\paragraph{Reductions} ($F^{\ax[n]} \rightarrow F$)
 \begin{align*}
-  \ndot{\ax} \colon F^{\ax[n]} \times F^{\ax[n]} &\rightarrow F \\
-  A \ndot{\ax} B &= \sum_{i=1}^n A_{\ax(i)} B_{\ax(i)}.
+  \nsum{\ax} A &= \sum_{i=1}^n A_{\ax(i)} \\
+  \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
+  \nfun{\ax}{max} A &= \max \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
+  \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
+  \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A \\
+  \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2
 \end{align*}
+
+\paragraph{Contraction} ($F^{\ax[n]} \times F^{\ax[n]} \rightarrow F$)
+\begin{align*}
+  A \ndot{\ax} B &= \sum_{i=1}^n A_{\ax(i)} B_{\ax(i)}
+\end{align*}
+
+\paragraph{Vectors to vectors} ($F^{\ax[n]} \rightarrow F^{\ax[n]}$)
+\begin{align*}
+  \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A} \\
+  \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A \\
+  \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A
+\end{align*}
+
+\paragraph{Renaming} ($F^{\ax[n]} \rightarrow F^{\ax'[n]}$)
+\begin{align*}
+  [A_{\ax\rightarrow\ax'}]_{\ax'(i)} &= A_{\ax(i)}
+\end{align*}
+
 
 \section{Differentiation}
 
