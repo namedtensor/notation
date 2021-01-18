@@ -2,46 +2,37 @@
 
 Contributors: Tongfei Chen and Chu-Cheng Lin
 
-NumPy defines two kinds of \emph{advanced} (also known as \emph{fancy}) indexing: by integer arrays and by Boolean arrays. Here, we generalize indexing by integer arrays to named tensors. That is, if $A$ is a named tensor with $D$ indices and $\iota^1, \ldots, \iota^D$ are named tensors, called ``indexers,'' what is $A_{\iota^1, \ldots, \iota^D}$?
+NumPy defines a kind of \emph{advanced} (also known as \emph{fancy}) indexing in which a tensor is indexed by another tensor of integers. The analogous operation for named tensors turns out to generalize both advanced indexing as well as TensorFlow and PyTorch's \verb|gather| function.
 
-Advanced indexing could be derived by taking a function
+Define
 \begin{align*}
   \nfun{\ax}{index} \colon F^{\ax[I]} \times I &\rightarrow F \\
-  \nfun{\ax}{index}(A, i) &= A_{\ax(i)}
+  \nfun{\ax}{index}(A, i) &= A_{\ax(i)}.
 \end{align*}
-and extending it to higher-order tensors in its second argument according to the rules in \S\ref{sec:tensorfunctions}. But because that's somewhat abstract, we give a more concrete definition below.
+This function can be extended to higher-order tensors in its second argument according to the rules in \S\ref{sec:tensorfunctions}. Then, to enable indexing by integer arrays, we just have to define
+\begin{equation*}
+  A_{\ax(\iota)} = \nfun{\ax}{index}(A, \iota).
+\end{equation*}
 
-We first consider the case where all the indexers have the same shape $\mathcal{S}$:
-\begin{align*}
-  A &\in F^{\ax_1[I_1] \times \cdots \times \ax_D[I_D]} \\
-  \iota^d &\in I_d^{\mathcal{S}} & d &= 1, \ldots, D.
-\end{align*}
-Then $A_{\iota^1, \ldots, \iota^D}$ is the named tensor with shape $\mathcal{S}$ such that for any $s \in \rec{\mathcal{S}}$,
-\begin{align*}
-  [A_{\iota^1, \ldots, \iota^D}]_s &= A_{\iota^1_s, \ldots, \iota^D_s}.
-\end{align*}
-More generally, suppose the indexers have different but compatible shapes:
-\begin{align*}
-  A &\in F^{\ax_1[I_1] \times \cdots \times \ax_D[I_D]} \\
-  \iota^d &\in I_d^{\mathcal{S}_d} & d &= 1, \ldots, D
-\end{align*}
-where the $\mathcal{S}_d$ are pairwise compatible. Then $A_{\iota^1, \ldots, \iota^D}$ is the named tensor with shape $\mathcal{S} = \bigcup_d \mathcal{S}_d$ such that for any $s \in \rec{\mathcal{S}}$,
-\begin{align*}
-  [A_{\iota^1, \ldots, \iota^D}]_s &= A_{\iota^1_{\restrict{s}{\mathcal{S}_1}}, \ldots, \iota^D_{\restrict{s}{\mathcal{S}_D}}}.
-\end{align*}
+There is more to this definition than meets the eye. Suppose that $A$ has shape $\ax_1$ and $\iota$ has shape $\ax_2 \times \ax_3$. Then $A_{\ax_1(\iota)}$ has shape $\ax_2 \times \ax_3$ and
+\begin{equation*}
+  [A_{\ax_1(\iota)}]_{\ax_2(i),\ax_3(j)} = A_{\ax_1(\iota_{\ax_2(i),\ax_3(j)})}
+\end{equation*}
+which is analogous to NumPy's advanced indexing. On the other hand, suppose that $A$ has shape $\ax_1 \times \ax_2 \times \ax_3$ and $\iota$ again has shape $\ax_2 \times \ax_3$. Then $A_{\ax_1(\iota)}$ again has shape $\ax_2 \times \ax_3$, but
+\begin{equation*}
+  [A_{\ax_1(\iota)}]_{\ax_2(i),\ax_3(j)} = A_{\ax_1(\iota_{\ax_2(i),\ax_3(j)}),\ax_2(i),\ax_3(j)}
+\end{equation*}
+which is analogous to \verb|gather|.
 
 \ndef{\subseq}{subseq}
 
-Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\batch[B] \times \seq[N] \times \emb[E]}$. For each sentence, we would like to take out the encodings of a particular span for each sentence $b \in [B]$ in the batch, resulting in a tensor $Y \in \mathbb{R}^{\batch[B] \times \subseq[M] \times \emb[E]}$.
+Let's consider a concrete example in natural language processing. Consider a batch of sentences encoded as a sequence of word vectors, that is, a tensor $X \in \mathbb{R}^{\batch[B] \times \seq[N] \times \emb[E]}$. For each sentence in the batch, we would like to take out the encodings of some subsequence (possibly different for each sentence), resulting in a tensor $Y \in \mathbb{R}^{\batch[B] \times \subseq[M] \times \emb[E]}$.
 
-We create a indexer for the $\seq$ axis: $\iota \in [N]^{\batch[B] \times \subseq[M]}$ that selects the desired tokens. Also define the function
-\begin{align*}
-  \nfun{\ax}{arange}(I) &\in I^{\ax[I]} \\
-  \left[\nfun{\ax}{arange}(I)\right]_{\ax(i)} &= i
-\end{align*}
-which generalizes the NumPy function of the same name.
-
-Then we can write
+We create a indexer for the $\seq$ axis: $\iota \in [N]^{\batch[B] \times \subseq[M]}$ that selects the desired positions. Then we can write
 \begin{equation*}
-  Y = X_{\batch(\iota), \seq(\nfun{\seq}{arange}(n)), \emb(\nfun{\emb}{arange}(E))}.
+  Y = X_{\seq(\iota)}
+\end{equation*}
+which is equivalent to the much more complicated expression
+\begin{equation*}
+  Y_{\batch(b),\subseq(i)} = X_{\batch(b),\seq(\iota_{\batch(b),\subseq(i)})}.
 \end{equation*}

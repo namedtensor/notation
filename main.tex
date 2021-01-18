@@ -653,13 +653,13 @@ In \S\ref{sec:overview}, we described several classes of functions that can be e
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
 f \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
-[f(A)]_r &= f(A_r) \qquad \text{for all $r \in \rec\mathcal{S'}$.}
+[f(A)]_s &= f(A_s) \qquad \text{for all $s \in \rec\mathcal{S'}$.}
 \end{align*}
 
 If $f$ is a multary function, we can extend its arguments to larger shapes, and we don't have to extend all the arguments with the same names. We consider just the case of two arguments; three or more arguments are analogous. Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can extend $f$ to:
 \begin{align*}
 f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{S'} \cup \mathcal{T'}} \\
-  [f(A,B)]_r &= f\left(A_{\restrict{r}{\mathcal{S'}}},B_{\restrict{r}{\mathcal{T'}}}\right) \qquad \text{for all $r \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
+  [f(A,B)]_s &= f\left(A_{\restrict{s}{\mathcal{S'}}},B_{\restrict{s}{\mathcal{T'}}}\right) \qquad \text{for all $s \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
 \end{align*}
 
 \subsection{Common operations}
@@ -667,7 +667,13 @@ f \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T
 
 All the tensor operations described in \S\ref{sec:operations} can be defined in this way, and others listed below.
 
-\paragraph{Reductions} ($F^{\ax[n]} \rightarrow F$)
+\paragraph{Elementwise operations} ($\reals \rightarrow \reals$)
+\begin{align*}
+  \sigma(x) &= \frac{1}{1+\exp(-x)} \\
+  \text{relu}(x) &= \max(0, x)
+\end{align*}
+
+\paragraph{Reductions} ($\reals^{\ax[n]} \rightarrow \reals$)
 \begin{align*}
   \nsum{\ax} A &= \sum_{i=1}^n A_{\ax(i)} \\
   \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
@@ -677,19 +683,19 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
   \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2
 \end{align*}
 
-\paragraph{Contraction} ($F^{\ax[n]} \times F^{\ax[n]} \rightarrow F$)
+\paragraph{Contraction} ($\reals^{\ax[n]} \times \reals^{\ax[n]} \rightarrow F$)
 \begin{align*}
   A \ndot{\ax} B &= \sum_{i=1}^n A_{\ax(i)} B_{\ax(i)}
 \end{align*}
 
-\paragraph{Vectors to vectors} ($F^{\ax[n]} \rightarrow F^{\ax[n]}$)
+\paragraph{Vectors to vectors} ($\reals^{\ax[n]} \rightarrow \reals^{\ax[n]}$)
 \begin{align*}
   \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A} \\
   \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A \\
   \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A
 \end{align*}
 
-\paragraph{Renaming} ($F^{\ax[n]} \rightarrow F^{\ax'[n]}$)
+\paragraph{Renaming} ($\reals^{\ax[n]} \rightarrow \reals^{\ax'[n]}$)
 \begin{align*}
   [A_{\ax\rightarrow\ax'}]_{\ax'(i)} &= A_{\ax(i)}
 \end{align*}
