@@ -24,7 +24,6 @@
 \ndef{\inp}{input} \ndef{\hidden}{hidden} \ndef{\out}{out}
 \ndef{\height}{height} \ndef{\width}{width} \ndef{\chans}{chans}
 \ndef{\kernel}{kernel} \ndef{\kh}{kh} \ndef{\kw}{kw}
-\ndef{\pool}{pool}     \ndef{\ph}{ph} \ndef{\pw}{pw}
 \ndef{\vocab}{vocab}
 \ndef{\classes}{classes}
 \ndef{\state}{state}
@@ -321,16 +320,19 @@ b &\in \reals.
 
 We first define an operation to reshape an axis:
 \begin{align*}
-\nfun{\seq,\pool}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\pool|],\pool} \\
-\left[\nfun{\seq,\pool}{pool}\right]_{\seq(i), \pool(di)} &= X_{\seq(i \times |\pool| + di - 1)}.
+\nfun{\seq,\kernel}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\kernel|],\kernel} \\
+\left[\nfun{\seq,\kernel}{pool}\right]_{\seq(i), \kernel(di)} &= X_{\seq(i \times |\kernel| + di - 1)}.
 \end{align*}
 
 Then we can define:
 \begin{align*}
 \text{MaxPool1d}_{k} \colon \mathbb{R}^{\seq[n]} &\rightarrow \mathbb{R}^{\seq[n/k]} \\
-\text{MaxPool1d}_{k}(X) &= \nfun{\pool}{max} \nfun{\seq,\pool[k]}{pool} X \\
+\text{MaxPool1d}_{k}(X) &= \nfun{\kernel}{max} \nfun{\seq,\kernel}{pool} X \\
+|\kernel| &= k \\
 \text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\height[h] \times \width[w]} &\rightarrow \mathbb{R}^{\height[h/kh] \times \width[w/kw]} \\
-\text{MaxPool2d}_{kh,hw}(X) &= \nfun{\ph,\pw}{max} \nfun{\height,\ph[kh]}{pool} \nfun{\width,\pw[kw]}{pool} X.
+\text{MaxPool2d}_{kh,kw}(X) &= \nfun{\kh,\kw}{max} \nfun{\height,\kh}{pool} \nfun{\width,\kw}{pool} X \\
+|\kh| &= kh \\
+|\kw| &= kw.
 \end{align*}
 Other pooling functions could be defined similarly.
 
