@@ -505,19 +505,18 @@ Tensor~$E$ contains word embeddings for all the words in the vocabulary. Integer
 
 \subsubsection{Continuous bag of words}
 
-A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
+A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ (as one-hot vectors) and projecting them to the space of classes. 
 
 \begin{align*}
-\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\seq \times \classes} \\
-\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} (W \ndot{\emb} E \ndot{\vocab} X)
+\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\classes} \\
+\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} \left(\nsum{\seq} W \ndot{\emb} E \ndot{\vocab} X\right)
 \end{align*}
 where
 \begin{align*}
-\nsum{\vocab} X &= 1 \\
+\nsum{\vocab} X_{\seq(i)} &= 1 & i &= 1, \ldots, |\seq| \\
 E &\in \reals^{\vocab \times \emb} \\
 W &\in \reals^{\classes \times \emb}.
 \end{align*}
-Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsubsection{Sudoku ILP}
 
