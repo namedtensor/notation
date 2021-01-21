@@ -475,21 +475,43 @@ p(\name{B}) &= \nsum{\name{A}} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A})
 p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A})}. && \text{Bayes' rule}
 \end{align*}
 
+\subsubsection{Advanced indexing}
+
+Contributors: Tongfei Chen and Chu-Cheng Lin
+
+NumPy and its derivatives provide various ways to recombine elements of a tensor to form a new tensor: integer array indexing, and functions like \verb|take|, \verb|index_select|, \verb|gather|, and \verb|batch_gather|. Using named tensors, we can write nearly all of these operations with a single function:
+\begin{align*}
+  \nfun{\ax}{index} \colon \reals^{\ax[n]} \times [n] &\rightarrow \reals \\
+  \nfun{\ax}{index}(A, i) &= A_{\ax(i)}.
+\end{align*}
+Suppose we have
+\begin{align*}
+  E &\in \reals^{\vocab[n] \times \emb} \\
+  i &\in [n] \\
+  I &\in [n]^{\seq} \\
+  P &\in \reals^{\seq \times \vocab[n]}
+\end{align*}
+Tensor~$E$ contains word embeddings for all the words in the vocabulary. Integer~$i$ is the numeric identifier of a word, while tensor~$I$ is a sequence of words. Tensor~$P$ contains a sequence of probability distributions over the vocabulary. Then:
+\begin{itemize}
+\item The expression $\nfun{\vocab}{index}(E,i)$ broadcasts $E$'s $\emb$ axis, giving the word embedding of word $i$. This is the same as partial indexing ($E_{\vocab(i)}$).
+\item The expression $\nfun{\vocab}{index}(E,I)$ also broadcasts $I$'s $\seq$ axis, giving a sequence of word embeddings. This is the same as integer array indexing.
+\item The expression $\nfun{\vocab}{index}(P,I)$ aligns $P$'s and $I$'s $\seq$ axes, giving a sequence of probabilities. This is the same as \verb|gather|.
+\end{itemize}
+
 \subsubsection{Continuous bag of words}
 
-A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ and then projecting them to the space of classes. 
+A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ (as one-hot vectors) and projecting them to the space of classes. 
 
 \begin{align*}
-\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\seq \times \classes} \\
-\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} (W \ndot{\hidden} E \ndot{\vocab} X)
+\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\classes} \\
+\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} \left(\nsum{\seq} W \ndot{\emb} E \ndot{\vocab} X\right)
 \end{align*}
 where
 \begin{align*}
-\nsum{\vocab} X &= 1 \\
-E &\in \reals^{\vocab \times \hidden} \\
-W &\in \reals^{\classes \times \hidden}.
+\nsum{\vocab} X_{\seq(i)} &= 1 & i &= 1, \ldots, |\seq| \\
+E &\in \reals^{\vocab \times \emb} \\
+W &\in \reals^{\classes \times \emb}.
 \end{align*}
-Here, the two contractions can be done in either order, so we leave the parentheses off.
 
 \subsubsection{Sudoku ILP}
 
@@ -695,15 +717,9 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
   [A_{\ax\rightarrow\ax'}]_{\ax'(i)} &= A_{\ax(i)}
 \end{align*}
 
-
 \section{Differentiation}
 
 \input{calculus}
-
-\section{Extensions}
-
-\input{types}
-\input{fancy}
 
 \section{Alternatives}
 
