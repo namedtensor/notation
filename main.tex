@@ -192,7 +192,7 @@ Again, we can write multiple names to contract multiple axes at once. A $\odot$ 
 The contraction operator can be used for many multiplication-like operations:
 \begin{align*}
   x \ndot{\height} x &= \sum_i x_{\height(i)} \, x_{\height(i)} && \text{inner product} \\
-  x \odot y &= \sum_{i,j} x_{\height(i)} \, y_{\width(j)} && \text{outer product} \\
+  [x \odot y]_{\height(i), \width(j)} &= x_{\height(i)} \, y_{\width(j)} && \text{outer product} \\
   A \ndot{\width} y &= \sum_i A_{\width(i)} \, y_{\width(i)} && \text{matrix-vector product} \\
   x \ndot{\height} A &= \sum_i x_{\height(i)} \, A_{\height(i)} && \text{vector-matrix product} \\
   A \ndot{\width} B &= \sum_i A_{\width(i)} \odot B_{\width(i)} && \text{matrix-matrix product}~(B \in \reals^{\width \times \width'})
@@ -732,7 +732,7 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 
 \section*{Acknowledgements}
 
-Thanks to Ekin Aky\"{u}rek, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it).
+Thanks to Ekin Aky\"{u}rek, Justin Bayer, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it).
 
 \iffalse % hack to make this heading appear only in pandoc
 \section*{References}
