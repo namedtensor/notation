@@ -18,6 +18,7 @@
 \ndef{\dd}{d}
 \ndef{\layer}{layer}
 \ndef{\seq}{seq}
+\ndef{\subseq}{subseq}
 \ndef{\key}{key} \ndef{\val}{val}
 \ndef{\heads}{heads}
 \ndef{\batch}{batch}
@@ -499,6 +500,15 @@ Tensor~$E$ contains word embeddings for all the words in the vocabulary. Integer
 \item The expression $\nfun{\vocab}{index}(E,I)$ also broadcasts $I$'s $\seq$ axis, giving a sequence of word embeddings. This is the same as integer array indexing.
 \item The expression $\nfun{\vocab}{index}(P,I)$ aligns $P$'s and $I$'s $\seq$ axes, giving a sequence of probabilities. This is the same as \verb|gather|.
 \end{itemize}
+
+In NumPy, indexing using two or more integer arrays requires a special definition with some surprising special cases. With named tensors, we simply apply the indexing function twice. For example, if we (for some reason) wanted to get probabilities of words at a subset of positions:
+\begin{align*}
+  |\seq| &= m \\
+  I_1 &= [m]^\subseq \\
+  I_2 &= [n]^\subseq \\
+  S &= \nfun{\vocab}{index}(\nfun{\seq}{index}(P, I_1), I_2) \in \reals^{\subseq} \\
+  S_{\subseq(i)} &= P_{\seq(I_{\subseq(i)}), \vocab(I_{\subseq(i)})}.
+\end{align*}
 
 \subsubsection{Continuous bag of words}
 
