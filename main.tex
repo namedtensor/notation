@@ -289,7 +289,8 @@ Convolutions can be easily written by unrolling a tensor and then
 applying a standard dot product. First, we define the unrolling operation:
 \begin{align*}
   \nfun{\seq \\ \kernel}{unroll} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n-|\kernel|+1], \kernel} \\
-  \left[\nfun{\seq \\ \kernel}{unroll} X\right]_{\seq(i), \kernel(j)} &= X_{\seq(i+j - 1)}.
+  \nfun{\seq \\ \kernel}{unroll} X &= Y,\ \text{where} \\
+  Y_{\seq(i), \kernel(j)} &= X_{\seq(i+j - 1)}.
 \end{align*}
 
 Then we can define convolutions as:
@@ -320,8 +321,9 @@ b &\in \reals.
 
 We first define an operation to reshape an axis:
 \begin{align*}
-\nfun{\seq,\kernel}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\kernel|],\kernel} \\
-\left[\nfun{\seq,\kernel}{pool}\right]_{\seq(i), \kernel(di)} &= X_{\seq(i \times |\kernel| + di - 1)}.
+  \nfun{\seq,\kernel}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\kernel|],\kernel} \\
+  \nfun{\seq,\kernel}{pool} X &= Y,\ \text{where} \\
+  Y_{\seq(i), \kernel(di)} &= X_{\seq(i \times |\kernel| + di - 1)}.
 \end{align*}
 
 Then we can define:
