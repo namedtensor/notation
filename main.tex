@@ -324,7 +324,7 @@ We first define an operation to reshape an axis:
 \begin{align*}
   \nfun{\seq,\kernel}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\kernel|],\kernel} \\
   \nfun{\seq,\kernel}{pool} X &= Y,\ \text{where} \\
-  Y_{\seq(i), \kernel(di)} &= X_{\seq(i \times |\kernel| + di - 1)}.
+  Y_{\seq(i), \kernel(j)} &= X_{\seq((i-1) \cdot |\kernel| + j)}.
 \end{align*}
 
 Then we can define:
