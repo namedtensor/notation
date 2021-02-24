@@ -343,28 +343,40 @@ Other pooling functions could be defined similarly.
 
 Batch, instance, and layer normalization are often informally described using the same
 equation, but they each correspond to very different functions. They differ
-by which axes are normalized.
+both by which axes are \textit{standardized} as well as their parameters.
 
-We can define a single generic normalization layer:
+We can define a single generic standardization function as:
 \begin{align*}
-  \nfun{\ax}{XNorm} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
-  \nfun{\ax}{XNorm}(X; \gamma, \beta, \epsilon) &= \frac{X - \nfun{\ax}{mean}(X)}{\sqrt{\nfun{\ax}{var}(X)} + \epsilon} \odot \gamma + \beta
+  \nfun{\ax}{standardize} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
+  \nfun{\ax}{standardize}(X) &= \frac{X - \nfun{\ax}{mean}(X)}{\sqrt{\nfun{\ax}{var}(X) + \epsilon}}
 \end{align*}
 where
 \begin{align*}
-  \gamma, \beta &\in \mathbb{R}^{\ax} \\
   \epsilon &> 0.
 \end{align*}
 
-Now, suppose that the input has three axes:
+Now, consider norm functions each with the same type.
 \begin{align*}
-X &\in \reals^{{\batch \times \chans \times \layer}}
+\text{xNorm} &: \reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}
 \end{align*}
 Then the three kinds of normalization layers can be written as:
 \begin{align*}
-Y &= \nfun{\batch}{XNorm}(X; \gamma, \beta) && \text{batch normalization} \\
-Y &= \nfun{\layer}{XNorm}(X; \gamma, \beta) && \text{instance normalization} \\
-Y &= \nfun{\layer,\chans}{XNorm}(X; \gamma, \beta) && \text{layer normalization}
+\text{BatchNorm}(X; \gamma, \beta) &= \nfun{\batch,\layer}{standardize}(X) \ndot{} \gamma + \beta \text{ where }   \gamma, \beta \in \mathbb{R}^{\chans} \\
+\text{InstanceNorm}(X; \gamma, \beta) &= \nfun{\layer}{standardize}(X) \ndot{} \gamma + \beta  \text{ where }   \gamma, \beta \in \mathbb{R}^{\chans} \\
+\text{LayerNorm}(X; \gamma, \beta) &= \nfun{\layer,\chans}{standardize}(X) \ndot{} \gamma + \beta  \text{ where }   \gamma, \beta \in \mathbb{R}^{\chans,\layer} \\
+\end{align*}
+
+Note that while superficially similar these functions differ in their standardized axes and their parameter shape. 
+
+Other deep learning methods have been proposed which consider different shapes of standardization. For instance, group norm is a popular extension that first pools channels into $k$-size groups before standardizing. 
+
+\begin{align*}
+\text{GroupNorm}_k(X; \gamma, \beta) &= \left( \nfun{\kernel,\layer}{standardize}(\nfun{\chans, \kernel}{pool} X)\right)_{(\chans,\kernel)\rightarrow \chans } \ndot{} \gamma + \beta \\ 
+\end{align*}
+where
+\begin{align*}
+|\kernel| &= k\\
+\gamma, \beta &\in \mathbb{R}^{\chans} \\
 \end{align*}
 
 \subsection{Transformer}
