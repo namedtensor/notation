@@ -62,7 +62,7 @@ Most papers about neural networks use the notation of vectors and matrices from 
 \[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
 where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? It sums over columns, but there's not enough information to know what the columns represent. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more difficult still.
 
-Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort.
+Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
 
 
 In our notation, the above equation becomes
@@ -80,7 +80,7 @@ The source code for this document can be found at \url{https://github.com/namedt
 \section{Informal Overview}
 \label{sec:overview}
 
-In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. If $A \in \reals^{3\times3}$, then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same element. It's up to the reader to remember what each axis of each tensor is for. We think this is a problem and propose a solution.
+In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers. If $A \in \reals^{3\times3}$, then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same element. It's up to the reader to remember what each axis of each tensor stands for. This problem is exacerbated in modern machine learning, where tensors have multiple axes with different meanings (batches, channels, etc.), and different operations act on different axes. The solution we propose is for each axis to have a \emph{name} that describes it and ensures there is no confusion between (for example) the batch or channel axis. Our notation also makes it easy to define unambiguously which operations act on which axes.
 
 \subsection{Named tensors}
 
