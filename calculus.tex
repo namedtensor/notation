@@ -31,17 +31,16 @@ To compute derivatives, we use the method of differentials \citep{magnus+neudeck
   \partial U_s &= \left[\partial U\right]_s \\
   \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}
 \end{align*}
-If we obtain an equation of the form
-\begin{equation}
+If we obtain an equation in the so-called \emph{canonical} form
+\begin{equation*}
   \partial Y = A \ndot{\mathcal{S}} \partial X + \text{const.}
-  \label{eq:canonical}
-\end{equation}
+\end{equation*}
 where $\mathcal{S}$ is orthogonal to $\mathcal{T}$ and ``const'' stands for terms not depending on $\partial X$, then we have
 \begin{equation*}
   \ddx{Y} = A.
 \end{equation*}
 
-In order to get equations into the form (\ref{eq:canonical}), some tricks are useful. First, contractions can be easier to reason about if rewritten as sums of elementwise products:
+In order to get equations into canonical form, some tricks are useful. First, contractions can be easier to reason about if rewritten as sums of elementwise products:
 \[ A \ndot{\ax} B = \nsum{\ax} A \odot B. \]
 Second, renaming can be thought of as contraction with an identity matrix:
 \begin{align*}
