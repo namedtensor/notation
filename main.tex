@@ -63,7 +63,8 @@ Most papers about neural networks use the notation of vectors and matrices from 
 \[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
 where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? It sums over columns, but there's not enough information to know what the columns represent. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more difficult still.
 
-Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
+Here, we propose mathematical notation for tensors with \emph{named axes}.\footnote{%
+We follow NumPy in using the term \emph{axis}. Other possible terms would be \emph{index}, \emph{dimension}, or \emph{mode}, but these are all ambiguous in their own way, and we thought that \emph{axis} would be the least problematic.} The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
 
 In our notation, the above equation becomes
 \begin{align*}
@@ -281,7 +282,7 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis $\seq'$, but this definition computes a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
+Note that this definition computes only a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
