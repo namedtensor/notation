@@ -1,4 +1,6 @@
-\documentclass{article}
+\pdfoutput=1
+\documentclass[10pt]{article}
+\usepackage{tmlr} \let\name\authorname
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
@@ -13,7 +15,6 @@
 \DeclareMathOperator{\rec}{rec}
 \newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
 \newcommand{\nmatrix}[3]{#1\begin{array}[b]{@{}c@{}}#2\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
-
 
 \ndef{\ax}{ax}
 \ndef{\dd}{d}
@@ -35,9 +36,9 @@
 \DeclareMathOperator*{\softmax}{softmax}
 \newcommand{\reals}{\mathbb{R}}
 
-\title{\bf Named Tensor Notation}
-\author{David Chiang \\ \small University of Notre Dame \and Alexander M. Rush \\ \small Cornell University \and Boaz Barak \\ \small Harvard University}
-\date{Version 1.0}
+\title{Named Tensor Notation}
+\author{\authorname David Chiang \\ \addr University of Notre Dame \AND \authorname Alexander M. Rush \\ \addr Cornell University \AND \authorname Boaz Barak \\ \addr Harvard University}
+%\date{Version 1.0}
 
 \begin{document}
 
@@ -48,13 +49,12 @@ We propose a notation for tensors with named axes, which relieves the author, re
 
 After a brief overview of our notation, we illustrate it through several examples from modern machine learning, from building blocks like attention and convolution to full models like Transformers and LeNet. Finally, we give formal definitions and describe some extensions. Our proposals build on ideas from many previous papers and software libraries. We hope that this document will encourage more authors to use named tensors, resulting in clearer papers and less bug-prone implementations.
 
-The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
+%The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 \end{abstract}
 
-\setcounter{tocdepth}{1}
-\tableofcontents
-
-\clearpage
+%\setcounter{tocdepth}{1}
+%\tableofcontents
+%\clearpage
 
 \section{Introduction}
 \label{sec:intro}
@@ -64,7 +64,6 @@ Most papers about neural networks use the notation of vectors and matrices from 
 where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? It sums over columns, but there's not enough information to know what the columns represent. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more difficult still.
 
 Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
-
 
 In our notation, the above equation becomes
 \begin{align*}
@@ -80,7 +79,7 @@ Similarly, we can also add a $\heads$ axis to the inputs for multiple attention 
 
 Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
 
-The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
+%The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
 \section{Informal Overview}
 \label{sec:overview}
@@ -473,6 +472,7 @@ and
 \text{MaxPool}^l(X) &= \text{MaxPool2d}_{ph^l,ph^l}(X).
 \end{align*}
 
+\iffalse
 \subsection{Other examples}
 
 \subsubsection{Discrete random variables}
@@ -622,7 +622,9 @@ where
 \mu &\in \reals^{\dd} \\
 \Sigma & \in \reals^{\dd_1 \times \dd_2}.
 \end{align*}
+\fi
 
+\iffalse
 \section{\LaTeX{} Macros}
 
 Many of the \LaTeX{} macros used in this document are available in the style file \url{https://namedtensor.github.io/namedtensor.sty}. To use it, put
@@ -647,6 +649,7 @@ We write axis names in sans-serif font. To make this easier, \verb|\ndef{\ax}{ax
   \item In general, you can use \verb|\nfun| to make a function with a name under it: \verb|\nfun{\ax}{qux} A| gives you $\nfun{\ax}{qux} A$.
   \end{itemize}
 \end{itemize}
+\fi
 
 \section{Formal Definitions}
 \label{sec:definitions}
@@ -716,10 +719,10 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 \paragraph{Reductions} ($\reals^{\ax[n]} \rightarrow \reals$)
 \begin{align*}
   \nsum{\ax} A &= \sum_{i=1}^n A_{\ax(i)} \\
-  \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
+  \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} &
   \nfun{\ax}{max} A &= \max \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
   \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
-  \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A \\
+  \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A &
   \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2
 \end{align*}
 
@@ -731,7 +734,7 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 \paragraph{Vectors to vectors} ($\reals^{\ax[n]} \rightarrow \reals^{\ax[n]}$)
 \begin{align*}
   \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A} \\
-  \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A \\
+  \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A &
   \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A
 \end{align*}
 
@@ -748,9 +751,11 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 
 \input{alternatives}
 
+\iffalse
 \section*{Acknowledgements}
 
 Thanks to Ekin Aky\"{u}rek, Justin Bayer, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it).
+\fi
 
 \iffalse % hack to make this heading appear only in pandoc
 \section*{References}
