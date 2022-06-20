@@ -78,7 +78,7 @@ Our notation also makes it easy to  ``broadcast'' or ``vectorize'' a function by
 %That is, in this case $\text{Attention}(Q,K,V)$ equals the tensor $A$ with axes $\val$, $\seq$ and $\batch$, such that for every index $s$ of $\seq$ and $b$ of $\batch$, the corresponding element of $A$ is obtained by applying $\text{Attention}$ to the corresponding restriction of $Q$ (together with $K$ and $V$).
 Similarly, we can also add a $\heads$ axis to the inputs for multiple attention heads.
 
-Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
+Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions for named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
 
 %The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
@@ -145,7 +145,7 @@ But if we apply a binary function/operator to tensors with different shapes, the
     1 & 4 & 1
   }.
 \end{align*}
-(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor $x'$ that contains a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
+(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor with a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
 \begin{align*}
 A + x &= \nmatrix{\height}{\width}{
   3+2 & 1+2 & 4+2 \\
@@ -163,7 +163,7 @@ A + y &= \nmatrix{\height}{\width}{
 \label{sec:reductions}
 
 The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. We always specify which axis a reduction applies to using a subscript (equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch).
-
+%
 See~\S\ref{sec:commonops} for some common reductions. Here we take summation as an example.
 \begin{align*}
 \nsum{\height} A &= \sum_i A_{\height(i)} = \nmatrix{}{\width}{
@@ -194,7 +194,7 @@ A \ndot{\width} y &= \sum_j A_{\width(j)} \, y_{\width(j)} = \nmatrix{\height}{}
 \end{align*}
 
 Again, we can write multiple names to contract multiple axes at once. A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
-
+%
 The contraction operator can be used for many multiplication-like operations:
 \begin{align*}
   x \ndot{\height} x &= \sum_i x_{\height(i)} \, x_{\height(i)} && \text{inner product} \\
@@ -350,7 +350,7 @@ Other pooling functions could be defined similarly.
 Batch, instance, and layer normalization are often informally described using the same
 equation, but they each correspond to very different functions. They differ
 both by which axes are \textit{standardized} as well as their parameters.
-
+%
 We can define a single generic standardization function as:
 \begin{align*}
   \nfun{\ax}{standardize} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
@@ -358,14 +358,12 @@ We can define a single generic standardization function as:
 \end{align*}
 where $\epsilon > 0$ is a small constant for numerical stability.
 
-Then, we can define the three kinds of normalization layers, all with type $\reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}$:
+Then, we can define the three kinds of normalization layers, all with type $\reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}$. While superficially similar, these functions differ in their standardized axes and their parameter shape. 
 \begin{align*}
 \text{BatchNorm}(X; \gamma, \beta) &= \nfun{\batch,\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
 \text{InstanceNorm}(X; \gamma, \beta) &= \nfun{\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
 \text{LayerNorm}(X; \gamma, \beta) &= \nfun{\layer,\chans}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans,\layer}
 \end{align*}
-
-Note that, while superficially similar, these functions differ in their standardized axes and their parameter shape. 
 
 \iffalse
 Other deep learning methods have been proposed which consider different shapes of standardization. For instance, group norm is a popular extension that first pools channels into $k$-size groups before standardizing. 
