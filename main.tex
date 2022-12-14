@@ -63,8 +63,9 @@ Most papers about neural networks use the notation of vectors and matrices from 
 \[ \text{Attention}(Q, K, V) = \softmax \left( \frac{QK^\top}{\sqrt{d_k}} \right) V. \]
 where $Q$, $K$, and $V$ (for query, key, and value, respectively) are sequences of feature vectors, packed into matrices. Does the product $QK^\top$ sum over the sequence, or over the features? It sums over columns, but there's not enough information to know what the columns represent. Is the softmax taken over the query sequence or the key sequence? The usual notation doesn't even offer a way to answer this question. With multiple attention heads or multiple sentences in a minibatch, the notation becomes more difficult still.
 
-Here, we propose mathematical notation for tensors with \emph{named axes}. The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
-
+Here, we propose mathematical notation for tensors with \emph{named axes}.\footnote{%
+We follow NumPy in using the term \emph{axis}. Other possible terms would be \emph{index}, \emph{dimension}, or \emph{mode}, but these are all ambiguous in their own way, and we thought that \emph{axis} would be the least problematic.} The notation has a formal underpinning, but is hopefully intuitive enough that machine learning researchers can understand it without much effort. 
+%
 In our notation, the above equation becomes
 \begin{align*}
   \text{Attention} \colon \mathbb{R}^{\key} \times \mathbb{R}^{\seq \times \key} \times \mathbb{R}^{\seq \times\val} &\rightarrow \mathbb{R}^{\val} \\
@@ -77,7 +78,7 @@ Our notation also makes it easy to  ``broadcast'' or ``vectorize'' a function by
 %That is, in this case $\text{Attention}(Q,K,V)$ equals the tensor $A$ with axes $\val$, $\seq$ and $\batch$, such that for every index $s$ of $\seq$ and $b$ of $\batch$, the corresponding element of $A$ is obtained by applying $\text{Attention}$ to the corresponding restriction of $Q$ (together with $K$ and $V$).
 Similarly, we can also add a $\heads$ axis to the inputs for multiple attention heads.
 
-Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions that use named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
+Our notation is inspired by libraries for programming with multidimensional arrays \citep{numpy,pytorch} and extensions for named axes, like xarray \citep{xarray}, Nexus \citep{chen2017typesafe}, tsalib \citep{tsalib}, NamedTensor \citep{namedtensor}, named tensors in PyTorch \citep{named-tensors}, and Dex \citep{maclaurin+:2019}. However, our focus is on mathematical notation rather than code.
 
 %The source code for this document can be found at \url{https://github.com/namedtensor/notation/}. We invite anyone to make comments on this proposal by submitting issues or pull requests on this repository.
 
@@ -144,7 +145,7 @@ But if we apply a binary function/operator to tensors with different shapes, the
     1 & 4 & 1
   }.
 \end{align*}
-(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor $x'$ that contains a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
+(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor with a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
 \begin{align*}
 A + x &= \nmatrix{\height}{\width}{
   3+2 & 1+2 & 4+2 \\
@@ -162,7 +163,7 @@ A + y &= \nmatrix{\height}{\width}{
 \label{sec:reductions}
 
 The same broadcasting rules apply to functions from vectors to scalars, called \emph{reductions}. We always specify which axis a reduction applies to using a subscript (equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch).
-
+%
 See~\S\ref{sec:commonops} for some common reductions. Here we take summation as an example.
 \begin{align*}
 \nsum{\height} A &= \sum_i A_{\height(i)} = \nmatrix{}{\width}{
@@ -193,7 +194,7 @@ A \ndot{\width} y &= \sum_j A_{\width(j)} \, y_{\width(j)} = \nmatrix{\height}{}
 \end{align*}
 
 Again, we can write multiple names to contract multiple axes at once. A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, so we use $\odot$ for elementwise multiplication as well.
-
+%
 The contraction operator can be used for many multiplication-like operations:
 \begin{align*}
   x \ndot{\height} x &= \sum_i x_{\height(i)} \, x_{\height(i)} && \text{inner product} \\
@@ -227,9 +228,9 @@ The order of elements in the new axis is undefined. If you need a particular ord
 
 In this section we give a series of examples illustrating how to use named tensors in various situations, mostly related to machine learning. Many of these examples use functions that the reader can probably guess the meaning of; if not, please see \S\ref{sec:commonops} for definitions.
 
-\subsection{Building blocks}
+%\subsection{Building blocks}
 
-\subsubsection{Feedforward neural networks}
+\subsection{Feedforward neural networks}
 
 A feedforward neural network looks like this:
 \begin{align*}
@@ -259,7 +260,7 @@ Then the network can be defined like this:
   X^3 &= \text{FullConn}^3(X^2).
 \end{align*}
 
-\subsubsection{Recurrent neural networks}
+\subsection{Recurrent neural networks}
 \label{sec:rnn}
 
 As a second example, let's define a simple (Elman) RNN. This is similar to the feedforward network, except that the number of timesteps is variable and they all share parameters.
@@ -272,7 +273,7 @@ h^{0} &\in \mathbb{R}^{\hidden} \\
 h^{t} &= \sigma\left( W^{\text{h}} \ndot{\hidden} h^{t-1} + W^{\text{i}} \ndot{\inp} x^{t} + b \right)_{\hidden'\rightarrow\hidden} & t &= 1, \ldots, n
 \end{align*}
 
-\subsubsection{Attention}
+\subsection{Attention}
 \label{sec:attention}
 
 In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in interpreting the equation for attention as it's usually written. In our notation, it looks like this:
@@ -281,7 +282,7 @@ In the introduction (\S\ref{sec:intro}), we mentioned some difficulties in inter
   \text{Attention}(Q,K,V) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V.
 \end{align*}
 
-This equation is slightly different from the one in the introduction. The previous definition computed an output sequence over axis $\seq'$, but this definition computes a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
+Note that this definition computes only a single value. If we want a sequence, we can just give $Q$ a $\seq'$ axis (or some other name), and the function will compute an output sequence. Furthermore, if we give $Q$, $K$, and $V$ a $\heads$ axis for multiple attention heads, then the function will compute multi-head attention.
 
 Sometimes we need to apply a mask to keep from attending to certain positions.
 \begin{align*}
@@ -289,7 +290,7 @@ Sometimes we need to apply a mask to keep from attending to certain positions.
 \text{Attention}(Q, K, V, M) &= \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} + M \right) \ndot{\seq} V.
 \end{align*}
 
-\subsubsection{Convolution}
+\subsection{Convolution}
 
 Convolutions can be easily written by unrolling a tensor and then
 applying a standard dot product. First, we define the unrolling operation:
@@ -323,7 +324,7 @@ W &\in \reals^{\chans \times \kh \times \kw} \\
 b &\in \reals.
 \end{align*}
 
-\subsubsection{Max pooling}
+\subsection{Max pooling}
 
 We first define an operation to reshape an axis:
 \begin{align*}
@@ -344,12 +345,12 @@ Then we can define:
 \end{align*}
 Other pooling functions could be defined similarly.
 
-\subsubsection{Normalization layers}
+\subsection{Normalization layers}
 
 Batch, instance, and layer normalization are often informally described using the same
 equation, but they each correspond to very different functions. They differ
 both by which axes are \textit{standardized} as well as their parameters.
-
+%
 We can define a single generic standardization function as:
 \begin{align*}
   \nfun{\ax}{standardize} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
@@ -357,15 +358,14 @@ We can define a single generic standardization function as:
 \end{align*}
 where $\epsilon > 0$ is a small constant for numerical stability.
 
-Then, we can define the three kinds of normalization layers, all with type $\reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}$:
+Then, we can define the three kinds of normalization layers, all with type $\reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}$. While superficially similar, these functions differ in their standardized axes and their parameter shape. 
 \begin{align*}
 \text{BatchNorm}(X; \gamma, \beta) &= \nfun{\batch,\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
 \text{InstanceNorm}(X; \gamma, \beta) &= \nfun{\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
 \text{LayerNorm}(X; \gamma, \beta) &= \nfun{\layer,\chans}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans,\layer}
 \end{align*}
 
-Note that, while superficially similar, these functions differ in their standardized axes and their parameter shape. 
-
+\iffalse
 Other deep learning methods have been proposed which consider different shapes of standardization. For instance, group norm is a popular extension that first pools channels into $k$-size groups before standardizing. 
 
 \begin{align*}
@@ -376,6 +376,7 @@ where
 |\kernel| &= k\\
 \gamma, \beta &\in \mathbb{R}^{\chans}.
 \end{align*}
+\fi
 
 \subsection{Transformer}
 \label{sec:transformer}
@@ -657,27 +658,27 @@ We write axis names in sans-serif font. To make this easier, \verb|\ndef{\ax}{ax
 \subsection{Records and shapes}
 
 A \emph{named index} is a pair, written $\ax(i)$, where $\ax$ is a \emph{name} and $i$ is usually a natural number. We write both names and variables ranging over names using sans-serif font.
-
+%
 A \emph{record} is a set of named indices $\{\ax_1(i_1), \ldots, \ax_r(i_r)\}$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. 
 
 An \emph{axis} is a pair, written $\ax[I]$, where $\ax$ is a name and $I$ is a set of \emph{indices}.
 We deal with axes of the form $\ax[[n]]$ (that is, $\ax[\{1, \ldots, n\}]$) so frequently that we abbreviate this as~$\ax[n]$.
-
+%
 In many contexts, there is only one axis with name $\ax$, and so we refer to the axis simply as $\ax$. The context always makes it clear whether $\ax$ is a name or an axis. If $\ax$ is an axis, we write $\ind(\ax)$ for its index set, and we write $|\ax|$ as shorthand for~$|\ind(\ax)|$.
 
 A \emph{shape} is a set of axes, written $\ax_1[I_1] \times \cdots \times \ax_r[I_r]$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. We write $\emptyset$ for the empty shape. A shape defines a set of records:
 \begin{equation*}
 \rec (\ax_1[I_1] \times \cdots \times \ax_r[I_r]) = \left\{\{\ax_1(i_1), \ldots, \ax_r(i_r)\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
 \end{equation*}
-
+%
 We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\ax$ such that $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$ for any $I$, $J$.
-
+%
 If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
 
 \subsection{Named tensors}
 
 Let $F$ be a field and let $\mathcal{S}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{S}$} is a mapping from $\mathcal{S}$ to $F$. We write the set of all named tensors with shape $\mathcal{S}$ as $F^{\mathcal{S}}$.
-
+%
 We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
 
 If $A \in F^{\mathcal{S}}$, then we access an element of $A$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $A_s$ rather than $A(s)$. To avoid clutter, in place of $A_{\{\ax_1(i_1), \ldots, \ax_r(i_r)\}}$, we usually write $A_{\ax_1(i_1), \ldots, \ax_r(x_r)}$. When a named tensor is an expression like $(A+B)$, we surround it with square brackets like this: $[A+B]_{\ax_1(i_1), \ldots, \ax_r(x_r)}$.
@@ -692,7 +693,7 @@ We also allow partial indexing. If $A$ is a tensor with shape $\mathcal{T}$ and 
 \label{sec:tensorfunctions}
 
 In \S\ref{sec:overview}, we described several classes of functions that can be extended to named tensors. Here, we define how to do this for general functions.
-
+%
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can extend $f$ to:
 \begin{align*}
 f \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
@@ -718,10 +719,9 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 
 \paragraph{Reductions} ($\reals^{\ax[n]} \rightarrow \reals$)
 \begin{align*}
-  \nsum{\ax} A &= \sum_{i=1}^n A_{\ax(i)} \\
+  \nsum{\ax} A &= \sum_{i=1}^n A_{\ax(i)} & \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
   \nfun{\ax}{min} A &= \min \{A_{\ax(i)} \mid 1 \leq i \leq n\} &
   \nfun{\ax}{max} A &= \max \{A_{\ax(i)} \mid 1 \leq i \leq n\} \\
-  \nfun{\ax}{norm} A &= \sqrt{\nsum{\ax} A^2} \\
   \nfun{\ax}{mean} A &= \frac{1}{n} \nsum{\ax} A &
   \nfun{\ax}{var} A &= \frac{1}{n} \nsum{\ax} (A - \nfun{\ax}{mean} A)^2
 \end{align*}
@@ -733,7 +733,7 @@ All the tensor operations described in \S\ref{sec:operations} can be defined in 
 
 \paragraph{Vectors to vectors} ($\reals^{\ax[n]} \rightarrow \reals^{\ax[n]}$)
 \begin{align*}
-  \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A} \\
+  \nfun{\ax}{softmax} A &= \frac{\exp A}{\nsum{\ax} \exp A} &
   \nfun{\ax}{argmax} A &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha A &
   \nfun{\ax}{argmin} A &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha A
 \end{align*}
