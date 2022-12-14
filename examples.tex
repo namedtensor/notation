@@ -1,254 +1,270 @@
-\documentclass{article}
+In this section we give a series of worked examples illustrating how standard neural network model components can be written using named tensors. Appendix~\ref{sec:examples_long} builds some of these components into complete specifications of the Transformer and LeNet.
 
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{mathtools}
-\usepackage{parskip}
+\subsection{Feedforward neural networks}
 
-\DeclareMathOperator*{\softmax}{softmax}
-\newcommand{\reals}[0]{\mathbb{R}}
+A multi-layer, feedforward neural network with different-sized layers can be written as:
+\begin{align*}
+  X^0 &\in \mathbb{R}^{\inp} \\
+  X^1 &= \sigma(W^1 \ndot{\inp} X^0 + b^1) & W^1 &\in \mathbb{R}^{\hidden_1 \times \inp} & b^1 &\in \mathbb{R}^{\hidden_1} \\
+  X^2 &= \sigma(W^2 \ndot{\hidden_1} X^1 + b^2) & W^2 &\in \mathbb{R}^{\hidden_2 \times \hidden_1} & b^2 &\in \mathbb{R}^{\hidden_2} \\
+  X^3 &= \sigma(W^3 \ndot{\hidden_2} X^2 + b^3) & W^3 &\in \mathbb{R}^{\out \times \hidden_2} & b^3 &\in \mathbb{R}^{\out}
+\end{align*}
+The layer sizes can be specified by writing $|\hidden_1| = n_1$, etc. As noted above, $\sigma$ is applied elementwise and does not require additional annotation. 
 
-% Named tensor prelude
-\newcommand{\nsum}[1]{\mathbin{\mathop{\sum}\displaylimits_{\name{#1}}}}
-\newcommand{\nfun}[2]{\underset{\name{#1}}{#2}}
+Alternatively, the layer equation can be abstracted by defining:
+\begin{align*}
+  \text{FullConn}^l(x) &= \sigma\Bigl(W^l \ndot{\layer} x + b^l\Bigr)_{\layer'\rightarrow\layer}
+\end{align*}
+where
+\begin{align*}
+  W^l &\in \mathbb{R}^{\layer'[n_l] \times \layer[n_{l-1}]} \\
+  b^l &\in \mathbb{R}^{\layer'[n_l]}.
+\end{align*}
+The function $\text{FullConn}^l$ encapsulates both the equation for layer $l$ as well as its parameters $W^l, b^l$ (analogous to what TensorFlow and PyTorch call \emph{modules}). Since we chose to use the same axis name $\layer$ for all the layers (with different sizes $n_l$), $\text{FullConn}^l$ temporarily computes its output over axis $\layer'$, then renames it back to $\layer$. The network can be defined like this:
+\begin{align*}
+  X^0 &\in \mathbb{R}^{\layer[n_0]} \\
+  X^1 &= \text{FullConn}^1(X^0) \\
+  X^2 &= \text{FullConn}^2(X^1) \\
+  X^3 &= \text{FullConn}^3(X^2).
+\end{align*}
 
-\newcommand{\name}[1]{\mathsf{#1}}
-\newcommand{\ndot}[1]{\mathbin{\mathop{\thinspace\boldsymbol\cdot\thinspace}\displaylimits_{\name{#1}}}}
+\subsection{Recurrent neural networks}
+\label{sec:rnn}
 
-\begin{document}
+As a second example, we consider a simple (Elman) RNN. This model is similar to the feedforward network, except that the number of timesteps is variable and parameters are shared over time. At each time step, it produces a tensor with a new axis $\hidden'$ which is then renamed $\hidden$ for the next step in the recursion. 
+\begin{align*}
+x^{t} &\in \mathbb{R}^{\inp} & t &= 1, \ldots, n \\
+W^{\text{h}} &\in \mathbb{R}^{\hidden \times \hidden'} & |\hidden| &= |\hidden'| \\
+W^{\text{i}} &\in \mathbb{R}^{\inp \times \hidden'} \\
+b &\in \mathbb{R}^{\hidden'} \\
+h^{0} &\in \mathbb{R}^{\hidden} \\
+h^{t} &= \sigma\Bigl( W^{\text{h}} \ndot{\hidden} h^{t-1} + W^{\text{i}} \ndot{\inp} x^{t} + b \Bigr)_{\hidden'\rightarrow\hidden} & t &= 1, \ldots, n
+\end{align*}
 
+\subsection{Attention}
+\label{sec:attention}
 
-\subsection*{Attention}
+In the introduction (\S\ref{sec:intro}), we described difficulties in interpreting the equation for attention as used with Transformers~\citep{vaswani+:2017}. In our notation, it looks like this:
+\begin{align}
+  \text{Attention} \colon \mathbb{R}^{\key} \times \mathbb{R}^{\seq \times\key} \times \mathbb{R}^{\seq \times\val} &\rightarrow \mathbb{R}^{\val} \\
+  \text{Attention}(Q,K,V) &= \left( \nfun{\seq}{softmax} \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V. \label{eq:def_att}
+\end{align}
 
-Standard (Single Headed):
+This definition takes a single query $Q$ vector and returns a single result vector (and actually could be further reduced to a scalar values as $\val$ is not strictly necessary). To apply to a sequence, we can give $Q$ a $\seq'$ axis, and the function will compute an output sequence. Providing $Q$, $K$, and $V$ with a $\heads$ axis \liftsVBZ{} the function to compute multiple attention heads. 
 
-\begin{align*} 
-\text{attention}(Q, K, V) &=  \softmax \left( \frac{Q K^\top }{\sqrt{d_k}} \right)  V 
+For Transformers we often need to apply a mask to ensure attention is only applied to 
+valid keys (e.g. for causal language models). We can modify the equation to include this mask:
+\begin{align*}
+  \text{Attention} \colon \mathbb{R}^{\key} \times \mathbb{R}^{\seq \times\key} \times \mathbb{R}^{\seq \times\val} \times \mathbb{R}^{\seq} &\rightarrow \mathbb{R}^{\val} \\
+\text{Attention}(Q, K, V, M) &= \left( \nfun{\seq}{softmax} \left( \frac{Q \ndot{\key} K}{\sqrt{|\key|}} + M \right) \right) \ndot{\seq} V.
+\end{align*}
+
+Appendix~\ref{sec:transformer} includes a full specification of the complete Transformer model using the named tensor notation. 
+
+\subsection{Convolution}
+
+Standard neural network convolutions can be specified by ``unrolling'' a vector and then applying a standard dot product. We define an axis-parameterized unrolling function that converts a one-axis tensor to a sequence of $\kernel$ sized vectors:
+\begin{align*}
+  \nfun{\seq \\ \kernel}{unroll} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n-|\kernel|+1], \kernel} \\
+  \nfun{\seq \\ \kernel}{unroll} X &= Y,\ \text{where} \\
+  Y_{\seq(i), \kernel(j)} &= X_{\seq(i+j - 1)}.
+\end{align*}
+
+A 1d convolution with input channels $\chans$ and output channels $\chans'$ consists of unrolling along the $\seq$ axis and then taking a dot product: 
+\begin{align*}
+\text{Conv1d} \colon \reals^{\chans \times \seq[n]} &\rightarrow \mathbb{R}^{\chans' \times \seq[n']} \\
+\text{Conv1d}(X; W, b) &= W \ndot{\chans \\ \kernel} \nfun{\seq \\ \kernel}{unroll} X + b
+\end{align*}
+where
+\begin{align*}
+W &\in \reals^{\chans' \times \chans \times \kernel} \\
+b &\in \reals^{\chans'} \\
+\end{align*}
+
+Unrolling easily generalizes to higher-dimensional convolutions:
+\begin{align*}
+  \text{Conv2d} \colon \reals^{\chans \times \height[h] \times \width[w]}
+  &\rightarrow \reals^{\chans' \times \height[h'] \times \width[w']} \\
+  \text{Conv2d}(X; W, b) &= W \ndot{\chans \\ \kh, \kw} \nfun{\height \\ \kh}{unroll} \nfun{\width\\\kw}{unroll} X + b
+\end{align*}  
+where
+\begin{align*}
+W &\in \reals^{\chans' \times \chans \times \kh \times \kw} \\
+b &\in \reals^{\chans'}.
+\end{align*}
+
+\subsection{Pooling}
+
+Pooling is similar to convolutions. 
+We first define a function to partition a tensor into windows. 
+\begin{align*}
+  \nfun{\seq,\kernel}{pool} \colon \reals^{\seq[n]} &\rightarrow \reals^{\seq[n/|\kernel|],\kernel} \\
+  \nfun{\seq,\kernel}{pool} X &= Y,\ \text{where} \\
+  Y_{\seq(i), \kernel(j)} &= X_{\seq((i-1) \cdot |\kernel| + j)}.
+\end{align*}
+
+Then we can define aggregations over $\kernel$. We define max-pooling as: 
+\begin{align*}
+\text{MaxPool1d}_{k} \colon \mathbb{R}^{\seq[n]} &\rightarrow \mathbb{R}^{\seq[n/k]} \\
+\text{MaxPool1d}_{k}(X) &= \nfun{\kernel}{max} \nfun{\seq,\kernel}{pool} X \\
+|\kernel| &= k \\
+\text{MaxPool2d}_{kh,kw} \colon \mathbb{R}^{\height[h] \times \width[w]} &\rightarrow \mathbb{R}^{\height[h/kh] \times \width[w/kw]} \\
+\text{MaxPool2d}_{kh,kw}(X) &= \nfun{\kh,\kw}{max} \nfun{\height,\kh}{pool} \nfun{\width,\kw}{pool} X \\
+|\kh| &= kh \\
+|\kw| &= kw.
+\end{align*}
+
+\subsection{Normalization layers}
+
+Normalization layers are used in all large-scale deep learning models, with different architectures requiring different types of normalization. However, despite their importance, the differences between them are often not clearly communicated. For example, the PyTorch documentation \citep{pytorchdoc} describes all of them using the same equation (where $\epsilon > 0$ is a small constant for numerical stability): 
+\begin{align*}
+   Y = \frac{X - \operatorname{mean}(X)}{\sqrt{\operatorname{var}(X) + \epsilon}} \odot \gamma + \beta
+\end{align*}
+\citet{wu+he:2018} give essentially the same equation and explain the differences using a combination of equations, words, and pictures. But they do not capture differences in $\gamma$ and $\beta$ among different normalization layers.
+
+Critically, the layers do differ by which axes are \textit{standardized} as well as their parameters. We define a single named standardization function as:
+\begin{align*}
+  \nfun{\ax}{standardize} \colon \mathbb{R}^{\ax} &\rightarrow \mathbb{R}^{\ax} \\
+  \nfun{\ax}{standardize}(X) &= \frac{X - \nfun{\ax}{mean}(X)}{\sqrt{\nfun{\ax}{var}(X) + \epsilon}}
 \end{align*}
 
 
-Named Tensor: 
-
-\begin{align*} 
-Q &\in \reals^{\name{head}:h, \name{key}{d_v},\name{time'}:n}\\
-K &\in \reals^{\name{head}:h,\name{key}:d_k, \name{time}{n}}\\
-V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
-\text{attention}(Q, K, V) &=  \nfun{time}{\softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} \right) \ndot{time} V 
+Then, we can define the three kinds of normalization layers, all with type $\reals^{{\batch \times \chans \times \layer}} \rightarrow \reals^{{\batch \times \chans \times \layer}}$. While superficially similar, these functions differ in their standardized axes and their parameter shape. 
+\begin{align*}
+\text{BatchNorm}(X; \gamma, \beta) &= \nfun{\batch,\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
+\text{InstanceNorm}(X; \gamma, \beta) &= \nfun{\layer}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans} \\
+\text{LayerNorm}(X; \gamma, \beta) &= \nfun{\layer,\chans}{standardize}(X) \ndot{} \gamma + \beta & \gamma, \beta &\in \mathbb{R}^{\chans,\layer}
 \end{align*}
 
+\iffalse
+Other deep learning methods have been proposed which consider different shapes of standardization. For instance, group norm is a popular extension that first pools channels into $k$-size groups before standardizing. 
 
+\begin{align*}
+\text{GroupNorm}_k(X; \gamma, \beta) &= \left[ \nfun{\kernel,\layer}{standardize} \nfun{\chans, \kernel}{pool} X \right]_{(\chans,\kernel)\rightarrow \chans } \ndot{} \gamma + \beta \\ 
+\end{align*}
+where
+\begin{align*}
+|\kernel| &= k\\
+\gamma, \beta &\in \mathbb{R}^{\chans}.
+\end{align*}
+\fi
 
-\subsection*{MLP}
-% Standard (unbatched):
+\iffalse
+\subsection{Other examples}
 
-% \begin{align*} 
-% V &\in \reals^{o \times  h},\ c\in \reals^{o} \\
-% W &\in \reals^{h \times i}, \ b \in \reals^{h} \\
-% X &\in \reals^{i} \\
-% \text{MLP}(x; V, W,b, c) &= \left( V \sigma \left( W x + b \right) + c \right)  
-% \end{align*}
+\subsubsection{Discrete random variables}
 
-Named Tensor:
-
-\begin{align*} 
-V &\in \reals^{\name{output}:o, \name{hidden}:h},\ c\in \reals^{\name{output}:o} \\
-W &\in \reals^{{\name{hidden}:h, \name{in}:i}}, \ b \in \reals^{\name{hidden}:h} \\
-X &\in \reals^{{\name{batch}:b, \name{in}:i}} \\
-\text{MLP}(X; V, W,b, c) &= \sigma \left( V \ndot{hidden} \sigma \left( W \ndot{in} X + b \right) + c \right)  
+Named axes are very helpful for working with discrete random variables, because each random variable can be represented by an axis with the same name. For instance, if $\name{A}$ and $\name{B}$ are random variables, we can treat $p(\name{B} \mid \name{A})$ and $p(\name{A})$ as tensors:
+\begin{align*}
+p(\name{B} \mid \name{A}) &\in [0, 1]^{\name{A} \times \name{B}} & \nsum{\name{B}} p(\name{B} \mid \name{A}) &= 1 \\
+p(\name{A}) &\in [0, 1]^{\name{A}} & \nsum{\name{A}} p(\name{A}) &= 1
+\end{align*}
+Then many common operations on probability distributions can be expressed in terms of tensor operations:
+\begin{align*}
+p(\name{A}, \name{B}) &= p(\name{B} \mid \name{A}) \odot p(\name{A}) && \text{chain rule}\\
+p(\name{B}) &= \nsum{\name{A}} p(\name{A}, \name{B}) = p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A}) && \text{marginalization} \\
+p(\name{A} \mid \name{B}) &= \frac{p(\name{A}, \name{B})}{p(\name{B})} = \frac{p(\name{B} \mid \name{A}) \odot p(\name{A})}{p(\name{B} \mid \name{A}) \ndot{\name{A}} p(\name{A})}. && \text{Bayes' rule}
 \end{align*}
 
-\subsection*{NN ``Norms''}
+\subsubsection{Continuous bag of words}
 
-% Standard:  These are often informally described with the same equation, but correspond to very functions.
+A continuous bag-of-words model classifies by summing up the embeddings of a sequence of words $X$ (as one-hot vectors) and projecting them to the space of classes. 
 
-% \begin{align*} 
-% \text{X-norm}(X; \gamma, \beta) &= \frac{X - \text{mean}[X]}{\sqrt{\text{var}(X)} + \epsilon } \odot \gamma + \beta
-% \end{align*}
-
-
-\subsubsection*{Batch Norm}
-
-\begin{align*} 
-X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
-\gamma, \beta &\in \reals^{{\name{batch}:b}} \\
-\text{batchnorm}(X; \gamma, \beta) &= \frac{X - \nfun{batch}{\text{mean}}(X)}{\sqrt{\nfun{batch}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+\begin{align*}
+\text{CBOW} \colon \{0, 1\}^{\seq \times \vocab} &\rightarrow \reals^{\classes} \\
+\text{CBOW}(X; E, W) &= \nfun{\classes}{softmax} \left(\nsum{\seq} W \ndot{\emb} E \ndot{\vocab} X\right)
+\end{align*}
+where
+\begin{align*}
+\nsum{\vocab} X_{\seq(i)} &= 1 & i &= 1, \ldots, |\seq| \\
+E &\in \reals^{\vocab \times \emb} \\
+W &\in \reals^{\classes \times \emb}.
 \end{align*}
 
+\subsubsection{Sudoku ILP}
 
-\subsubsection*{Instance Norm}
+\ndef{\assign}{assign}
 
-\begin{align*} 
-X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}}\\
-\gamma, \beta &\in \reals^{{\name{hidden}:h}} \\
-\text{instancenorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden}{\text{mean}}[X]}{\sqrt{\nfun{hidden}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta
+Sudoku puzzles can be represented as  binary tiled tensors.
+Given a grid we can check that it is valid by converting it to a grid of grids. 
+Constraints then ensure that there is one digit per row, per column and per sub-box.
+
+\begin{align*}
+\text{check} \colon \{0, 1\}^{\height[9] \times \width[9] \times \assign[9]} &\rightarrow \{0, 1\} \\
+\text{check}(X) &=
+\mathbb{I}\left[\begin{aligned}
+\nsum{\assign} X = 1 &\land \nsum{\height \\ \width} Y = 1 \land {} \\
+\nsum{\height} X = 1 &\land \nsum{\width} X = 1
+\end{aligned}\right]
 \end{align*}
-
-\subsubsection*{Layer Norm}
-
-\begin{align*} 
-X &\in \reals^{{\name{batch}:b, \name{channel}:c, \name{hidden}:h}} \\
-\gamma, \beta &\in \reals^{{\name{channel}:c, \name{hidden}:h}} \\
-\text{layernorm}(X; \gamma, \beta) &= \frac{X - \nfun{hidden,channel}{\text{mean}}[X]}{\sqrt{\nfun{hidden, channel}{\text{var}}(X)} + \epsilon } \odot \gamma + \beta 
-\end{align*}
-
-
-\subsection*{Continuous Bag of Words}
-
-A continutous bag-of-words model classifies by summing up the embeddings of a sequence of words and then projecting them to the space of classes. 
-
-\begin{align*} 
-X &\in \{0, 1\}^{{\name{time}:t, \name{vocab}:v}}\ s.t. \ \nsum{v} X = 1\\
-E &\in \reals^{{\name{vocab}:v, \name{hidden}:h}}\\
-W &\in \reals^{{\name{class}:c, \name{hidden}:h}}\\
-\text{cbow}(X; E, W) &= \nfun{class}{\text{softmax}} (W \ndot{hidden} E \ndot{vocab} X)
-\end{align*}
-
-\section*{Bayes' Rule}
-
-Given $p(B \mid A)$ and $p(A)$ as tensors. Bayes' rule computes $p(A \mid B)$ by applying the chain rule, computing the marginal, and broadcast dividing. 
-
-\begin{align*} 
-BA &\in [0, 1]^{\name{A}{a}, \name{B}{b}}, 
-A \in [0, 1]^{\name{A}{a}} \ s.t. \nsum{A} A =  \nsum{B} BA =  1 \\
-AB &= (BA \ndot{} A)  / (BA \ndot{A} A)
-\end{align*}
-
-
-\subsection*{Beam Search}
-
-
-\begin{align*} 
-H &\in \reals^{{ \name{batch}:b, \name{beam}:k}} \\
-S &\in \{0, 1\}^{{ \name{batch}:b, \name{beam}:k, \name{state}:s}} \ s.t. \ \nsum{state} X = 1\\
-f &\in \{0, 1\}^{{\name{state}}} \mapsto \reals^{{\name{state'}}} \\ 
-\text{beamstep}(H, S) &=  \nfun{beam, state'}{\text{max-k}} \left( \nfun{state'}{\text{softmax}}(f(S)) \odot H  \right)
+where
+\begin{align*}
+Y &\in \{0, 1\}^{\height'[3] \times \width'[3] \times \height[3] \times \width[3] \times \assign[9]}  \\
+Y_{\height'(h'), \height(h), \width'(w'), \width(w)} &= X_{\height(3h' + h-1), \width(3 w' + w-1)}.
 \end{align*} 
+
+\subsubsection{$K$-means clustering}
+
+\ndef{\clusters}{clusters}
+
+The following equations define one step of $k$-means clustering. Given a set of points $X$ and an initial set of cluster centers $C$,
+\begin{align*}
+  X &\in \reals^{\batch \times \dd} \\
+C &\in \reals^{\clusters \times \dd}
+\end{align*}
+we repeat the following update: Compute cluster assignments
+\begin{align*}
+Q &= \nfun{\clusters}{argmin} \nfun{\dd}{norm}(C-X)
+\end{align*}
+then recompute the cluster centers:
+\begin{equation*}
+C \leftarrow \nsum{\batch} \frac{Q \odot X}{Q}.
+\end{equation*}
+
+\subsubsection{Beam search}
+
+\ndef{\beam}{beam}
 
 Beam search is a commonly used approach for approximate discrete search. Here $H$ is the score of each element in the beam, $S$ is the state of each element in the beam, and $f$ is an update function that returns the score of each state transition. 
-Beam step returns the new $H$ tensor. 
-
-\subsection*{Sudoku ILP}
-
-Constraint set to ensure a valid Sudoku puzzle. Sudoku is a tensor binary tiled tensor. With Row / Col subgrids of size row / col. Each cell is has assign possible assignments. 
-Constraints need to ensure that there is one digit per row, per column and per sub-box. 
-
 \begin{align*} 
-X &\in \{0, 1\}^{\name{row}: 9, \name{col}:9, \name{assign}:9}  \\
-\nsum{assign} Y &= 
-\nsum{Row,row} Y = 
-\nsum{Col, col} Y =  
-\nsum{row, col} Y = 1\\
-Y &\in \{0, 1\}^{\name{Row}: 3, \name{Col}:3, \name{row}: 3, \name{col}:3, \name{assign}:9}  \\
-Y_{\name{Row}:r, \name{row}:r', \name{Col}:c, \name{col}:c'} &= X_{\name{row}:r*3 + r'-1, \name{cow}:c*3 + c'-1}, 
-\end{align*} 
-
-
-\subsection*{Image max pooling}
-
-Max pooling tasks a similar form as the Sudoku example.
-
-\begin{align*} 
-X &\in \reals^{\name{height}: h, \name{width}:w} \\
-\text{maxpool2d}(X, kh, kw) &=  \nfun{kh, kw}{\max}\  U \\
-U &\in \reals^{{\name{height}:h / kh,
-\name{width}:w / kw, \name{kh}:kh, \name{kw}:kw}}  \\
-U_{\name{height}:i, \name{width}:j, \name{kh}:di, \name{kw}:dj  } & = X_{\name{height}:i * kh + di -1, \name{width}:j * kw + dj -1}  
+H &\in \reals^{\beam} \\
+S &\in \{0, 1\}^{\beam \times \state} & \nsum{\state} S &= 1 \\
+f &\colon \{0, 1\}^{\state} \rightarrow \reals^{\state} \\
 \end{align*}
-
-
-
-\subsection*{Explicit 1D Conv}
-
-\begin{align*} 
-X &\in \reals^{{\name{channel}:c, \name{time}:t}}  \\
-W &\in \reals^{{\name{out\_channel}:c', \name{channel}:c, \name{kernel}:k}}  \\
-\text{conv1d}(X, W) &= W \ndot{channel, kernel} U \\
-U &\in \reals^{{\name{channel}:c, \name{time}:t-k +1, \name{kernel}:k}}  \\
-U_{\name{time}:i, \name{kernel:j}} & = X_{\name{time}:i+j - 1}  
-\end{align*} 
-
-
-\subsection*{K-Means Clustering}
-
-\begin{align*} 
-X &\in \reals^{\name{batch}:b, \name{dim}:k}  \\
-C &\in \reals^{\name{cluster}:c, \name{dim}:k}  \\
-\text{kmeans}(X, C) &= \nsum{batch} \frac{ Q \odot X}{  Q} \\
-% Q &\in \{0, 1\}^{\name{batch}{b},\name{cluster}{c}} \\
-Q &= \nfun{cluster}{\arg\min} \ \nfun{dim}{\text{norm}}(C-X
-)\end{align*}
-Runs one step of kmeans clustering. Bottom term computes cluster alignments $Q$ top term recomputes cluster centers $C$. Like softmax, argmin keeps the same dimensions but uses a 1-hot encoding.
-
-\end{document}
-
-\subsection*{Multivariate Normal}
-
-Bilinear terms are an area that is more verbose with the named tensor notation. However it is also more explicit.
-
-\begin{align*} 
-X &\in \reals^{\name{batch}{b}, \name{d}{k}}  \\
-\mu &\in \reals^{{\name{d}{k}}}  \\
-\Sigma & \in   \reals^{{\name{d1}{k}, \name{d2}{k}}}  \\
-{\cal N}(X; \mu, \Sigma) &= \frac{\displaystyle \exp\left(-\frac{1}{2}  \left(\nfun{d1, d2}{\text{inv}}(\Sigma) \ndot{d1} [X - \mu]_{\name{d} \rightarrow \name{d1}} \right) \ndot{d2} [X - \mu]_{\name{d} \rightarrow \name{d2}} \right) }{\sqrt{(2 \pi)^k \nfun{d1, d2}{\text{det}}(\Sigma)} }
+Then we repeat the following update:
+\begin{align*}
+H' &= \nfun{\beam}{max} (H \odot f(S)) \\
+H &\leftarrow \nfun{\state,\beam}{maxk} H' \\
+S &\leftarrow \nfun{\state,\beam}{argmaxk} H'
 \end{align*}
-
-
-\subsection*{Attention with Causal Masking (For Generation)}
-
-
-
-\begin{align*} 
-Q &\in \reals^{\name{key}:d_v,\name{time'}:n}\\
-K &\in \reals^{\name{head}:h,\name{key}:d_k, \name{time}:n}\\
-V &\in \reals^{\name{head}:h, \name{val}:d_v, \name{time}:n}\\
-\text{attention}(Q, K, V) &=  \nfun{time}{\softmax} \left( \frac{Q \ndot{key} K }{\sqrt{d_k}} + M \right) \ndot{time} V \\
-M & \in \reals^{\name{time}:n, \name{time'}:n} \\
-M_{\name{time}:i, \name{time'}:j} & = \begin{cases}0 &\text{\ if\ } i \leq j\\
--\infty & \text{o.w} \end{cases} \\
+where
+\begin{align*}
+\nfun{\ax,\name{k}}{maxk} \colon \reals^{\ax} &\rightarrow \reals^{\name{k}} \\
+\nfun{\ax,\name{k}}{argmaxk} \colon \reals^{\ax} &\rightarrow \{0,1\}^{\ax,\name{k}}
 \end{align*}
+are defined such that $[\nfun{\ax,\name{k}}{maxk} A]_{\name{k}(i)}$ is the $i$-th largest value along axis $\ax$ and $A \ndot{\ax} (\nfun{\ax,\name{k}}{argmaxk}{A}) = \nfun{\ax,\name{k}}{max} A$.
 
+We can add a $\batch$ axis to $H$ and $S$ and the above equations will work unchanged.
 
+\subsubsection{Multivariate normal distribution}
 
-
-
-\subsection*{Elman RNN}
-
-This is one way to do it that make the recursion explicit. 
-
-\begin{align*} 
-X &\in \{0, 1\}^{{\name{time}{t}, \name{vocab}{v}}} \ s.t. \ \nsum{v} X = 1\\
-W &\in \reals^{{\name{hidden'}:h, \name{hidden}:h}}\\
-E &\in \reals^{{\name{vocab}:v, \name{hidden'}:h}}\\
-\text{RNN}(X; E, W) &= \text{step}(X_{\name{time}:t}, \text{step}(X_{\name{time}:t-1}, \text{step}(...) ) \\ 
-\text{step}(X, H) &= \left[ \sigma (W \ndot{hidden} H +   E \ndot{vocab} X_{\name{time}:1} ) \right]_{\name{hidden'} \rightarrow \name{hidden}} \\
+To define a multivariate normal distribution, we need some matrix operations. These have two axis names written under them, for rows and columns, respectively. Determinant and inverse have the following signatures:
+\begin{align*}
+\nfun{\ax_1,\ax_2}{det} \colon F^{\ax_1[n] \times \ax_2[n]} &\rightarrow F \\
+\nfun{\ax_1,\ax_2}{inv} \colon F^{\ax_1[n] \times \ax_2[n]} &\rightarrow F^{\ax_1[n] \times \ax_2[n]}.
 \end{align*}
+(We write $\text{inv}$ instead of $\cdot^{-1}$ because there's no way to write axis names under the latter.)
 
+In our notation, the application of a bilinear form is more verbose than the standard notation ($(X-\mu)^\top \Sigma^{-1} (X-\mu)$), but also makes it look more like a function of two arguments (and would generalize to three or more arguments).
 
-
-\subsection*{Performer Attention Decomposition}
-
-
-Matmul: 
-
-Recent paper on Performer Attention uses the following notation. 
-
-
-\begin{align*} 
-Q &\in \reals^{{ n \times d_v }}\\
-K &\in \reals^{{ n \times d_v }}\\
-V &\in \reals^{{ n \times d_v }}\\
-\text{attention}(Q, K, V) &=  D^{-1} A V \\
-A & = \exp\left( \frac{Q K^\top }{\sqrt{d_k}} \right) \\
-D & = \text{diag}(A 1_L) 
-\end{align*} 
-
-Named Tensor: 
-
-\begin{align*} 
-Q &\in \reals^{{ \name{key}:d_v, \name{time'}:n }}\\
-K &\in \reals^{{ \name{key}:d_v, \name{time}:n}}\\
-V &\in \reals^{{ \name{val}:d_v, \name{time}:n}}\\
-\text{attention}(Q, K, V) &=  \frac{ A \ndot{time} V }{ \nsum{time} A }  \\
-A & = \exp  \frac{Q \ndot{key} K }{\sqrt{d_k}}  \\
-\end{align*} 
-
+\begin{align*}
+\mathcal{N} \colon \reals^{\dd} &\rightarrow \reals \\
+\mathcal{N}(X; \mu, \Sigma) &= \frac{\exp\left(-\frac{1}{2} \left(\nfun{\dd_1, \dd_2}{inv} \Sigma\right) \ndot{\dd_1,\dd_2} \left([X - \mu]_{\dd\rightarrow\dd_1} \odot [X - \mu]_{\dd\rightarrow\dd_2} \right) \right)}{\sqrt{(2 \pi)^{|\dd|} \nfun{\dd_1, \dd_2}{det} \Sigma}}
+\end{align*}
+where
+\begin{align*}
+|\dd| &= |\dd_1| = |\dd_2| \\
+\mu &\in \reals^{\dd} \\
+\Sigma & \in \reals^{\dd_1 \times \dd_2}.
+\end{align*}
+\fi

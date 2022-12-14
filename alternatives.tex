@@ -1,23 +1,56 @@
-A very frequently asked question is why we haven't used index notation as used in physics, and the Einstein summation convention in particular. In this notation, axes are ordered, and every equation is written in terms of tensor components.
-If an index appears on both sides of an equation, then the equation must hold for each value of the index, and if an index appears twice on one side and not on the other, there is an implicit summation over that index.
+\subsection{Index notations}
+
+Among alternatives to standard vector and matrix notation, the most common one is index notation as used in physics \citep{ricci+levi-civita:1901}. 
+Related notations are used in other fields as well \citep{harshman:2001}.
+In this notation, axes are ordered, and every equation is written in terms of tensor components.
+If an index appears on both sides of an equation, then the equation must hold for each value of the index, and the Einstein summation convention \citep{einstein:1916} is that if an index appears twice on one side and not on the other, there is an implicit summation over that index.
 \begin{align*}
-  \text{Attention} \colon \reals^{n' \times d_k} \times \reals^{n \times d_k} \times \reals^{n \times d_v} &\rightarrow \reals^{n' \times d_v} \\
-  \left[\text{Attention}(Q, K, V)\right]_{i'k} &= \softmax_i \left( \frac{Q_{i'j} K_{ij}}{\sqrt{d_k}} \right) V_{ik}.
+  \text{Attention} \colon \reals^{d_k} \times \reals^{n \times d_k} \times \reals^{n \times d_v} &\rightarrow \reals^{d_v} \\
+  \left[\text{Attention}(Q, K, V)\right]_{k} &= \softmax_i \left( \frac{Q_{j} K_{ij}}{\sqrt{d_k}} \right) V_{ik}.
 \end{align*}
-Because $i'$ and $k$ appear on both sides, the equation must hold over all values of these indices. But because $j$ and $k$ occur twice on only the right-hand side, they are both summed over. We'd have to define exactly what the $i$ under softmax means ($i$ is bound inside the softmax and free outside it), and since softmax doesn't distribute over addition, we'd need to clarify that the summation over $j$ occurs inside the softmax.
+Because $k$ appears on both sides, the equation must hold over all values of this index. But because $i$ and $j$ occur twice on only the right-hand side, they are both summed over. We would have to define exactly what the $i$ under the softmax means ($i$ is bound inside the softmax and free outside it), and since softmax doesn't distribute over addition, we would need to modify the summation convention so that the summation over $j$ occurs inside the softmax.
 
-Other than that, this is concise and unambiguous. But it doesn't really solve the main problem we set out to solve, which is that ordered axes force the author and reader to remember the purpose of each axis. The indices do act as symbolic names for axes (indeed, in \emph{abstract} index notation, they really are symbols, not variables), but they are temporary names; they could be totally different in the next equation. It would be up to the author to choose to use consistent names, and to do so correctly.
+Aside from these correctable issues, this notation scales very well to more than two axes and is concise and unambiguous. But it does not solve the main problem we set out to solve, which is that ordered axes force the author and reader to remember the purpose of each axis. The indices do act as symbolic names for axes (indeed, in \emph{abstract} index notation \citep{penrose+rindler:1984}, they really are symbols, not variables), but they are temporary names; they could be totally different in the next equation. It would be up to the author to choose to use consistent names, and to do so correctly.
 
-A second issue is that because it depends on repetition of indices to work, index notation can be a little bit more verbose than our notation, particularly for reductions and contractions:
+A second issue is that because it depends on repetition of indices to work, index notation can be more verbose than our notation, particularly for reductions and contractions:
 \begin{align*}
   C &= \max_i A_i & C &=\nfun{\ax}{max} A \\
   C &= A_i B_i & C &= A \ndot{\ax} B.
 \end{align*}
 
-Finally, index notation requires us to write out all indices explicitly. So if we wanted to extend attention to multiple heads and minibatches, we would write:
+Finally, index notation requires us to write out all indices explicitly. So if we wanted to \liftVB{} attention to minibatches ($b \in [B]$), multiple heads ($h \in [H]$) and multiple query tokens ($i' \in [n']$), we would write:
 \begin{gather*}
   \text{Attention} \colon \reals^{B \times H \times n' \times d_k} \times \reals^{B \times H \times n \times d_k} \times \reals^{B \times H \times n \times d_v} \rightarrow \reals^{B \times H \times n' \times d_v} \\
   \left[\text{Attention}(Q, K, V)\right]_{bhi'k} = \softmax_i \left( \frac{Q_{bhi'j} K_{bhij}}{\sqrt{d_k}} \right) V_{bhik}.
 \end{gather*}
-We could adopt a convention that extends a function on tensors to tensors that have extra axes to the \emph{left}, but such conventions tend to lead to messy reordering and squeezing/unsqueezing of axes. Named axes make this unnecessary.
+We could adopt a convention that \liftsVBZ{} a function on tensors to tensors that have extra axes to the \emph{left}, but such conventions tend to lead to messy reordering and squeezing/unsqueezing of axes. Named axes make such conventions unnecessary.
 
+\subsection{Graphical notations}
+
+In the graphical notation of \citet{penrose:1971}, a node in the graph stands for a tensor, and its incident edges stand for its indices. The edges are ordered from left to right. An edge connecting two nodes denotes contraction. The notation of \citet{alsberg:1997} is similar, except that edges are named, not ordered.
+
+Graphs are commonly used in machine learning for representing probability models \citep{koller+friedman:2009}. A node in the graph stands for a random variable, and an edge or hyperedge stands for a dependency between variables. If random variables have finite domains, then a (hyper)edge with $r$ endpoints can be thought of as an $r$-th order tensor. A graph can then be thought of as a product and contraction. Extensions that allow for a choice between two subgraphs \citep[e.g.,][]{minka+winn:2008} can be thought of as addition.
+
+Our assessment of graphical notations like these is that, on the positive side, they have obvious value for visualization, and they at least have the potential to represent indices in a purely unordered way. On the negative side, these notations seem best suited for representing linear functions, and even for this purpose, some other practical considerations are that drawing pictures requires more effort from the author, and that pictures will have a less transparent relationship with their implementation in most programming languages.
+
+\subsection{Relational algebra}
+
+In relational algebra \citep{codd:1970}, the basic objects are sets of $r$-tuples, which could be thought of as tensors of order $r$ with Boolean-valued entries. In the original formulation, the members of the tuples, which correspond to axes, were both named \emph{and} ordered, although later definitions \citep[e.g.][]{pirotte:1982} made them unordered.
+
+Probabilistic variants of relational algebra also exist \citep[e.g.][]{dey+sarkar:1996,fuhr+rolleke:1997}, whose relations would correspond to tensors of probabilities.
+
+While relational algebra and tensor notations are designed for totally different purposes, the notation of relational algebra generally has a similar flavor to ours (for example, our contraction operator is similar to the $\bowtie$ operator, and our renaming operator is the same as the $\rho$ operator).
+
+\subsection{Programming languages}
+
+One response to the notation presented here, as well as the alternative notations mentioned in this section, is that research papers in machine learning should simply present models as code rather than equations.
+But we argue that a model's mathematical specification should abstract away from details of its implementation.
+
+Conceptually, it is important to have a distinct specification to define what makes an implementation (both the original implementation and any reimplementations) correct or incorrect.
+If the implementation is its own specification, it cannot be correct or incorrect; it will be ``not even wrong.''
+
+Practically, abstracting away from implementation is important because we do not want the interpretation of research papers to be subject to differences across programming languages and libraries, or versions thereof.
+%For example, Python tensor libraries allow broadcasting with tensors of different orders, but Julia does not; among Python libraries, PyTorch and TensorFlow both have functions called \verb|matmul|, but they have slightly different behavior.
+%Nor do we want the interpretation of papers to be subject to changes in languages and libraries over time. 
+For example, PyTorch's \verb|Dropout2d| on order-3 tensors has one behavior in versions 1.11 and 1.13, but another behavior in 1.10, 1.12, and future versions.
+It would be problematic for correct understanding of a paper to depend on such differences.

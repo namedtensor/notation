@@ -1,99 +1,205 @@
-\newcommand{\ddx}[1]{\frac{\partial #1}{\partial X}}
 
-Let $f$ be a function from order-$m$ tensors to order-$n$ tensors and let $Y = f(X)$. The partial derivatives of $Y$ with respect to $X$ form an order-$(m+n)$ tensor: $m$ ``input'' axes for the directions in which $X$ could change and $n$ ``output'' axes for the change in $Y$.
+In many machine learning applications, we need to compute derivatives of functions from tensors to tensors. In standard vector/matrix notation, this can become complicated.
+For example, if $f$ maps from vectors to vectors, then the partial derivatives of $f$ form a matrix (the Jacobian). It has an ``input'' axis for the directions in which $X$ could change, and an ``output'' axis for the directions in which $f(X)$ could change.
+But there are conflicting conventions about whether the first axis is the input axis (``denominator layout'') or the output axis (``numerator layout''). The derivative of a function from vectors to matrices or matrices to vectors cannot be represented as a matrix at all, so one must resort to flattening the matrices into vectors.
 
-For example, if $f$ maps from vectors to vectors, then $\ddx Y$ is a matrix (the Jacobian). But using matrix notation, there are conflicting conventions about whether the first axis is the input axis (``denominator layout'') or the output axis (``numerator layout''). The derivative of a function from vectors to matrices or matrices to vectors cannot be represented as a matrix at all, so one must resort to flattening the matrices into vectors.
+With non-named tensor index notation, taking derivatives is not difficult \citep{laue+:2018}, but again a convention must be adopted that the input axes come after the output axes, separated by a comma.
 
-With tensors, taking derivatives of higher-order tensors with respect to higher-order tensors is not difficult \citep{laue+:2018}. With named tensors, we get the additional advantage of using names to distinguish input and output axes.
+With named tensors, axes are not ordered, so we don't need to remember whether the input or output axes come first. But we do need to ensure that the input and output axes have different names.
 
 \subsection{Definition}
 
-Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, where $\mathcal{S}$ and $\mathcal{T}$ are orthogonal, and let $Y = f(X)$. Then the derivative of $Y$ at $X$ is the tensor with shape $\mathcal{S} \times \mathcal{T}$ such that for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$,
-\begin{equation*}
-  \left[\ddx Y \right]_{s,t} = \frac{\partial Y_t}{\partial X_s}.
-\end{equation*}
+\begin{definition}
+Let $\mathcal{S} = \ax_1 \times \cdots \times \ax_r$ be a shape. Then we write $\mathcal{S\inax} = \ax_1\inax \times \cdots \times \ax_r\inax$, and if $s = \{\ax_1(i_1), \ldots \ax_r(i_r)\} \in \rec \mathcal{S}$, then we write $s\inax = \{\ax_1\inax(i_1), \ldots \ax_r\inax(i_r)\}$. Furthermore, if $X \in \reals^\mathcal{S}$ then we write $X\inax = X_{\mathcal{S}\rightarrow\mathcal{S}\inax}$.
+\end{definition}
 
-If $X$ and $Y$'s shapes are not orthogonal, we take the derivative of $Y_{\mathcal{T}\rightarrow\mathcal{T'}}$ instead. (It's also possible to rename $X$, but we think it's easier to think about renaming $Y$, so that's what we'll do.) Assume $\mathcal{T} = \ax_1 \times \cdots \times \ax_r$. Then for each $\ax_i$, choose a new name $\ax_i'$ not in either $\mathcal{S}$ or $\mathcal{T}$, and let $\mathcal{T'} = \ax_1' \times \cdots \times \ax_r'$. Then we seek the tensor of partial derivatives
-\begin{equation*}
-  \left[\ddx{Y_{\mathcal{T}\rightarrow\mathcal{T'}}} \right]_{s,t'} = \frac{\partial Y_t}{\partial X_s}.
-\end{equation*}
-
-\subsection{Rules}
-
-To compute derivatives, we use the method of differentials \citep{magnus+neudecker:1985}. The differential of an expression $U$, written $\partial U$, is a tensor with the same shape as $U$, computed using rules like the following:
+\begin{definition}
+Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$. The \emph{derivative} of~$f(X)$ with respect to $X\inax$  
+%at $A \in \reals^\mathcal{S}$
+is the tensor such that
 \begin{align*}
-  \partial f(U) &= f'(U) \ndot{\mathcal{U}} \partial U && f \colon \reals^\mathcal{U} \rightarrow \reals^{\mathcal{V}} \\
-  \partial (U + V) &= \partial U + \partial V \\
-  \partial \nsum{\ax} U &= \nsum{\ax} \partial U \\
-  \partial (U \odot V) &= \partial U \odot V + U \odot \partial V \\
-  \partial (U \ndot{\ax} V) &= \partial U \ndot{\ax} V + U \ndot{\ax} \partial V \\
-  \partial \left(\frac{U}{V}\right) &= \frac{\partial U \odot V - U \odot \partial V}{V^2} \\
-  \partial U_s &= \left[\partial U\right]_s \\
-  \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}
+  \ddx {f(X)} &\in \reals^{\mathcal{S}\inax \cup \mathcal{T}} \\
+  \left[\ddx {f(X)} \right]_{s\inax,t} &= \frac{\partial f(X)_t}{\partial X_s}
 \end{align*}
-If we obtain an equation in the so-called \emph{canonical} form
+for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$.
+\end{definition}
+
+The above definition assumes that $\mathcal{S}\inax$ and $\mathcal{T}$ are orthogonal; if not, the axes in $ \mathcal{S}$ should be renamed to something else. For example, the second derivative (the Hessian) could be
+\begin{align*}
+\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dag} &\in \reals^{\mathcal{S}\inax \cup \mathcal{S}^\dag \cup \mathcal{T}} \\
+\left[\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dag}\right]_{r\inax, s\dag, t} &= \frac{\partial^2 f(X)_t}{\partial X_r \, \partial X_s}
+\end{align*}
+for all $r, s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$.
+
+\subsection{Differentials}
+
+We could derive rules like the chain rule and the sum and product rules, and use them to compute derivatives; however, ensuring that input and output shapes are orthogonal is inconvenient. Instead, we recommend the method of differentials \citep{magnus+neudecker:1985}, which reduces renaming to a minimum.
+
+The first-order Taylor approximation of $f$ around $X \in \reals^{\mathcal{S}}$ is
+\begin{equation*}
+  f(X+H) \approx f(X) + \ddx{f(X)} \ndot{\mathcal{S}\inax} H\inax \qquad H \in \reals^{\mathcal{S}}.
+\end{equation*}
+The \emph{differential} of $f(X)$ with increment $H$, written $\partial f (X; H)$, is the second term of this approximation;
+we defer a formal definition to \cref{sec:calculus_formal}.
+
+For example,
+\begin{subequations}
+\begin{itemize}
+\item If $\text{id}$ is the identity function, then
+\begin{align*}
+\text{id}(X + H) &= X + H \\
+\\partial\/\text{id}(X; H) &= H. \yestag\label{eq:diff_id}
+\end{align*}
+\item If $f(X) = X \ndot\ax X$ where $X \in \reals^\ax$, then
+\begin{align*}
+f(X + H) &= (X + H) \ndot\ax (X + H) \\
+&= X \ndot\ax X + 2X \ndot\ax H + H \ndot\ax H \\
+\partial f(X; H) &= 2X \ndot\ax H. \yestag\label{eq:diff_example}
+\end{align*}
+\end{itemize}
+\end{subequations}
+It's often more convenient to work directly with the expression $X \ndot\ax X$ instead of $f(X)$, and to write $\partial (X \ndot\ax X)$ for $\partial f(X; H)$. Then, since $\partial X = \partial\/\text{id}(X; H) = H$, we can write \cref{eq:diff_example} simply as \begin{equation*}\partial(X \ndot\ax X) = 2X \ndot\ax \partial X\end{equation*}
+so that the $H$ has beeen ``hidden'' inside  $\partial X$.
+More generally, we can derive rules like the following:
+\begin{subequations}
+\begin{align}
+\partial (U + V) &= \partial U + \partial V \label{eq:plus_rule} \\
+  \partial (U \odot V) &= U \odot \partial V  + V \odot \partial U \label{eq:odot_rule} \\
+  \partial \left(\frac{U}{V}\right) &= \frac{V \odot \partial U - U \odot \partial V}{V^2} \label{eq:quotient_rule} \\
+  \partial \nsum{\ax} U &= \nsum{\ax} \partial U \label{eq:sum_rule} \\
+  \partial (U \ndot{\ax} V) &= U \ndot{\ax} \partial V + V \ndot\ax \partial U \label{eq:ndot_rule} \\
+  \partial U_s &= \left[\partial U\right]_s \\
+  \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}. \label{eq:renaming_rule} \\
+\end{align}
+
+The chain rule for differentials is
+\begin{align}
+  \partial f(U) &= \left.\ddx{f(X)}\right|_{X=U} \ndot{\mathcal{S}\inax} \partial U_{\mathcal{S}\rightarrow\mathcal{S}\inax} && f \colon \reals^{\mathcal{S}} \rightarrow \reals^{\mathcal{T}}. \label{eq:chain_rule} \\
+  \intertext{Recall that $f$ can be lifted to shapes larger than $\mathcal{S}$. In that case, the rule above still applies, but note that the contraction will still be over $\mathcal{S}$. A special case of this is when $\mathcal{S} = \mathcal{T} = \emptyset$:}
+  \partial f(U) &= \left.\frac{\mathrm{d} f(x)}{\mathrm{d} x}\right|_{x=U}  \odot \partial U && f \colon \reals \rightarrow \reals. \label{eq:elementwise_rule}
+  \intertext{For example, letting $f(x) = \exp x$ gives the rule}
+  \partial (\exp U) &= \exp U \odot \partial U. \label{eq:exp_rule}
+\end{align}
+\end{subequations}
+
+Using these rules we can compute the differential of a wide variety of expressions. For example, the softmax operator:
+\begin{align*}
+  \partial (\nfun{\ax}{softmax} X) &\eqby{eq:def_softmax} \partial \biggl(\frac{\exp X}{\nsum{\ax} \exp X}\biggr) \\
+  &\eqby{eq:quotient_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \partial\bigl(\nsum{\ax} \exp X\bigr)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
+  &\eqby{eq:sum_rule} \frac{\bigl( \nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \nsum{\ax} \partial(\exp X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
+  &\eqby{eq:exp_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot \nsum{\ax} (\exp X \odot \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
+  &\eqby{eq:ndot_as_nsum} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot (\exp X \ndot{\ax} \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
+  &= \frac{\exp X}{\nsum{\ax} \exp X}  \odot \partial X - \frac{\exp X}{\nsum{\ax} \exp X} \odot \Biggl(\frac{\exp X}{\nsum{\ax} \exp X} \ndot{\ax} \partial X\Biggr) \\
+  &\eqby{eq:def_softmax} \nfun{\ax}{softmax} X \odot \partial X - \nfun{\ax}{softmax} X \odot (\nfun{\ax}{softmax} X \ndot{\ax} \partial X) \\
+  &= \nfun{\ax}{softmax} X \odot (\partial X - \nfun{\ax}{softmax} X \ndot{\ax} \partial X). \yestag\label{eq:diff_softmax}
+\end{align*}
+We stop when the only differentials left are $\partial X$.
+
+\subsection{Derivatives via differentials}
+
+If we can get $\partial f(X)$ into so-called \emph{canonical form},
 \begin{equation}
-  \partial Y = A \ndot{\mathcal{S}} \partial X + \text{const.}
+  \partial f(X) = D \ndot{\mathcal{S}\inax} \partial X\inax + \text{const.}
   \label{eq:canonical}
 \end{equation}
-where $\mathcal{S}$ is orthogonal to $\mathcal{T}$ and ``const'' stands for terms not depending on $\partial X$, then we have
+where ``const.''~stands for terms not depending on $\partial X$, then
+by \citeauthor{magnus+neudecker:1985}'s first identification theorem (\cref{thm:identification} in \cref{sec:calculus_formal}),
+we can conclude that
 \begin{equation*}
-  \ddx{Y} = A.
+  \ddx{f(X)} = D.
 \end{equation*}
 
-In order to get equations into canonical form, some tricks are useful. First, contractions can be easier to reason about if rewritten as sums of elementwise products:
-\[ A \ndot{\ax} B = \nsum{\ax} A \odot B. \]
-Second, renaming can be thought of as contraction with an identity matrix:
+When trying to get expressions into canonical form, one helpful fact is that
+renaming can be thought of as contraction with an identity matrix. First we define the identity matrix with shape $\ax \times \ax'$:
+\begin{align}
+[I_{\ax,\ax'}]_{\ax(i),\ax'(j)} &= \begin{cases} 1 & i = j \\ 0 & i \neq j. \end{cases} \notag \\
+\intertext{Then for any tensor $A$ with an axis $\ax$,}
+A_{\ax\rightarrow\ax'} &= I_{\ax,\ax'} \ndot\ax A. 
+\label{eq:rename_as_id}
+\end{align}
+More specifically, if $\partial X \in \reals^\mathcal{S}$, then
+\begin{align}
+\partial X &= I_{\mathcal{S},\mathcal{S}\inax} \ndot{\mathcal{S}\inax} \partial X\inax \label{eq:unrename_as_id}
+\end{align}
+and then \cref{eq:ndot_assoc} can usually be used to move the ${}\ndot{\mathcal{S}\inax} \partial X_{\mathcal{S}\rightarrow\mathcal{S}\inax}$ to the outermost level of the expression.
+
+Above, we found the differential of the softmax function; now let us find its derivative.
 \begin{align*}
-[I_{\ax,\ax'}]_{\ax(i),\ax'(j)} &= \begin{cases} 1 & i = j \\ 0 & i \neq j \end{cases} \\
-A_{\ax\rightarrow\ax'} &= \nsum{\ax} I_{\ax,\ax'} \odot A.
+\partial (\nfun{\ax}{softmax} X) 
+&\eqby{eq:diff_softmax} \nfun{\ax}{softmax} X \odot (\partial X - \nfun{\ax}{softmax} X \ndot{\ax} \partial X) \\
+&\eqby{eq:unrename_as_id} \nfun{\ax}{softmax} X \odot (I_{\ax,\ax\inax} \ndot{\ax\inax} \partial X\inax - \nfun{\ax}{softmax} X \ndot{\ax} (I_{\ax,\ax\inax} \ndot{\ax\inax} \partial X\inax)) \\
+&\eqby{eq:ndot_assoc} (\nfun{\ax}{softmax} X \odot (I_{\ax,\ax\inax} - \nfun{\ax}{softmax} X \ndot{\ax} I_{\ax,\ax\inax})) \ndot{\ax\inax} \partial X\inax \\
+&\eqby{eq:rename_as_id} (\nfun{\ax}{softmax} X \odot (I_{\ax,\ax\inax} - (\nfun{\ax}{softmax} X)\inax)) \ndot{\ax\inax} \partial X\inax.
+\end{align*}
+This is in canonical form, so we have
+\begin{align}
+\frac{\partial}{\partial X} (\nfun{\ax}{softmax} X) &= \nfun{\ax}{softmax} X \odot (I_{\ax,\ax\inax} - (\nfun{\ax}{softmax} X)\inax). \label{eq:deriv_softmax}
+\end{align}
+
+\subsection{\LiftingNN}
+
+Recall that $f^\mathcal{S'}$ is the \liftNN{} of $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$ with $\mathcal{S'}$, and in most contexts we can simply write $f$ instead of $f^\mathcal{S'}$. However, derivatives are one place where some extra caution is in order.
+To lighten notation, let's write $g$ for the derivative of $f$:
+\begin{align*}
+  g(X) &= \ddx{f(X)}. \\
+\intertext{Recall that the chain rule (\ref{eq:chain_rule}) works under lifting, so}
+  \partial f^{\mathcal{S'}} (X) &= g^{\mathcal{S'}}(X) \ndot{\mathcal{S}\inax} \partial X_{\mathcal{S}\rightarrow\mathcal{S}\inax}.
+\end{align*}
+But the contraction is only over $\mathcal{S}\inax$, so it would be incorrect to conclude that $\frac{\partial f^{\mathcal{S'}}(X)}{\partial X} = g^{\mathcal{S'}}(X)$. The derivative of a lift is \emph{not} the lift of a derivative. We must rename and contract $\mathcal{S'}$ as well:
+\begin{align*}
+  \partial f^{\mathcal{S'}} (X)
+  &\eqby{eq:chain_rule} g^{\mathcal{S'}}(X) \ndot{\mathcal{S}\inax} \partial X_{\mathcal{S}\rightarrow\mathcal{S}\inax} \\
+  &\eqby{eq:unrename_as_id} g^{\mathcal{S'}}(X) \ndot{\mathcal{S}\inax} (I_{\mathcal{S'},\mathcal{S'}\inax} \ndot{\mathcal{S'}\inax} \partial X_{\mathcal{S}\cup\mathcal{S'}\rightarrow(\mathcal{S}\cup\mathcal{S'})\inax}) \\
+  &\eqby{eq:ndot_assoc2} (g^{\mathcal{S'}}(X) \odot I_{\mathcal{S'},\mathcal{S'}\inax}) \ndot{(\mathcal{S}\cup\mathcal{S'})\inax} \partial X_{\mathcal{S}\cup\mathcal{S'}\rightarrow(\mathcal{S}\cup\mathcal{S'})\inax} \\
+  \frac{\partial f^{\mathcal{S'}} (X)}{\partial X\inax}
+  &= g^{\mathcal{S'}}(X) \odot I_{\mathcal{S'}, \mathcal{S'}\inax}.
+\end{align*}
+In general, then, the derivative of a \liftNN{} is the \liftNN{} of the derivative, multiplied by the identity matrix for the new axes.
+Intuitively, this is because the derivative is a linear transformation---before \liftingNN{}, a transformation from $\mathcal{S}\inax$ to $\mathcal{T}$. When \liftingVBG{} to $\mathcal{S} \cup \mathcal{S}'$, this transformation must also be lifted, which is what multiplication by $I_{\mathcal{S}',\mathcal{S'}\inax}$ accomplishes.
+
+\subsection{Extended example}
+
+\newcommand{\smseq}[1]{\nfun\seq{softmax} #1}
+\newcommand{\qk}{Q \ndot\key K}
+\newcommand{\attwt}{\alpha}
+
+As a more elaborate example, we find the derivative of self-attention. For brevity, we omit the factor $\frac{1}{\sqrt{|\key|}}$, and we write $\attwt = \nfun\seq{softmax} (Q\ndot\key K)$.
+\begin{align*}
+\partial \text{Att}(Q, K, V)
+  &\eqby{eq:def_att} \partial ( \attwt \ndot{\seq} V ) \\
+  &\eqby{eq:ndot_rule} \alpha \ndot{\seq} \partial V + V \ndot{\seq} \partial \alpha. \yestag\label{eq:att1}
 \end{align*}
 
-\subsection{Example}
-
-Let's find the differential of the softmax operator.
+Focus first on the first term, which is the only term depending on $\partial V$:
 \begin{align*}
-  Y &= \nfun{\ax}{softmax} X \\
-  \partial Y &= \partial \biggl(\frac{\exp X}{\nsum{\ax} \exp X}\biggr) \\
-    &= \frac{\exp X \odot \partial X \odot \nsum{\ax} \exp X - \exp X \odot \nsum{\ax} (\exp X \odot \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
-  &= Y \odot (\partial X - Y \ndot{\ax} \partial X).
+\attwt \ndot{\seq} \partial V
+&\eqby{eq:unrename_as_id} \attwt \ndot{\seq} ((I_{\seq,\seq\inax} \odot I_{\val,\val\inax}) \ndot{\seq\inax\\\val\inax} \partial V\inax) \\
+&\eqby{eq:ndot_assoc} ((\attwt \ndot{\seq} I_{\seq,\seq\inax}) \odot I_{\val,\val\inax}) \ndot{\seq\inax\\\val\inax} \partial V\inax \\
+&\eqby{eq:rename_as_id} (\attwt_{\seq\rightarrow\seq\inax} \odot I_{\val,\val\inax}) \ndot{\seq\inax\\\val\inax} \partial V\inax \\
+  \frac{\partial}{\partial V\inax}
+  \text{Att}(Q,K,V) &= \attwt_{\seq\rightarrow\seq\inax} \odot I_{\val,\val\inax}.
 \end{align*}
 
-Next, use this to find the Jacobian, $\ddx Y$. Since $X$ and $Y$ have the same shape, we rename $Y$:
+Next, focus on the second term of \cref{eq:att1}:
 \begin{align*}
-  \partial Y_{\ax\rightarrow\ax'} &= [Y \odot (\partial X - \nsum{\ax} Y \odot \partial X)]_{\ax\rightarrow\ax'} \\
-  &= Y_{\ax\rightarrow\ax'} \odot (\partial X_{\ax\rightarrow\ax'} - \nsum{\ax} Y \odot \partial X) \\
-  &= Y_{\ax\rightarrow\ax'} \odot \left(\nsum{\ax} I_{\ax',\ax} \odot \partial X - \nsum{\ax} Y \odot \partial X\right) \\
-  &= \nsum{\ax} Y_{\ax\rightarrow\ax'} \odot (I_{\ax',\ax} - Y) \odot \partial X \\
-  \ddx {Y_{\ax\rightarrow\ax'}} &= Y_{\ax\rightarrow\ax'} \odot (I_{\ax',\ax} - Y).
+V \ndot{\seq} \partial \attwt
+&\eqby{eq:diff_softmax} V \ndot{\seq} (\attwt \odot (\partial (\qk) - \attwt \ndot{\seq} \partial (\qk))) \\
+&\eqby{eq:ndot_rule} V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K + K \ndot\key \partial Q - \attwt \ndot{\seq} (Q \ndot\key \partial K + K \ndot\key \partial Q))). \yestag\label{eq:att2}
+\end{align*}
+Keeping only terms depending on $\partial Q$, we get
+\begin{align*}
+\mathmakebox[6em][l]{V \ndot{\seq} (\attwt \odot (K \ndot\key \partial Q - \attwt \ndot{\seq} (K \ndot\key \partial Q)))} \\
+&\eqby{eq:unrename_as_id} V \ndot{\seq} (\attwt \odot (K \ndot\key (I_{\key,\key\inax} \ndot{\key\inax} \partial Q\inax) - \attwt \ndot{\seq} (K \ndot\key (I_{\key,\key\inax} \ndot{\key\inax} \partial Q\inax)))) \\
+&\eqby{eq:ndot_assoc} \Bigl(V \ndot{\seq} (\attwt \odot (K \ndot\key I_{\key,\key\inax} - \attwt \ndot{\seq} (K \ndot\key I_{\key,\key\inax})))\Bigr) \ndot{\key\inax} \partial Q\inax \\
+&\eqby{eq:ndot_assoc} \Bigl(V \ndot{\seq} (\attwt \odot (K_{\key\rightarrow\key\inax} - \attwt \ndot{\seq} K_{\key\rightarrow\key\inax}))\Bigr) \ndot{\key\inax} \partial Q\inax \\
+  \frac{\partial}{\partial Q\inax}
+  \text{Att}(Q, K, V) &= V \ndot{\seq} (\attwt \odot (K_{\key\rightarrow\key\inax} - \attwt \ndot{\seq} K_{\key\rightarrow\key\inax})).
 \end{align*}
 
-To derive the rule for backpropagation, we assume a function $f \colon \reals^\ax \rightarrow \reals$ and differentiate $f(Y)$. Since $f$ is scalar-valued, there is no name overlap, so no renaming is needed.
+Similarly, keeping only terms from \cref{eq:att2} depending on $\partial K$, we get
 \begin{align*}
-  \partial f(Y) &= \nsum{\ax} f'(Y) \odot \partial Y \\
-  &= \nsum{\ax} f'(Y) \odot Y \odot (\partial X - \nsum{\ax} Y \odot \partial X) \\
-  %&= f'(Y) \ndot{\ax} (Y \odot (\partial X - Y \ndot{\ax} \partial X)) \\
-  &= \nsum{\ax} f'(Y) \odot Y \odot \partial X - \nsum{\ax} f'(Y) \odot Y \odot \nsum{\ax} Y \odot \partial X \\
-  &= \nsum{\ax} f'(Y) \odot Y \odot \partial X - \nsum{\ax} \left(\nsum{\ax} f'(Y) \odot Y\right) \odot Y \odot \partial X \\
-  &= \nsum{\ax} Y \odot (f'(Y) - \nsum{\ax} f'(Y) \odot Y) \odot \partial X \\
-  \ddx{f(Y)} &= Y \odot (f'(Y) - f'(Y) \ndot{\ax} Y).
+\mathmakebox[6em][l]{V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K - \attwt \ndot{\seq} (Q \ndot\key \partial K)))} \\
+&= \Bigl(V \ndot{\seq} (\attwt \odot (Q\inax \odot I_{\seq,\seq\inax}) - \attwt \ndot{\seq} (Q\inax \odot I_{\seq,\seq\inax})))\Bigr) \ndot{\key\inax\\\seq\inax} \partial K\inax \\
+  \frac{\partial}{\partial K\inax}
+  \text{Att}(Q, K, V) &= V \ndot{\seq} (\attwt \odot (Q\inax \odot I_{\seq,\seq\inax}) - \attwt \ndot{\seq} (Q\inax \odot I_{\seq,\seq\inax}))).
 \end{align*}
-
-\subsection{Broadcasting}
-
-Let $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$, and let $f'$ be its derivative. If $X \in \reals^{\mathcal{S} \cup \mathcal{U}}$, where $\mathcal{U}$ is orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, recall that $Y = f(X)$ is defined by:
-\begin{align*}
-  Y_r &= f(X_r)
-\end{align*}
-Finding the differential of $Y$ is easy:
-\begin{align*}
-  \partial Y_r &= f'(X_r) \ndot{\mathcal{S}} \partial X_r \\
-  \partial Y &= f'(X) \ndot{\mathcal{S}} \partial X.
-\end{align*}
-But although $f'$ extends to $X$ using the usual broadcasting rules, it's not the case that $\ddx Y = f'(X)$, which would have the wrong shape. The reason is that the contraction is only over $\mathcal{S}$, not $\mathcal{S}\cup\mathcal{U}$. To get this into the form (\ref{eq:canonical}):
-\begin{align*}
-  \partial Y_{\mathcal{U}\rightarrow\mathcal{U'}} &= \nsum{\mathcal{S}} [f'(X) \odot \partial X]_{\mathcal{U}\rightarrow\mathcal{U'}} \\
-  &= \nsum{\mathcal{S}} \nsum{\mathcal{U}} I_{\mathcal{U},\mathcal{U'}} \odot f'(X) \odot \partial X \\
-  \ddx{Y_{\mathcal{U}\rightarrow\mathcal{U'}}} &= I_{\mathcal{U},\mathcal{U'}} \odot f'(X).
-\end{align*}
-In general, then, when we extend a function to new axes, we extend its derivative by multiplying by the identity matrix for those axes.

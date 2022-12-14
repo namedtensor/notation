@@ -5,7 +5,7 @@
   journal = "Journal of Open Research Software",
   volume = 5, number = 1,
   pages = "10",
-  doi = "http://doi.org/10.5334/jors.148",
+  doi = "10.5334/jors.148",
 }
 
 @misc{namedtensor,
@@ -24,14 +24,28 @@
   note="PyTorch documentation"
 }
 
+@software{jax2018github,
+  author = {James Bradbury and Roy Frostig and Peter Hawkins and Matthew James Johnson and Chris Leary and Dougal Maclaurin and George Necula and Adam Paszke and Jake Vander{P}las and Skye Wanderman-{M}ilne and Qiao Zhang},
+  title = {{JAX}: composable transformations of {P}ython+{N}um{P}y programs},
+  url = {http://github.com/google/jax},
+  version = {0.3.13},
+  year = {2018},
+}
+
+@book{goodfellow2016deep,
+  title={Deep Learning},
+  author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
+  year={2016},
+  publisher={MIT Press}
+}
 @inproceedings{chen2017typesafe,
  author = {Chen, Tongfei},
  title = {Typesafe Abstractions for Tensor Operations},
- booktitle = {Proceedings of the 8th {ACM} {SIGPLAN} International Symposium on {S}cala},
- series = {SCALA 2017},
+ booktitle = {Proc. 8th {ACM} {SIGPLAN} International Symposium on {S}cala},
+ xseries = {SCALA 2017},
  year = {2017},
  pages = {45--50},
- url = {http://doi.acm.org/10.1145/3136000.3136001},
+ xurl = {http://doi.acm.org/10.1145/3136000.3136001},
  doi = {10.1145/3136000.3136001}
 }
 
@@ -40,6 +54,14 @@
   year = "2018",
   title = "Tensor Shape (Annotation) Library",
   url = "https://github.com/ofnote/tsalib",
+  note = "Open-source software",
+}
+
+@misc{axisarrays,
+  author = "Matt Bauman",
+  year = "2018",
+  title = "AxisArrays",
+  url = "https://github.com/JuliaArrays/AxisArrays.jl",
   note = "Open-source software",
 }
 
@@ -71,18 +93,19 @@
  pages         = {357--362},
  doi           = {10.1038/s41586-020-2649-2},
  publisher     = {Springer Science and Business Media {LLC}},
- url           = {https://doi.org/10.1038/s41586-020-2649-2}
+ xurl           = {https://doi.org/10.1038/s41586-020-2649-2}
 }
 
 @inproceedings{vaswani+:2017,
  author = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, \L{}ukasz and Polosukhin, Illia},
- booktitle = {Advances in Neural Information Processing Systems},
- editor = {I. Guyon and U. V. Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
+ xbooktitle = {Advances in Neural Information Processing Systems},
+ booktitle = "Proc. NeurIPS",
+ xeditor = {I. Guyon and U. V. Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
  pages = {5998--6008},
- publisher = {Curran Associates, Inc.},
+ xpublisher = {Curran Associates, Inc.},
  title = {Attention is All you Need},
  url = {https://proceedings.neurips.cc/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf},
- volume = {30},
+ xvolume = {30},
  year = {2017}
 }
 
@@ -99,13 +122,14 @@ url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-perf
 
 @inproceedings{laue+:2018,
  author = {Laue, Soeren and Mitterreiter, Matthias and Giesen, Joachim},
- booktitle = {Advances in Neural Information Processing Systems},
- editor = {S. Bengio and H. Wallach and H. Larochelle and K. Grauman and N. Cesa-Bianchi and R. Garnett},
+ booktitle = "Proc. NeurIPS",
+ xbooktitle = {Advances in Neural Information Processing Systems},
+ xeditor = {S. Bengio and H. Wallach and H. Larochelle and K. Grauman and N. Cesa-Bianchi and R. Garnett},
  pages = {2750--2759},
- publisher = {Curran Associates, Inc.},
+ xpublisher = {Curran Associates, Inc.},
  title = {Computing Higher Order Derivatives of Matrix and Tensor Expressions},
  url = {https://proceedings.neurips.cc/paper/2018/file/0a1bf96b7165e962e90cb14648c9462d-Paper.pdf},
- volume = {31},
+ xvolume = {31},
  year = {2018}
 }
 
@@ -116,7 +140,190 @@ volume = "29",
 number = "4",
 pages = "474--492",
 year = "1985",
-doi = "https://doi.org/10.1016/0022-2496(85)90006-9",
-url = "http://www.sciencedirect.com/science/article/pii/0022249685900069",
+doi = "10.1016/0022-2496(85)90006-9",
+xurl = "http://www.sciencedirect.com/science/article/pii/0022249685900069",
 author = "Jan R. Magnus and H. Neudecker",
 }
+
+@incollection{tucker:1964,
+  address = {New York},
+  author = {Tucker, L. R.},
+  booktitle = {Contributions to Mathematical Psychology},
+  editor = {Gulliksen, H. and Frederiksen, N.},
+  pages = {110--127},
+  publisher = {Holt, Rinehart and Winston},
+  title = {The extension of factor analysis to three-dimensional matrices},
+  year = 1964,
+  comment = "Origin of term 'mode'"
+}
+
+%%% Index notation
+
+@article { ricci+levi-civita:1901,
+  author = "Ricci, M. M. G. and Levi-Civita, T.",
+  year = 1900,
+  title = "M{\'e}thodes de calcul diff{\'e}rentiel absolu et leurs applications",
+  journal = "Mathematische Annalen",
+  volume = "54",
+  pages = "125--201",
+  doi = "10.1007/BF01454201",
+}
+
+@article { einstein:1916, 
+  author = "Einstein, A.",
+  year = 1916,
+  title = "Die {G}rundlage der allgemeinen {R}elativitätstheorie", 
+  journal = "Annalen der Physik",
+  volume = 354,
+  number = 7,
+  pages = "769--880",
+  doi = "10.1002/andp.19163540702",
+}
+
+@book { penrose+rindler:1984,
+  title = "Spinors and space-time",
+  author = "R. Penrose and W. Rindler",
+  year = 1984,
+  publisher = "Cambridge University Press",
+  volume = 1,
+}
+
+@article { harshman:2001,
+  journal = "Journal of Chemometrics",
+  year = 2001,
+  volume = 15, pages = "689--714",
+  doi = "10.1002/cem.665",
+  title = "An index formalism that generalizes the capabilities of matrix notation and algebra to n-way arrays",
+  author = "Richard A. Harshman",
+}
+
+%%% Graphical notation
+
+@inproceedings { penrose:1971,
+ author = "Roger Penrose", 
+ title = "Applications of Negative Dimensional Tensors", 
+ booktitle = "Combinatorial Mathematics and its Applications", 
+ editor = "D. J. A. Welsh",
+ publisher = "Academic Press",
+ year = 1971,
+ pages = "221--244",
+}
+
+@article { alsberg:1997,
+  journal = "Journal of Chemometrics",
+  volume = 11,
+  pages = "251--266",
+  year = 1997,
+  title = "A Diagram Notation For N-mode Array Equations",
+  author = "Bj{\o}rn K. Alsberg",
+  doi = "10.1002/(SICI)1099-128X(199705)11:3<251::AID-CEM472>3.0.CO;2-Q",
+}
+
+@book { koller+friedman:2009,
+  title = "Probabilistic Graphical Models: Principles and Techniques",
+  year = 2009,
+  author = "Daphne Koller and Nir Friedman",
+  publisher = "MIT Press",
+}
+
+@inproceedings{minka+winn:2008,
+  author = "Tom Minka and John Winn",
+  title = "Gates",
+  booktitle = "Proc. NeurIPS",
+  year = 2008,
+  pages = "1073--1080",
+  url = "https://papers.nips.cc/paper/3379-gates"
+}
+
+%%% Relational algebra
+
+@article{ codd:1970, 
+  author = {Codd, E. F.}, 
+  title = {A Relational Model of Data for Large Shared Data Banks}, 
+  year = {1970},
+  xpublisher = {Association for Computing Machinery}, 
+  xaddress = {New York, NY, USA}, 
+  volume = {13}, number = {6},
+  doi = {10.1145/362384.362685},
+  journal = {Communications of the ACM}, 
+  month = jun, 
+  pages = {377--387}, 
+  numpages = {11},
+}
+
+@article { pirotte:1982,
+  title = "A Precise Definition of Basic Relational Notations and of the Relational Algebra",
+  author = "Alain Pirotte",
+  journal = "ACM SIGMOD Record",
+  volume = 13, number = 1,
+  xmonth = sep, year = 1982,
+  pages = "30--45",
+  doi = "10.1145/984514.984516",
+}  
+
+@article{ fuhr+rolleke:1997,
+author = {Fuhr, Norbert and R\"{o}lleke, Thomas}, 
+title = {A Probabilistic Relational Algebra for the Integration of Information Retrieval and Database Systems}, 
+year = {1997}, 
+xpublisher = {Association for Computing Machinery}, 
+xaddress = {New York, NY, USA}, 
+volume = {15}, number = {1}, 
+doi = {10.1145/239041.239045},
+journal = {ACM Transactions on Information Systems}, 
+month = jan, 
+pages = {32--66},
+}
+
+@article{ dey+sarkar:1996,
+author = {Dey, Debabrata and Sarkar, Sumit},
+title = {A Probabilistic Relational Model and Algebra}, 
+year = {1996}, 
+xpublisher = {Association for Computing Machinery}, 
+xaddress = {New York, NY, USA}, 
+volume = {21}, number = {3}, 
+doi = {10.1145/232753.232796},
+journal = {ACM Transactions on Database Systems}, 
+month = sep, pages = {339--369}, 
+}
+
+@inproceedings { wu+he:2018,
+  title = "Group Normalization",
+  author = "Yuxin Wu and Kaiming He",
+  year = 2018,
+  booktitle = "Proc. ECCV",
+  url = "https://openaccess.thecvf.com/content_ECCV_2018/papers/Yuxin_Wu_Group_Normalization_ECCV_2018_paper.pdf",
+}
+
+@misc { pytorchdoc,
+  author = "{PyTorch Contributors}",
+  year = 2022,
+  title = "{P}y{T}orch Documentation",
+  note = "version 1.12",
+  url = "https://pytorch.org/docs/1.12/",
+}
+
+@inproceedings { einops,
+  author = "Alex Rogozhnikov",
+  title = "Einops: Clear and Reliable Tensor Manipulations with {E}instein-like Notation",
+  year = 2022,
+  booktitle = "Proc. ICLR",
+  url = "https://openreview.net/pdf?id=oapKSVM2bcj",
+}
+
+@misc { torchdim,
+  author = "Zachary DeVito",
+  title = "Named Tensors using First-class Dimensions in {PyTorch}",
+  url = "https://github.com/facebookresearch/torchdim",
+  year = 2023,
+  note = "Open-source software",
+}
+
+@misc {jax_xmap,
+  title = "Named axes and easy-to-revise parallelism",
+  url = "https://jax.readthedocs.io/en/latest/notebooks/xmap_tutorial.html",
+  author = "{JAX authors}",
+  year = 2021,
+}
+
+@article{ dex, 
+author = {Paszke, Adam and Johnson, Daniel D. and Duvenaud, David and Vytiniotis, Dimitrios and Radul, Alexey and Johnson, Matthew J. and Ragan-Kelley, Jonathan and Maclaurin, Dougal}, title = {Getting to the Point: Index Sets and Parallelism-Preserving Autodiff for Pointful Array Programming}, year = {2021}, issue_date = {August 2021}, xpublisher = {Association for Computing Machinery}, address = {New York, NY, USA}, volume = {5}, number = {ICFP}, xurl = {https://doi.org/10.1145/3473593}, doi = {10.1145/3473593}, journal = {Proc. ACM on Programming Languages}, month = aug, articleno = {88}, numpages = {29} }
