@@ -34,9 +34,9 @@ Functions
 
 ## Credits
 
-David Chiang, University of Notre Dame, dchiang@nd.edu
-Alexander M. Rush, Cornell University, arush@cornell.edu
-Boaz Barak, Harvard University, b@boazbarak.org
+- David Chiang, University of Notre Dame, dchiang@nd.edu
+- Alexander M. Rush, Cornell University, arush@cornell.edu
+- Boaz Barak, Harvard University, b@boazbarak.org
 
 ## License
 
