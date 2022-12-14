@@ -1,4 +1,4 @@
-%.html: %.tex namedtensor.sty start.tmp
+%.html: %.tex namedtensor.sty template.html
 	pandoc --toc-depth 1 --toc --number-section $< --mathjax -f latex --template template.html -t html -s -o $@ --bibliography references.bib
 
 %.pdf: %.tex namedtensor.sty
@@ -15,5 +15,5 @@ pdf: main.pdf
 html: main.html
 	cp main.html index.html
 
-main.pdf main.html: main.tex types.tex dual.tex fancy.tex calculus.tex alternatives.tex
+main.pdf main.html: main.tex intro.tex tensors.tex operations.tex examples.tex calculus.tex alternatives.tex conclusion.tex examples_long.tex calculus_formal.tex macros.tex
 
