@@ -1,5 +1,5 @@
 %.html: %.tex namedtensor.sty template.html
-	pandoc --toc-depth 1 --toc --number-section $< --mathjax -f latex --template template.html -t html -s -o $@ --bibliography references.bib
+	pandoc --toc-depth 1 --toc --number-section $< --mathjax -f latex --template template.html -t html -s -o $@ --citeproc --bibliography references.bib
 
 %.pdf: %.tex namedtensor.sty
 	pdflatex $<
