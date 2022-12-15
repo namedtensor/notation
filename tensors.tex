@@ -1,0 +1,98 @@
+In standard notation, a vector, matrix, or tensor is indexed by an integer or sequence of integers; if it has dimensions $n_1,\ldots,n_r$, it can be thought of as a map that takes as input $(i_1,\ldots,i_r) \in [n_1]\times \cdots \times [n_r]$ and outputs a real number (or an element of a different field).
+For example, if $A \in \reals^{3\times3}$, then the order of the two axes matters: $A_{1,3}$ and $A_{3,1}$ are not the same element. It is up to the reader to remember what each axis of each tensor stands for. This problem is exacerbated in modern machine learning, where tensors have multiple axes with different meanings (batches, channels, etc.), and different operations act on different axes. 
+
+In contrast, we propose \emph{named tensors}, in which each axis has a \emph{name} that describes it and ensures there is no confusion between axes.
+We write $\ax[n]$ for an axis with name $\ax$ and size $n$, and we write $\ax(i)$ to index the $i$-th element along axis $\ax$.
+So if a tensor has axes $\ax_1[n_1],\ldots,\ax_r[n_r]$ (with $\ax_1,\ldots, \ax_r$ being distinct names), it can be thought of as a map that takes as input a \emph{record} $\{ \ax_1(i_1) ,\ldots, \ax_r(i_r) \}$, with $i_1 \in [n_1], \ldots, i_r \in [n_r]$, and outputs a field element.
+
+In summary the key difference is that, while a tensor in standard notation takes as input an ordered tuple of indices, a named tensor takes as input a record, which is an unordered set of named indices. We illustrate with some examples below, then give formal definitions.
+
+\subsection{By example} \label{sec:example}
+
+For example, if $A$ represents a $3\times 3$ grayscale image, we can make it a named tensor like so (writing it two equivalent ways to show that the order of axes does not matter):
+
+\begin{align}
+  A &\in \reals^{\height[3] \times \width[3]} = \reals^{\width[3] \times \height[3]} \notag \\
+  A &= \nmatrix{\height}{\width}{
+    3 & 1 & 4 \\
+    1 & 5 & 9 \\
+    2 & 6 & 5
+  } = \nmatrix{\width}{\height}{
+    3 & 1 & 2 \\
+    1 & 5 & 6 \\
+    4 & 9 & 5
+  }. \label{eq:example_tensor}
+\end{align}
+
+We access elements of $A$ using named indices, whose order again does not matter: $A_{\height(1), \width(3)} = A_{\width(3), \height(1)} = 4$.
+We also allow partial indexing:
+\begin{align*}
+A_{\height(1)} &= \nmatrix{}{\width}{
+  3 & 1 & 4
+}
+&
+A_{\width(3)} &= \nmatrix{}{\height}{
+  4 & 9 & 5
+}.
+\end{align*}
+
+It does not matter if we write  $A_{\height(1)}$ or $A_{\width(3)}$ as row and column vectors.
+In many contexts, an axis name is used with only one size. If so, we can simply write $\height$ for the unique axis with name $\height$, as in $\mathbb{R}^{\height \times \width}$. 
+We can leave the size of an axis unspecified at first, and specify its size later (e.g., deferring it to an appendix on experimental details).
+For example, we can specify $|\height|=|\width|=28$ if we want to prescribe the precise size of an image, or just write $|\height|=|\width|$ to specify that it's a square image.
+
+\subsection{What's in a name?}
+\label{sec:goodnames}
+
+Although users of this notation are free to choose any names for axes, we offer the following recommendations.
+First, we recommend \emph{words} instead of single letters, to communicate better the meaning of each axis. 
+
+More subtly, we recommend words that describe a \emph{whole} rather than its parts. For example, to represent a minibatch of examples, we would name the axis $\batch$; to represent a sequence of tokens, we would name the axis $\seq$. 
+One reason for this choice is that there are cases, like $\height$ and $\width$, where there is a name for the whole, but no unambiguous name for the part. By contrast, in cases where there is a name for the part but not the whole, it's always possible to use the plural form of the name of the part. For example, if we wanted $A$ to have red, green, and blue channels, we would name the axis $\chans$.
+
+\Cref{sec:examples} contains many more examples of axis names.
+
+\subsection{Formal definition}
+
+We now define formally the notation we use.
+
+\begin{definition}[Names, indices, and axes]
+An \emph{axis} is a pair, written $\ax[I]$, where
+\begin{itemize}
+\item $\ax$ is the \emph{name} of the axis, which is simply a string of letters.
+We write both names and variables ranging over names using sans-serif font.
+\item $I$ is a set of \emph{indices}. In this paper, $I$ is always of the form $\{1, \ldots, n\}$ for some $n$, so we abbreviate $\ax[\{1, \ldots, n\}]$ as $\ax[n]$.
+\end{itemize}
+In many contexts, there is only one axis with name $\ax$, and so we refer to the axis simply as $\ax$. The context always makes it clear whether $\ax$ is a name or an axis. If $\ax$ is an axis, we write $\ind(\ax)$ for its index set, and we write $|\ax|$ as shorthand for~$|\ind(\ax)|$.
+\end{definition}
+
+\begin{definition}[Named indices and records]
+If $\ax[I]$ is an axis and $i\in I$, then a \emph{named index} is a pair, written $\ax(i)$. 
+A \emph{record} is a set of named indices $\{\ax_1(i_1), \ldots, \ax_r(i_r)\}$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. 
+\end{definition}
+
+\begin{definition}[Shapes]
+A \emph{shape} is a set of axes, written $\ax_1[I_1] \times \cdots \times \ax_r[I_r]$, where $\ax_1, \ldots \ax_r$ are pairwise distinct names. We write $\emptyset$ for the empty shape. A shape defines a set of records:
+\begin{equation*}
+\rec (\ax_1[I_1] \times \cdots \times \ax_r[I_r]) = \left\{\{\ax_1(i_1), \ldots, \ax_r(i_r)\} \mid i_1 \in I_1, \ldots, i_r \in I_r\right\}.
+\end{equation*}
+%
+We say two shapes $\mathcal{S}$ and $\mathcal{T}$ are \emph{compatible} if whenever $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$, then $I = J$. We say that $\mathcal{S}$ and $\mathcal{T}$ are \emph{orthogonal} if there is no $\ax$ such that $\ax[I] \in \mathcal{S}$ and $\ax[J] \in \mathcal{T}$ for any $I$, $J$.
+%
+If $t \in \rec \mathcal{T}$ and $\mathcal{S} \subseteq \mathcal{T}$, then we write $\restrict{t}{\mathcal{S}}$ for the unique record in $\rec \mathcal{S}$ such that $\restrict{t}{\mathcal{S}} \subseteq t$.
+\end{definition}
+
+\begin{definition}[Named tensors]
+Let $F$ be a field and let $\mathcal{S}$ be a shape. Then a \emph{named tensor over $F$ with shape $\mathcal{S}$} is a mapping from $\rec \mathcal{S}$ to $F$. If $X$ has shape $\mathcal{S}$ then we write $\shp X = \mathcal{S}$. We write the set of all named tensors with shape $\mathcal{S}$ as $F^{\mathcal{S}}$.
+\end{definition}
+
+We don't make any distinction between a scalar (an element of $F$) and a named tensor with empty shape (an element of $F^\emptyset$).
+
+If $X \in F^{\mathcal{S}}$, then we access an element of $X$ by applying it to a record $s \in \rec \mathcal{S}$; but we write this using the usual subscript notation: $X_s$ rather than $X(s)$. To avoid clutter, in place of $X_{\{\ax_1(i_1), \ldots, \ax_r(i_r)\}}$, we usually write $X_{\ax_1(i_1), \ldots, \ax_r(x_r)}$. When a named tensor is an expression like $(X+Y)$, we index it by surrounding it with square brackets like this: $[X+Y]_{\ax_1(i_1), \ldots, \ax_r(x_r)}$.
+
+We also allow partial indexing. If $X$ is a tensor with shape $\mathcal{T}$ and $s \in \rec \mathcal{S}$ where $\mathcal{S} \subseteq \mathcal{T}$, then we define $X_s$ to be the named tensor with shape $\mathcal{T} \setminus \mathcal{S}$ such that, for any $t \in \rec (\mathcal{T} \setminus \mathcal{S})$,
+\begin{align*}
+\left[X_s\right]_t &= X_{s \cup t}.
+\end{align*}
+(For the edge case $\mathcal{T} = \emptyset$, our definitions for indexing and partial indexing coincide: one gives a scalar and the other gives a tensor with empty shape, but we don't distinguish between the two.)
+

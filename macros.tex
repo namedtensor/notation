@@ -1,0 +1,24 @@
+\section{\LaTeX{} Macros}
+
+Many of the \LaTeX{} macros used in this document are available in the style file \verb|namedtensor.sty|, available at \url{https://namedtensor.github.io/namedtensor.sty} or on CTAN. To use it, put
+\begin{quote}
+\begin{verbatim}
+\usepackage{namedtensor}
+\end{verbatim}
+\end{quote}
+in the preamble of your \LaTeX{} source file (after \verb|\documentclass{article}| but before \verb|\begin{document}|).
+
+We write axis names in sans-serif font. To make this easier, \verb|\name{ax}| prints an axis name (like this: \name{ax}), and \verb|\ndef{\ax}{ax}| defines a macro \verb|\ax| that does the same.
+
+\begin{itemize}
+\item Binary operators
+  \begin{itemize}
+  \item Use \verb|A \ndot{\ax} B| for contraction: $A \ndot{\ax} B$. You can use \verb|\\| to stack up several names.
+  \item In general, you can use \verb|\nbin| to make a new binary operator with a name under it: \verb|A \nbin{\ax}{\star} B| gives you $A \nbin{\ax}{\star} B$.
+  \end{itemize}
+\item Functions
+  \begin{itemize}
+  \item Use \verb|\nsum{\ax} A| for summation: $\nsum{\ax} A$.
+  \item In general, you can use \verb|\nfun| to make a function with a name under it: \verb|\nfun{\ax}{qux} A| gives you $\nfun{\ax}{qux} A$.
+  \end{itemize}
+\end{itemize}

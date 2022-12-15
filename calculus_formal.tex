@@ -1,0 +1,30 @@
+The following definition and theorem come directly from the paper by \citet{magnus+neudecker:1985}, but generalized to named tensors.
+
+For any $X \in \reals^\mathcal{S}$, we write $\|X\| = \nfun{\mathcal{S}}{norm} X$.
+
+\begin{definition}
+  Let $f \colon S \rightarrow \reals^\mathcal{T}$ where $S \subseteq \reals^\mathcal{S}$.
+  Let $A$ be an interior point of $\reals^\mathcal{S}$, that is, for some $r > 0$, $B(A;r) = \{X \mid \|X-A\| < r\} \subseteq S$.
+  If there is a tensor $D(A) \in \reals^{\mathcal{S\inax} \cup \mathcal{T}}$ and $R(A,H) \in \reals^{\mathcal{T}}$ such that
+  \begin{equation*}
+    f(A + H) = f(A) + D(A) \ndot{\mathcal{S\inax}} H_{\mathcal{S} \rightarrow \mathcal{S\inax}} + R(A,H)
+  \end{equation*}
+  for all $H \in \reals^\mathcal{S}$ with $\|H\| < r$, and
+  \begin{equation*}
+    \lim_{H \rightarrow \mathbf{0}} \frac{R(A,H)}{\|H\|} = \mathbf{0},
+  \end{equation*}
+  then $f$ is said to be \emph{differentiable} at $A$; the tensor
+  \begin{equation*}
+    \partial f(A; H) = D(A) \ndot{\mathcal{S\inax}} H_{\mathcal{S} \rightarrow \mathcal{S\inax}}
+  \end{equation*}
+  is then called the \emph{(first) differential of $f$ at $A$ with increment $H$}.
+\end{definition}
+
+\citeauthor{magnus+neudecker:1985} give their (first) identification theorem twice, once for vector-to-vector functions and once for matrix-to-matrix functions (but omitting vector-to-matrix and matrix-to-vector functions). Here, we only need one version, which works for functions from tensors to tensors of any shape.
+\begin{theorem} \label{thm:identification}
+  Let $f \colon S \rightarrow \reals^\mathcal{T}$, where $S \subseteq \reals^\mathcal{S}$, be differentiable at $A \in S$. Let $D(X) \in \reals^{\mathcal{S}\inax \cup \mathcal{T}}$. Then
+\begin{align*}
+\text{for all $H$,} \ \partial f(A; H) &= D(X) \ndot{\mathcal{S}\inax} H_{\mathcal{S}\rightarrow\mathcal{S}\inax} \qquad \text{iff} \qquad \left.\ddx{f(X)}\right|_{X=A} = D(X).
+\end{align*}
+\end{theorem}
+

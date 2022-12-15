@@ -1,0 +1,246 @@
+A significant benefit of named tensor notation is that it allows one to unambiguously specify \emph{operations} that map tensors to tensors, and defines precisely how operations can be \emph{\liftedVBN} when an 
+operation is applied to tensors with more axes than are present in its signature and how \emph{broadcasting} happens when different arguments add different axes.
+
+We start with the formal definition of named tensor operations and lifting, then show how this definition leads to many common operations.
+
+\subsection{Formal definition}
+
+By \emph{(named) tensor function} or \emph{(named) tensor operation}, we mean not only functions from tensors to tensors, but also operators like negation ($-$), addition ($+$), and so on. We will extend the standard function/operator notation by allowing tensor operations to be \emph{\liftedVBN} to higher-order tensors.
+
+\begin{definition}[\liftingNN, unary] \label{def:lifting}
+Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can define the \emph{\liftNN} $f^{\mathcal{S'}}$ of $f$ with the shape $\mathcal{S'}$ to be the map
+\begin{align*}
+f^{\mathcal{S'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
+\left[f^{\mathcal{S'}}(X)\right]_{s'} &= f(X_s) \qquad \text{for all $A \in F^{\mathcal{S}\cup\mathcal{S'}}$ and  $s' \in \rec\mathcal{S'}$.}
+\end{align*}
+Usually, we simply write $f$ instead of $f^{\mathcal{S'}}$. That is, for every tensor $X$ with shape  $\mathcal{R} \supseteq \mathcal{S}$, we let $f(X) = f^{\mathcal{R} \setminus \mathcal{S}}(X)$.
+\end{definition}
+
+If $f$ is a multary function, we can \liftVB{} each of its arguments to larger shapes, and we don't have to add the same axes to all the arguments; an axis present in one argument but not another is \emph{broadcast} from the former to the latter. We consider just the case of two arguments; three or more arguments are analogous. 
+\begin{definition}[\liftingNN, binary] \label{def:lifting2}
+Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and such that $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can \liftVB{} $f$ to:
+\begin{align*}
+f^{\mathcal{S'} \cup \mathcal{T'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{S'} \cup \mathcal{T'}} \\
+  \left[f^{\mathcal{S'} \cup \mathcal{T'}}(X,Y)\right]_{s'} &= f\left(X_{\restrict{s}{\mathcal{S'}}},Y_{\restrict{s}{\mathcal{T'}}}\right) \qquad \text{for all $X \in F^{\mathcal{S} \cup \mathcal{S'}}$, $Y \in F^{\mathcal{T} \cup \mathcal{T'}}$, $s' \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
+\end{align*}
+Again, we usually write $f$ instead of $f^{\mathcal{S'} \cup \mathcal{T'}}$.
+\end{definition}
+
+In the following sections, we present some consequences of the above lifting rules. In particular, we show how they allow one to lift some common operations from operating on scalars, vectors, or matrices to operating on tensors with more axes, and how they correspond to vectorizing and broadcasting (as implemented by NumPy and related packages).
+
+\subsection{Elementwise operations and broadcasting}
+
+Any function from a scalar to a scalar corresponds to a tensor function with signature $F^{\emptyset} \rightarrow F^{\emptyset}$. 
+Hence lifting it to any tensor shape, by \cref{def:lifting}, corresponds to elementwise application. 
+For example, given the logistic sigmoid function,
+\begin{align*}
+  \sigma \colon \reals &\rightarrow \reals \\
+  \sigma(x) &= \frac{1}{1+\exp(-x)}
+\end{align*}  
+we can \liftVB{} it to tensors. If $A \in \reals^{\height[3] \times \width[3]}$ is the example tensor (\ref{eq:example_tensor}), then
+\begin{equation*}
+\sigma(A) = \nmatrix{\height}{\width}{
+  \frac1{1+\exp(-3)} & \frac1{1+\exp(-1)} & \frac1{1+\exp(-4)} \\[1ex]
+  \frac1{1+\exp(-1)} & \frac1{1+\exp(-5)} & \frac1{1+\exp(-9)} \\[1ex]
+  \frac1{1+\exp(-2)} & \frac1{1+\exp(-6)} & \frac1{1+\exp(-5)}
+}.
+\end{equation*}
+Similarly for rectified linear units ($\text{relu}(x) = \max(0, x)$), negation, and so on.
+
+Any function with signature $\reals \times \reals \rightarrow \reals$, including binary operators like addition ($\mathord+$), can be applied to two named tensors with the same shape.
+But if we apply a binary function or operator to tensors with different shapes, then, by \cref{def:lifting2}, broadcasting applies. For example, let
+\begin{align*}
+  x &\in \reals^{\height[3]} & y &\in \reals^{\width[3]} \\
+  x &= \nmatrix{\height}{}{
+    2 \\ 7 \\ 1
+  } & 
+  y &= \nmatrix{}{\width}{
+    1 & 4 & 1
+  }.
+\end{align*}
+(We write $x$ as a column just to make the broadcasting easier to visualize.) Then, to evaluate $A+x$, we effectively replace $x$ with a new tensor with a copy of $x$ for every index of axis $\width$. Likewise for $A+y$:
+\begin{align*}
+A + x &= \nmatrix{\height}{\width}{
+  3+2 & 1+2 & 4+2 \\
+  1+7 & 5+7 & 9+7 \\
+  2+1 & 6+1 & 5+1
+} &
+A + y &= \nmatrix{\height}{\width}{
+  3+1 & 1+4 & 4+1 \\
+  1+1 & 5+4 & 9+1 \\
+  2+1 & 6+4 & 5+1
+}.
+\end{align*}
+Similarly for other operations. We write elementwise multiplication (Hadamard product) as $\odot$.
+
+\subsection{Reductions}
+\label{sec:reductions}
+
+The same rules apply to functions from vectors to scalars, called \emph{reductions}. We specify which axis a reduction applies to using a subscript (equivalent to the \verb|axis| argument in NumPy and \verb|dim| in PyTorch), so that even after lifting, we know which axis to reduce.
+%
+For example, we can define summation:
+\begin{align*}
+\nsum{\ax} \mathord- \colon \reals^{\ax[I]} &\rightarrow \reals \\
+\nsum{\ax} X &= \sum_{i \in I} X_{\ax(i)}
+\end{align*}
+and use it on $A$ from \cref{eq:example_tensor}:
+\begin{align*}
+\nsum{\height} A &= \sum_i A_{\height(i)} = \nmatrix{}{\width}{
+  3+1+2 & 1+5+6 & 4+9+5
+}
+\\
+\nsum{\width} A &= \sum_j A_{\width(j)} = \nmatrix{}{\height}{
+  3+1+4 & 1+5+9 & 2+6+5
+}.
+\end{align*}
+
+We can also write multiple names to sum over multiple axes:
+\begin{equation*}
+  \nsum{\height \\ \width} A = \sum_i \sum_j A_{\height(i),\width(j)} = 3+1+4+1+5+9+2+6+5.
+\end{equation*}
+But a summation with an index variable (like $i$ or $j$ above) is a standard summation over values of that variable, and a summation with no subscript is a standard summation over a set.
+
+Other examples of reductions include:
+\begin{align*}
+  \nfun{\ax}{norm} X &= \sqrt{\nsum{\ax} X^2} & \nfun{\ax}{norm_\mathit{p}} X &= \biggl(\nsum{\ax} X^p\biggr)^{\frac1p} \\
+  \nfun{\ax}{min} X &= \min \{X_{\ax(i)} \mid i \in I\} &
+  \nfun{\ax}{max} X &= \max \{X_{\ax(i)} \mid i \in I\} \\
+  \nfun{\ax}{mean} X &= \frac{1}{|\ax|} \nsum{\ax} X &
+  \nfun{\ax}{var} X &= \frac{1}{|\ax|} \nsum{\ax} (X - \nfun{\ax}{mean} X)^2
+\end{align*}
+
+\subsection{Contraction}
+
+The vector dot-product is a function from \emph{two} vectors to a scalar. We write it as follows:
+\begin{align*}
+\mathord- \ndot{\ax} \mathord- \colon \reals^{\ax[I]} \times \reals^{\ax[I]} &\rightarrow \reals \\
+  X \ndot{\ax} Y &= \sum_{i\in I} X_{\ax(i)} Y_{\ax(i)}
+\end{align*}
+When lifted to higher-order tensors, the dot-product generalizes to the ubiquitous \emph{contraction} operator, which can also be thought of as elementwise multiplication followed by summation over one axis, that is,
+\begin{equation}
+X \ndot\ax Y = \nsum\ax X \odot Y. \label{eq:ndot_as_nsum}
+\end{equation}
+For example,
+\begin{align*}
+A \ndot{\height} x &= \nsum\height A \odot x = \nmatrix{}{\width}{
+  3\cdot2 + 1\cdot7 + 2\cdot1 & 1\cdot2 + 5\cdot7 + 6\cdot1 & 4\cdot2 + 9\cdot7 + 5\cdot 1
+} \\
+A \ndot{\width} y &= \nsum\width A \odot y = \nmatrix{\height}{}{
+  3\cdot1 + 1\cdot4 + 4\cdot1 \\
+  1\cdot1 + 5\cdot4 + 9\cdot1 \\
+  2\cdot1 + 6\cdot4 + 5\cdot1
+}.
+\end{align*}
+
+Again, we can write multiple names to contract multiple axes at once:
+\begin{align*}
+A \ndot{\height\\\width} A = \nsum{\height\\\width} A \odot A = 3\cdot3 + 1\cdot1 + 4\cdot4 + 1\cdot1 + 5\cdot5 + 9\cdot9 + 2\cdot2 + 6\cdot6 + 5\cdot5
+\end{align*}
+
+A $\odot$ with no axis name under it contracts zero axes and is equivalent to elementwise multiplication, which is the reason we use the same symbol $\odot$ for elementwise multiplication and contraction.
+%
+The contraction operator can be used for many multiplication-like operations:
+\begin{align*}
+  x \ndot{\height} x &= \nsum\height x \odot x && \text{inner product} \\ \phantom{\sum_i}
+  %[x \odot y]_{\height(i), \width(j)} &= x_{\height(i)} \, y_{\width(j)} && \text{outer product} \\
+  x \odot y &= \nmatrix{\height}{\width}{2 \cdot 1 & 2 \cdot 4 & 2 \cdot 1 \\ 7 \cdot 1 & 7 \cdot 4 & 7 \cdot 1 \\ 1 \cdot 1 & 1 \cdot 4 & 1 \cdot 1} && \text{outer product} \\
+  A \ndot{\width} y &= \nsum\width A \odot y && \text{matrix-vector product} \\
+  x \ndot{\height} A &= \nsum\height x \odot A && \text{vector-matrix product} \\
+  A \ndot{\width} B &= \nsum\width A \odot B && \text{matrix-matrix product}~(B \in \reals^{\width \times \width'})
+\end{align*}
+
+A contraction of three more tensors can be written as a sum. For example, the three-way inner product of vectors $x, y, z \in \reals^{\width}$ can be written as $\nsum{\width} x \odot y \odot z$.
+
+Like the dot-product from which it is lifted, but unlike matrix multiplication, the contraction operator is commutative, but not associative.
+However, contraction does obey the following associative-like law.
+\begin{align}
+  X \ndot{\mathcal{S} \cup \mathcal{T}} (Y \ndot{\mathcal{U}} Z) &= (X \ndot{\mathcal{S}} Y) \ndot{\mathcal{T}\cup\mathcal{U}} Z && \text{if $\mathcal{S} \cap \shp Z = \mathcal{U} \cap \shp X = \emptyset$}. \label{eq:ndot_assoc2} \\
+\intertext{The special case}  
+  X \ndot{\mathcal{S}} (Y \ndot{\mathcal{U}} Z) &= (X \ndot{\mathcal{S}} Y) \ndot{\mathcal{U}} Z && \text{if $\mathcal{S} \cap \shp Z = \mathcal{U} \cap \shp X = \emptyset$} \label{eq:ndot_assoc}
+\end{align}
+will be useful in \cref{sec:calculus} for moving $Z$ from inside one or more sets of parentheses to the outside.
+
+\subsection{Vectors to vectors and beyond}
+
+Functions from vectors to vectors ($\reals^{\ax[I]} \rightarrow \reals^{\ax[I]}$) lift to functions on tensors that operate along one axis, but leave the tensor shape unchanged. Such functions are particularly problematic in standard notation, which does not provide any way (to our knowledge) of specifying which axis the operation should be performed over. Such functions include:
+\begin{subequations}
+\begin{align}
+  \nfun{\ax}{softmax} X &= \frac{\exp X}{\nsum{\ax} \exp X} \label{eq:def_softmax} \\
+  \nfun{\ax}{argmax} X &= \lim_{\alpha \rightarrow \infty} \nfun{\ax}{softmax} \alpha X \\
+  \nfun{\ax}{argmin} X &= \lim_{\alpha \rightarrow -\infty} \nfun{\ax}{softmax} \alpha X
+\end{align}
+\end{subequations}
+For example, we can clearly distinguish between two ways of performing a softmax on $A$:
+\begin{align*}
+  \nfun{\height}{softmax} A &= \nmatrix{\height}{\width}{ 
+    \frac{\exp 3}{\exp 3 + \exp 1 + \exp 2} & \frac{\exp 1}{\exp 1 + \exp 5 + \exp 6} & \frac{\exp 4}{\exp 4 + \exp 9 + \exp 5} \\
+    \frac{\exp 1}{\exp 3 + \exp 1 + \exp 2} & \frac{\exp 5}{\exp 1 + \exp 5 + \exp 6} & \frac{\exp 9}{\exp 4 + \exp 9 + \exp 5} \\
+    \frac{\exp 2}{\exp 3 + \exp 1 + \exp 2} & \frac{\exp 6}{\exp 1 + \exp 5 + \exp 6} & \frac{\exp 5}{\exp 4 + \exp 9 + \exp 5} \\
+    }
+  \\
+  \nfun{\width}{softmax} A &= \nmatrix{\height}{\width}{
+    \frac{\exp 3}{\exp 3 + \exp 1 + \exp 4} & \frac{\exp 1}{\exp 3 + \exp 1 + \exp 4} & \frac{\exp 4}{\exp 3 + \exp 1 + \exp 4} \\
+    \frac{\exp 1}{\exp 1 + \exp 5 + \exp 9} & \frac{\exp 5}{\exp 1 + \exp 5 + \exp 9} & \frac{\exp 9}{\exp 1 + \exp 5 + \exp 9} \\
+    \frac{\exp 2}{\exp 2 + \exp 6 + \exp 5} & \frac{\exp 6}{\exp 2 + \exp 6 + \exp 5} & \frac{\exp 5}{\exp 2 + \exp 6 + \exp 5} \\
+    }
+\end{align*}
+
+\subsection{Renaming and reshaping}
+
+It's often useful to rename an axis (analogous to a transpose operation in standard notation). We can think of this as the lift of a function from vectors to vectors, but with different input and output axes:
+\begin{align*}
+[\mathord-]_{\ax\rightarrow\ax'} \colon \reals^{\ax[I]} &\rightarrow \reals^{\ax'[I]} \\
+[X_{\ax\rightarrow\ax'}]_{\ax'(i)} &= X_{\ax(i)}
+\end{align*}
+For example,
+\begin{equation*}
+A_{\height\rightarrow\height'} = \nmatrix{\height'}{\width}{
+  3 & 1 & 4 \\
+  1 & 5 & 9 \\
+  2 & 6 & 5 \\
+}.
+\end{equation*}
+We can also define notation for reshaping two or more axes into one axis:
+\begin{equation*}
+  A_{(\height,\width)\rightarrow\layer} = \nmatrix{}{\layer}{
+    3 & 1 & 4 & 1 & 5 & 9 & 2 & 6 & 5
+  }
+\end{equation*}
+%Similarly, we can reshape one axis into two or more axes, or even multiple axes into multiple axes.
+The order of elements in the new axis is undefined. Authors who need a particular ordering may write a more specific definition.
+
+\subsection{Indexing\protect\footnotemark}
+
+\footnotetext{We are grateful to Tongfei Chen and Chu-Cheng Lin for contributing the original idea behind this section, as well as the example.}
+
+NumPy and its derivatives provide various ways to recombine elements of a tensor to form a new tensor: integer array indexing, and functions like \verb|numpy.take|, \verb|numpy.take_along_axis|, \verb|torch.index_select|, and \verb|torch.gather|. Using named tensors, we can write nearly all of these operations as lifts of a single function:
+\begin{align*}
+  \nfun{\ax}{index} \colon \reals^{\ax[n]} \times [n] &\rightarrow \reals \\
+  \nfun{\ax}{index}(X, i) &= X_{\ax(i)}.
+\end{align*}
+For example, suppose we have
+\begin{align*}
+  E &\in \reals^{\vocab[n] \times \emb} \\
+  i &\in [n] \\
+  I &\in [n]^{\seq} \\
+  P &\in \reals^{\seq \times \vocab[n]}
+\end{align*}
+Tensor~$E$ contains word embeddings for all the words in the vocabulary. Integer~$i$ is the numeric identifier of a word, while tensor~$I$ is a sequence of numeric identifiers of words. Tensor~$P$ contains a sequence of probability distributions over the vocabulary (e.g., the predictions of a language model). Then:
+\begin{itemize}
+\item $\nfun{\vocab}{index}(E,i)$ broadcasts the $\emb$ axis from $E$ to $i$, giving the word embedding of word $i$. This is the same as partial indexing ($E_{\vocab(i)}$).
+\item $\nfun{\vocab}{index}(E,I)$ also broadcasts the $\seq$ axis from $I$ to $E$, giving a sequence of word embeddings. This is the same as integer array indexing (\texttt{$E$[$I$]}), \texttt{numpy.take($E$, $I$, 0)}, or \texttt{torch.index\_select($E$, 0, $I$)}.
+\item $\nfun{\vocab}{index}(P,I)$ aligns $P$'s and $I$'s $\seq$ axes, giving a sequence of probabilities. This is the same as \texttt{numpy.take\_along\_axis($P$, $I$, 0)} or \texttt{torch.gather($P$, 0, $I$)}.
+\item If $P$ and $I$ additionally had a $\batch$ axis (before the other axes), then $\nfun{\vocab}{index}(P,I)$ would be the same as \texttt{tensorflow.gather($P$, $I$, axis=1, batch\_dims=1)}.
+\end{itemize}
+
+In NumPy, indexing using two or more integer arrays requires a special definition with some surprising special cases. With named tensors, we simply apply the indexing function twice. For example, if we wanted to get probabilities of words $J$ at a subset $I$ of positions:
+\begin{align*}
+  |\seq| &= m \\
+  I &\in [m]^\subseq && \text{positions} \\
+  J &\in [n]^\subseq && \text{numeric identifiers} \\
+  S &= \nfun{\vocab}{index}(\nfun{\seq}{index}(P, I), J) \in \reals^{\subseq} \\
+\intertext{so that}  
+  S_{\subseq(k)} &= P_{\seq(I_{\subseq(k)}), \vocab(I_{\subseq(k)})}.
+\end{align*}
+
+
