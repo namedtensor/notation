@@ -142,7 +142,6 @@ A $\odot$ with no axis name under it contracts zero axes and is equivalent to el
 The contraction operator can be used for many multiplication-like operations:
 \begin{align*}
   x \ndot{\height} x &= \nsum\height x \odot x && \text{inner product} \\ \phantom{\sum_i}
-  %[x \odot y]_{\height(i), \width(j)} &= x_{\height(i)} \, y_{\width(j)} && \text{outer product} \\
   x \odot y &= \nmatrix{\height}{\width}{2 \cdot 1 & 2 \cdot 4 & 2 \cdot 1 \\ 7 \cdot 1 & 7 \cdot 4 & 7 \cdot 1 \\ 1 \cdot 1 & 1 \cdot 4 & 1 \cdot 1} && \text{outer product} \\
   A \ndot{\width} y &= \nsum\width A \odot y && \text{matrix-vector product} \\
   x \ndot{\height} A &= \nsum\height x \odot A && \text{vector-matrix product} \\
@@ -233,13 +232,15 @@ Tensor~$E$ contains word embeddings for all the words in the vocabulary. Integer
 \item If $P$ and $I$ additionally had a $\batch$ axis (before the other axes), then $\nfun{\vocab}{index}(P,I)$ would be the same as \texttt{tensorflow.gather($P$, $I$, axis=1, batch\_dims=1)}.
 \end{itemize}
 
-In NumPy, indexing using two or more integer arrays requires a special definition with some surprising special cases. With named tensors, we simply apply the indexing function twice. For example, if we wanted to get probabilities of words $J$ at a subset $I$ of positions:
+In NumPy, indexing using two or more integer arrays requires a special definition with some surprising special cases. With named tensors, we simply apply the indexing function twice. For example, if we wanted to get probabilities of words $J$ at a subset $I$ of positions, we could let:
 \begin{align*}
   |\seq| &= m \\
   I &\in [m]^\subseq && \text{positions} \\
   J &\in [n]^\subseq && \text{numeric identifiers} \\
-  S &= \nfun{\vocab}{index}(\nfun{\seq}{index}(P, I), J) \in \reals^{\subseq} \\
-\intertext{so that}  
+  S &= \nfun{\vocab}{index}(\nfun{\seq}{index}(P, I), J) \in \reals^{\subseq}
+\end{align*}
+so that
+\begin{align*}
   S_{\subseq(k)} &= P_{\seq(I_{\subseq(k)}), \vocab(I_{\subseq(k)})}.
 \end{align*}
 

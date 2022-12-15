@@ -23,9 +23,7 @@
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
 \newcommand{\eqby}[1]{\stackrel{\text{(\ref{#1})}}{=}}
-\makeatletter
-\newcommand\yestag{\incr@eqnum\tag{\number\value{equation}}}
-\makeatother
+\newcommand{\firsteq}[1]{\mathmakebox[6em][l]{#1} \\}
 \allowdisplaybreaks
 
 \DeclareMathOperator{\ind}{ind}

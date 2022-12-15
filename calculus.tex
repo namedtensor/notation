@@ -25,8 +25,8 @@ for all $s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$.
 
 The above definition assumes that $\mathcal{S}\inax$ and $\mathcal{T}$ are orthogonal; if not, the axes in $ \mathcal{S}$ should be renamed to something else. For example, the second derivative (the Hessian) could be
 \begin{align*}
-\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dag} &\in \reals^{\mathcal{S}\inax \cup \mathcal{S}^\dag \cup \mathcal{T}} \\
-\left[\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dag}\right]_{r\inax, s\dag, t} &= \frac{\partial^2 f(X)_t}{\partial X_r \, \partial X_s}
+\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dagger} &\in \reals^{\mathcal{S}\inax \cup \mathcal{S}^\dagger \cup \mathcal{T}} \\
+\left[\frac{\partial^2 f(X)}{\partial X\inax \, \partial X^\dagger}\right]_{r\inax, s\dagger, t} &= \frac{\partial^2 f(X)_t}{\partial X_r \, \partial X_s}
 \end{align*}
 for all $r, s \in \rec\mathcal{S}$ and $t \in \rec\mathcal{T}$.
 
@@ -45,16 +45,16 @@ For example,
 \begin{subequations}
 \begin{itemize}
 \item If $\text{id}$ is the identity function, then
-\begin{align*}
-\text{id}(X + H) &= X + H \\
-\partial\/\text{id}(X; H) &= H. \yestag\label{eq:diff_id}
-\end{align*}
+\begin{align}
+\text{id}(X + H) &= X + H \notag \\
+\partial\/\text{id}(X; H) &= H. \label{eq:diff_id}
+\end{align}
 \item If $f(X) = X \ndot\ax X$ where $X \in \reals^\ax$, then
-\begin{align*}
-f(X + H) &= (X + H) \ndot\ax (X + H) \\
-&= X \ndot\ax X + 2X \ndot\ax H + H \ndot\ax H \\
-\partial f(X; H) &= 2X \ndot\ax H. \yestag\label{eq:diff_example}
-\end{align*}
+\begin{align}
+f(X + H) &= (X + H) \ndot\ax (X + H) \notag \\
+&= X \ndot\ax X + 2X \ndot\ax H + H \ndot\ax H \notag \\
+\partial f(X; H) &= 2X \ndot\ax H. \label{eq:diff_example}
+\end{align}
 \end{itemize}
 \end{subequations}
 It's often more convenient to work directly with the expression $X \ndot\ax X$ instead of $f(X)$, and to write $\partial (X \ndot\ax X)$ for $\partial f(X; H)$. Then, since $\partial X = \partial\/\text{id}(X; H) = H$, we can write \cref{eq:diff_example} simply as \begin{equation*}\partial(X \ndot\ax X) = 2X \ndot\ax \partial X\end{equation*}
@@ -68,7 +68,7 @@ More generally, we can derive rules like the following:
   \partial \nsum{\ax} U &= \nsum{\ax} \partial U \label{eq:sum_rule} \\
   \partial (U \ndot{\ax} V) &= U \ndot{\ax} \partial V + V \ndot\ax \partial U \label{eq:ndot_rule} \\
   \partial U_s &= \left[\partial U\right]_s \\
-  \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}. \label{eq:renaming_rule} \\
+  \partial U_{\ax\rightarrow\ax'} &= \left[\partial U\right]_{\ax\rightarrow\ax'}. \label{eq:renaming_rule}
 \end{align}
 
 The chain rule for differentials is
@@ -82,16 +82,16 @@ The chain rule for differentials is
 \end{subequations}
 
 Using these rules we can compute the differential of a wide variety of expressions. For example, the softmax operator:
-\begin{align*}
-  \partial (\nfun{\ax}{softmax} X) &\eqby{eq:def_softmax} \partial \biggl(\frac{\exp X}{\nsum{\ax} \exp X}\biggr) \\
-  &\eqby{eq:quotient_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \partial\bigl(\nsum{\ax} \exp X\bigr)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
-  &\eqby{eq:sum_rule} \frac{\bigl( \nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \nsum{\ax} \partial(\exp X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
-  &\eqby{eq:exp_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot \nsum{\ax} (\exp X \odot \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
-  &\eqby{eq:ndot_as_nsum} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot (\exp X \ndot{\ax} \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \\
-  &= \frac{\exp X}{\nsum{\ax} \exp X}  \odot \partial X - \frac{\exp X}{\nsum{\ax} \exp X} \odot \Biggl(\frac{\exp X}{\nsum{\ax} \exp X} \ndot{\ax} \partial X\Biggr) \\
-  &\eqby{eq:def_softmax} \nfun{\ax}{softmax} X \odot \partial X - \nfun{\ax}{softmax} X \odot (\nfun{\ax}{softmax} X \ndot{\ax} \partial X) \\
-  &= \nfun{\ax}{softmax} X \odot (\partial X - \nfun{\ax}{softmax} X \ndot{\ax} \partial X). \yestag\label{eq:diff_softmax}
-\end{align*}
+\begin{align}
+  \partial (\nfun{\ax}{softmax} X) &\eqby{eq:def_softmax} \partial \biggl(\frac{\exp X}{\nsum{\ax} \exp X}\biggr) \notag \\
+  &\eqby{eq:quotient_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \partial\bigl(\nsum{\ax} \exp X\bigr)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \notag \\
+  &\eqby{eq:sum_rule} \frac{\bigl( \nsum{\ax} \exp X\bigr) \odot \partial(\exp X) - \exp X \odot \nsum{\ax} \partial(\exp X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \notag \\
+  &\eqby{eq:exp_rule} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot \nsum{\ax} (\exp X \odot \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \notag \\
+  &\eqby{eq:ndot_as_nsum} \frac{\bigl(\nsum{\ax} \exp X\bigr) \odot \exp X \odot \partial X - \exp X \odot (\exp X \ndot{\ax} \partial X)}{\bigl(\nsum{\ax} \exp X\bigr)^2} \notag \\
+  &= \frac{\exp X}{\nsum{\ax} \exp X}  \odot \partial X - \frac{\exp X}{\nsum{\ax} \exp X} \odot \Biggl(\frac{\exp X}{\nsum{\ax} \exp X} \ndot{\ax} \partial X\Biggr) \notag \\
+  &\eqby{eq:def_softmax} \nfun{\ax}{softmax} X \odot \partial X - \nfun{\ax}{softmax} X \odot (\nfun{\ax}{softmax} X \ndot{\ax} \partial X) \notag \\
+  &= \nfun{\ax}{softmax} X \odot (\partial X - \nfun{\ax}{softmax} X \ndot{\ax} \partial X). \label{eq:diff_softmax}
+\end{align}
 We stop when the only differentials left are $\partial X$.
 
 \subsection{Derivatives via differentials}
@@ -110,9 +110,11 @@ we can conclude that
 
 When trying to get expressions into canonical form, one helpful fact is that
 renaming can be thought of as contraction with an identity matrix. First we define the identity matrix with shape $\ax \times \ax'$:
+\begin{align*}
+[I_{\ax,\ax'}]_{\ax(i),\ax'(j)} &= \begin{cases} 1 & i = j \\ 0 & i \neq j. \end{cases}
+\end{align*}
+Then for any tensor $A$ with an axis $\ax$,
 \begin{align}
-[I_{\ax,\ax'}]_{\ax(i),\ax'(j)} &= \begin{cases} 1 & i = j \\ 0 & i \neq j. \end{cases} \notag \\
-\intertext{Then for any tensor $A$ with an axis $\ax$,}
 A_{\ax\rightarrow\ax'} &= I_{\ax,\ax'} \ndot\ax A. 
 \label{eq:rename_as_id}
 \end{align}
@@ -140,8 +142,10 @@ This is in canonical form, so we have
 Recall that $f^\mathcal{S'}$ is the lift of $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$ with $\mathcal{S'}$, and in most contexts we can simply write $f$ instead of $f^\mathcal{S'}$. However, derivatives are one place where some extra caution is in order.
 To lighten notation, let's write $g$ for the derivative of $f$:
 \begin{align*}
-  g(X) &= \ddx{f(X)}. \\
-\intertext{Recall that the chain rule (\ref{eq:chain_rule}) works under lifting, so}
+  g(X) &= \ddx{f(X)}.
+\end{align*}
+Recall that the chain rule (\ref{eq:chain_rule}) works under lifting, so
+\begin{align*}
   \partial f^{\mathcal{S'}} (X) &= g^{\mathcal{S'}}(X) \ndot{\mathcal{S}\inax} \partial X_{\mathcal{S}\rightarrow\mathcal{S}\inax}.
 \end{align*}
 But the contraction is only over $\mathcal{S}\inax$, so it would be incorrect to conclude that $\frac{\partial f^{\mathcal{S'}}(X)}{\partial X} = g^{\mathcal{S'}}(X)$. The derivative of a lift is \emph{not} the lift of a derivative. We must rename and contract $\mathcal{S'}$ as well:
@@ -163,11 +167,11 @@ Intuitively, this is because the derivative is a linear transformation---before 
 \newcommand{\attwt}{\alpha}
 
 As a more elaborate example, we find the derivative of self-attention. For brevity, we omit the factor $\frac{1}{\sqrt{|\key|}}$, and we write $\attwt = \nfun\seq{softmax} (Q\ndot\key K)$.
-\begin{align*}
+\begin{align}
 \partial \text{Att}(Q, K, V)
-  &\eqby{eq:def_att} \partial ( \attwt \ndot{\seq} V ) \\
-  &\eqby{eq:ndot_rule} \alpha \ndot{\seq} \partial V + V \ndot{\seq} \partial \alpha. \yestag\label{eq:att1}
-\end{align*}
+  &\eqby{eq:def_att} \partial ( \attwt \ndot{\seq} V ) \notag \\
+  &\eqby{eq:ndot_rule} \alpha \ndot{\seq} \partial V + V \ndot{\seq} \partial \alpha. \label{eq:att1}
+\end{align}
 
 Focus first on the first term, which is the only term depending on $\partial V$:
 \begin{align*}
@@ -180,14 +184,14 @@ Focus first on the first term, which is the only term depending on $\partial V$:
 \end{align*}
 
 Next, focus on the second term of \cref{eq:att1}:
-\begin{align*}
+\begin{align}
 V \ndot{\seq} \partial \attwt
-&\eqby{eq:diff_softmax} V \ndot{\seq} (\attwt \odot (\partial (\qk) - \attwt \ndot{\seq} \partial (\qk))) \\
-&\eqby{eq:ndot_rule} V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K + K \ndot\key \partial Q - \attwt \ndot{\seq} (Q \ndot\key \partial K + K \ndot\key \partial Q))). \yestag\label{eq:att2}
-\end{align*}
+&\eqby{eq:diff_softmax} V \ndot{\seq} (\attwt \odot (\partial (\qk) - \attwt \ndot{\seq} \partial (\qk))) \notag \\
+&\eqby{eq:ndot_rule} V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K + K \ndot\key \partial Q - \attwt \ndot{\seq} (Q \ndot\key \partial K + K \ndot\key \partial Q))). \label{eq:att2}
+\end{align}
 Keeping only terms depending on $\partial Q$, we get
 \begin{align*}
-\mathmakebox[6em][l]{V \ndot{\seq} (\attwt \odot (K \ndot\key \partial Q - \attwt \ndot{\seq} (K \ndot\key \partial Q)))} \\
+\firsteq{V \ndot{\seq} (\attwt \odot (K \ndot\key \partial Q - \attwt \ndot{\seq} (K \ndot\key \partial Q)))}
 &\eqby{eq:unrename_as_id} V \ndot{\seq} (\attwt \odot (K \ndot\key (I_{\key,\key\inax} \ndot{\key\inax} \partial Q\inax) - \attwt \ndot{\seq} (K \ndot\key (I_{\key,\key\inax} \ndot{\key\inax} \partial Q\inax)))) \\
 &\eqby{eq:ndot_assoc} \Bigl(V \ndot{\seq} (\attwt \odot (K \ndot\key I_{\key,\key\inax} - \attwt \ndot{\seq} (K \ndot\key I_{\key,\key\inax})))\Bigr) \ndot{\key\inax} \partial Q\inax \\
 &\eqby{eq:ndot_assoc} \Bigl(V \ndot{\seq} (\attwt \odot (K_{\key\rightarrow\key\inax} - \attwt \ndot{\seq} K_{\key\rightarrow\key\inax}))\Bigr) \ndot{\key\inax} \partial Q\inax \\
@@ -197,7 +201,7 @@ Keeping only terms depending on $\partial Q$, we get
 
 Similarly, keeping only terms from \cref{eq:att2} depending on $\partial K$, we get
 \begin{align*}
-\mathmakebox[6em][l]{V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K - \attwt \ndot{\seq} (Q \ndot\key \partial K)))} \\
+\firsteq{V \ndot{\seq} (\attwt \odot (Q \ndot\key \partial K - \attwt \ndot{\seq} (Q \ndot\key \partial K)))}
 &= \Bigl(V \ndot{\seq} (\attwt \odot (Q\inax \odot I_{\seq,\seq\inax}) - \attwt \ndot{\seq} (Q\inax \odot I_{\seq,\seq\inax})))\Bigr) \ndot{\key\inax\\\seq\inax} \partial K\inax \\
   \frac{\partial}{\partial K\inax}
   \text{Att}(Q, K, V) &= V \ndot{\seq} (\attwt \odot (Q\inax \odot I_{\seq,\seq\inax}) - \attwt \ndot{\seq} (Q\inax \odot I_{\seq,\seq\inax}))).
