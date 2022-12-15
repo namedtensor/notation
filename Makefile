@@ -9,11 +9,15 @@
 
 all: pdf html
 
-pdf: main.pdf
-	cp main.pdf namedtensor.pdf
+pdf: paper.pdf
+	cp paper.pdf namedtensor.pdf
 
-html: main.html
-	cp main.html index.html
+html: web.html
+	cp web.html index.html
 
-main.pdf main.html: main.tex intro.tex tensors.tex operations.tex examples.tex calculus.tex alternatives.tex conclusion.tex examples_long.tex calculus_formal.tex macros.tex
+paper.pdf: paper.tex
+
+web.html: web.tex
+
+paper.pdf web.html: defs.tex intro.tex tensors.tex operations.tex examples.tex calculus.tex alternatives.tex conclusion.tex ack.tex examples_long.tex calculus_formal.tex macros.tex
 

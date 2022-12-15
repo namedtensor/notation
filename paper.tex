@@ -1,0 +1,66 @@
+\pdfoutput=1
+\documentclass[10pt]{article}
+\usepackage[accepted]{tmlr} 
+\let\authorname\name \let\name\undefined % avoid conflict with our \name macro
+\input{defs}
+
+\title{Named Tensor Notation}
+\author{\authorname David Chiang \\ \addr University of Notre Dame \AND \authorname Alexander M. Rush \\ \addr Cornell University \AND \authorname Boaz Barak \\ \addr Harvard University}
+\def\month{12}
+\def\year{2022}
+\def\openreview{https://openreview.net/forum?id=hVT7SHlilx}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We propose a notation for tensors with named axes, which relieves the author, reader, and future implementers of machine learning models from the burden of keeping track of the order of axes and the purpose of each. The notation makes it easy to lift operations on low-order tensors to higher order ones, for example, from images to minibatches of images, or from an attention mechanism to multiple attention heads.
+
+After a brief overview and formal definition of the notation, we illustrate it through several examples from modern machine learning, from building blocks like attention and convolution to full models like Transformers and LeNet. We then discuss differential calculus in our notation and compare with some alternative notations. Our proposals build on ideas from many previous papers and software libraries. We hope that our notation will encourage more authors to use named tensors, resulting in clearer papers and more precise implementations.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+\input{intro}
+
+\section{Named Tensors}
+\input{tensors}
+
+\section{Operations}
+\label{sec:operations}
+\input{operations}
+
+\section{Worked Examples: Neural Networks}
+\label{sec:examples}
+\input{examples}
+
+\section{Differential Calculus}
+\label{sec:calculus}
+\input{calculus}
+
+\section{Alternatives and Related Work}
+\input{alternatives}
+
+\section{Conclusions}
+\input{conclusion}
+
+\section*{Acknowledgements}
+\input{ack}
+
+\bibliographystyle{tmlr}
+\bibliography{references}
+
+\appendix
+
+\section{Extended Examples}
+\label{sec:examples_long}
+\input{examples_long}
+
+\section{Differentiation: Formal Definitions}
+\label{sec:calculus_formal}
+\input{calculus_formal}
+
+\input{macros}
+
+\end{document}

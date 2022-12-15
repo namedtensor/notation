@@ -1,0 +1,53 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{natbib}
+
+%%% The order of the following is important
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsthm}
+\usepackage[capitalize]{cleveref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}[definition]{Example}
+%%%
+
+% Make DOIs clickable
+\newcommand{\doi}[1]{\href{https://doi.org/#1}{doi: #1}}
+
+\usepackage{namedtensor}
+
+\DeclareMathOperator*{\softmax}{softmax}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\restrict}[2]{\mathopen{}\left.#1\right|_{#2}}
+\newcommand{\eqby}[1]{\stackrel{\text{(\ref{#1})}}{=}}
+\makeatletter
+\newcommand\yestag{\incr@eqnum\tag{\number\value{equation}}}
+\makeatother
+\allowdisplaybreaks
+
+\DeclareMathOperator{\ind}{ind}
+\DeclareMathOperator{\rec}{rec}
+\DeclareMathOperator{\shp}{shp}
+\newcommand{\nmatrix}[3]{#1\begin{array}[b]{@{}c@{}}#2\\\begin{bmatrix}#3\end{bmatrix}\end{array}}
+\newcommand{\inax}{^*} % diacritic for input axis in differentiation
+\newcommand{\ddx}[1]{\frac{\partial #1}{\partial X\inax}}
+
+% axis names
+\ndef{\ax}{ax}
+\ndef{\dd}{d}
+\ndef{\layer}{layer}
+\ndef{\seq}{seq}
+\ndef{\subseq}{subseq}
+\ndef{\key}{key} \ndef{\val}{val}
+\ndef{\heads}{heads}
+\ndef{\batch}{batch}
+\ndef{\inp}{input} \ndef{\hidden}{hidden} \ndef{\out}{out}
+\ndef{\height}{height} \ndef{\width}{width} \ndef{\chans}{chans}
+\ndef{\kernel}{kernel} \ndef{\kh}{kh} \ndef{\kw}{kw}
+\ndef{\vocab}{vocab}
+\ndef{\classes}{classes}
+\ndef{\state}{state}
+\ndef{\emb}{emb}
