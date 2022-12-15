@@ -50,7 +50,7 @@ In the introduction (\S\ref{sec:intro}), we described difficulties in interpreti
   \text{Attention}(Q,K,V) &= \left( \nfun{\seq}{softmax} \frac{Q \ndot{\key} K}{\sqrt{|\key|}} \right) \ndot{\seq} V. \label{eq:def_att}
 \end{align}
 
-This definition takes a single query $Q$ vector and returns a single result vector (and actually could be further reduced to a scalar values as $\val$ is not strictly necessary). To apply to a sequence, we can give $Q$ a $\seq'$ axis, and the function will compute an output sequence. Providing $Q$, $K$, and $V$ with a $\heads$ axis \liftsVBZ{} the function to compute multiple attention heads. 
+This definition takes a single query $Q$ vector and returns a single result vector (and actually could be further reduced to a scalar values as $\val$ is not strictly necessary). To apply to a sequence, we can give $Q$ a $\seq'$ axis, and the function will compute an output sequence. Providing $Q$, $K$, and $V$ with a $\heads$ axis lifts the function to compute multiple attention heads. 
 
 For Transformers we often need to apply a mask to ensure attention is only applied to 
 valid keys (e.g. for causal language models). We can modify the equation to include this mask:

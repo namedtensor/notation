@@ -5,7 +5,6 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
-\usepackage{parskip}
 \usepackage{natbib}
 
 %%% The order of the following is important
@@ -57,14 +56,6 @@
 \ndef{\state}{state}
 \ndef{\emb}{emb}
 
-\newcommand{\liftVB}{lift}
-\newcommand{\liftingVBG}{lifting}
-\newcommand{\liftsVBZ}{lifts}
-\newcommand{\liftedVBN}{lifted}
-\newcommand{\liftNN}{lift} % result of lifting
-\newcommand{\LiftingNN}{Lifting} % act of lifting
-\newcommand{\liftingNN}{lifting} % act of lifting
-
 \title{Named Tensor Notation}
 \author{\authorname David Chiang \\ \addr University of Notre Dame \AND \authorname Alexander M. Rush \\ \addr Cornell University \AND \authorname Boaz Barak \\ \addr Harvard University}
 \def\month{12}
@@ -76,7 +67,7 @@
 \maketitle
 
 \begin{abstract}
-We propose a notation for tensors with named axes, which relieves the author, reader, and future implementers of machine learning models from the burden of keeping track of the order of axes and the purpose of each. The notation makes it easy to \liftVB{} operations on low-order tensors to higher order ones, for example, from images to minibatches of images, or from an attention mechanism to multiple attention heads.
+We propose a notation for tensors with named axes, which relieves the author, reader, and future implementers of machine learning models from the burden of keeping track of the order of axes and the purpose of each. The notation makes it easy to lift operations on low-order tensors to higher order ones, for example, from images to minibatches of images, or from an attention mechanism to multiple attention heads.
 
 After a brief overview and formal definition of the notation, we illustrate it through several examples from modern machine learning, from building blocks like attention and convolution to full models like Transformers and LeNet. We then discuss differential calculus in our notation and compare with some alternative notations. Our proposals build on ideas from many previous papers and software libraries. We hope that our notation will encourage more authors to use named tensors, resulting in clearer papers and more precise implementations.
 \end{abstract}
@@ -110,12 +101,9 @@ After a brief overview and formal definition of the notation, we illustrate it t
 
 We would like to thank Ekin Aky\"{u}rek, Justin Bayer, Tongfei Chen, Chu-Cheng Lin, Colin McDonald, Adam Poliak, Matt Post, Chung-chieh Shan, Nishant Sinha, and Yee Whye Teh for their input to this document (or the ideas in it). We also thank the anonymous TMLR reviewers for their feedback, which substantially improved the quality of the paper, especially \cref{sec:calculus}.
 
-This material is based upon work supported by the National Science Foundation under Grants No.~CCF-2019291 and~DMS-213415, as well as Simons Investigator Fellowship, DARPA grant W911NF2010021, and DOE grant DE-SC0022199. 
+This material is based upon work supported by the National Science Foundation under Grants No.~CCF-2019291 and~DMS-2134157, as well as Simons Investigator Fellowship, DARPA grant W911NF2010021, and DOE grant DE-SC0022199. 
 Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the funding agencies.
 
-\iffalse % hack to make this heading appear only in pandoc
-\section*{References}
-\fi
 \bibliographystyle{tmlr}
 \bibliography{references}
 

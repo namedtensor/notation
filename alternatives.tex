@@ -18,12 +18,12 @@ A second issue is that because it depends on repetition of indices to work, inde
   C &= A_i B_i & C &= A \ndot{\ax} B.
 \end{align*}
 
-Finally, index notation requires us to write out all indices explicitly. So if we wanted to \liftVB{} attention to minibatches ($b \in [B]$), multiple heads ($h \in [H]$) and multiple query tokens ($i' \in [n']$), we would write:
+Finally, index notation requires us to write out all indices explicitly. So if we wanted to lift attention to minibatches ($b \in [B]$), multiple heads ($h \in [H]$) and multiple query tokens ($i' \in [n']$), we would write:
 \begin{gather*}
   \text{Attention} \colon \reals^{B \times H \times n' \times d_k} \times \reals^{B \times H \times n \times d_k} \times \reals^{B \times H \times n \times d_v} \rightarrow \reals^{B \times H \times n' \times d_v} \\
   \left[\text{Attention}(Q, K, V)\right]_{bhi'k} = \softmax_i \left( \frac{Q_{bhi'j} K_{bhij}}{\sqrt{d_k}} \right) V_{bhik}.
 \end{gather*}
-We could adopt a convention that \liftsVBZ{} a function on tensors to tensors that have extra axes to the \emph{left}, but such conventions tend to lead to messy reordering and squeezing/unsqueezing of axes. Named axes make such conventions unnecessary.
+We could adopt a convention that lifts a function on tensors to tensors that have extra axes to the \emph{left}, but such conventions tend to lead to messy reordering and squeezing/unsqueezing of axes. Named axes make such conventions unnecessary.
 
 \subsection{Graphical notations}
 

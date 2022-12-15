@@ -1,14 +1,14 @@
-A significant benefit of named tensor notation is that it allows one to unambiguously specify \emph{operations} that map tensors to tensors, and defines precisely how operations can be \emph{\liftedVBN} when an 
+A significant benefit of named tensor notation is that it allows one to unambiguously specify \emph{operations} that map tensors to tensors, and defines precisely how operations can be \emph{lifted} when an 
 operation is applied to tensors with more axes than are present in its signature and how \emph{broadcasting} happens when different arguments add different axes.
 
 We start with the formal definition of named tensor operations and lifting, then show how this definition leads to many common operations.
 
 \subsection{Formal definition}
 
-By \emph{(named) tensor function} or \emph{(named) tensor operation}, we mean not only functions from tensors to tensors, but also operators like negation ($-$), addition ($+$), and so on. We will extend the standard function/operator notation by allowing tensor operations to be \emph{\liftedVBN} to higher-order tensors.
+By \emph{(named) tensor function} or \emph{(named) tensor operation}, we mean not only functions from tensors to tensors, but also operators like negation ($-$), addition ($+$), and so on. We will extend the standard function/operator notation by allowing tensor operations to be \emph{lifted} to higher-order tensors.
 
-\begin{definition}[\liftingNN, unary] \label{def:lifting}
-Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can define the \emph{\liftNN} $f^{\mathcal{S'}}$ of $f$ with the shape $\mathcal{S'}$ to be the map
+\begin{definition}[lifting, unary] \label{def:lifting}
+Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can define the \emph{lift} $f^{\mathcal{S'}}$ of $f$ with the shape $\mathcal{S'}$ to be the map
 \begin{align*}
 f^{\mathcal{S'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
 \left[f^{\mathcal{S'}}(X)\right]_{s'} &= f(X_s) \qquad \text{for all $A \in F^{\mathcal{S}\cup\mathcal{S'}}$ and  $s' \in \rec\mathcal{S'}$.}
@@ -16,9 +16,9 @@ f^{\mathcal{S'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathc
 Usually, we simply write $f$ instead of $f^{\mathcal{S'}}$. That is, for every tensor $X$ with shape  $\mathcal{R} \supseteq \mathcal{S}$, we let $f(X) = f^{\mathcal{R} \setminus \mathcal{S}}(X)$.
 \end{definition}
 
-If $f$ is a multary function, we can \liftVB{} each of its arguments to larger shapes, and we don't have to add the same axes to all the arguments; an axis present in one argument but not another is \emph{broadcast} from the former to the latter. We consider just the case of two arguments; three or more arguments are analogous. 
-\begin{definition}[\liftingNN, binary] \label{def:lifting2}
-Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and such that $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can \liftVB{} $f$ to:
+If $f$ is a multary function, we can lift each of its arguments to larger shapes, and we don't have to add the same axes to all the arguments; an axis present in one argument but not another is \emph{broadcast} from the former to the latter. We consider just the case of two arguments; three or more arguments are analogous. 
+\begin{definition}[lifting, binary] \label{def:lifting2}
+Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and such that $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can lift $f$ to:
 \begin{align*}
 f^{\mathcal{S'} \cup \mathcal{T'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{S'} \cup \mathcal{T'}} \\
   \left[f^{\mathcal{S'} \cup \mathcal{T'}}(X,Y)\right]_{s'} &= f\left(X_{\restrict{s}{\mathcal{S'}}},Y_{\restrict{s}{\mathcal{T'}}}\right) \qquad \text{for all $X \in F^{\mathcal{S} \cup \mathcal{S'}}$, $Y \in F^{\mathcal{T} \cup \mathcal{T'}}$, $s' \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
@@ -37,7 +37,7 @@ For example, given the logistic sigmoid function,
   \sigma \colon \reals &\rightarrow \reals \\
   \sigma(x) &= \frac{1}{1+\exp(-x)}
 \end{align*}  
-we can \liftVB{} it to tensors. If $A \in \reals^{\height[3] \times \width[3]}$ is the example tensor (\ref{eq:example_tensor}), then
+we can lift it to tensors. If $A \in \reals^{\height[3] \times \width[3]}$ is the example tensor (\ref{eq:example_tensor}), then
 \begin{equation*}
 \sigma(A) = \nmatrix{\height}{\width}{
   \frac1{1+\exp(-3)} & \frac1{1+\exp(-1)} & \frac1{1+\exp(-4)} \\[1ex]

@@ -1,4 +1,3 @@
-
 In many machine learning applications, we need to compute derivatives of functions from tensors to tensors. In standard vector/matrix notation, this can become complicated.
 For example, if $f$ maps from vectors to vectors, then the partial derivatives of $f$ form a matrix (the Jacobian). It has an ``input'' axis for the directions in which $X$ could change, and an ``output'' axis for the directions in which $f(X)$ could change.
 But there are conflicting conventions about whether the first axis is the input axis (``denominator layout'') or the output axis (``numerator layout''). The derivative of a function from vectors to matrices or matrices to vectors cannot be represented as a matrix at all, so one must resort to flattening the matrices into vectors.
@@ -136,9 +135,9 @@ This is in canonical form, so we have
 \frac{\partial}{\partial X} (\nfun{\ax}{softmax} X) &= \nfun{\ax}{softmax} X \odot (I_{\ax,\ax\inax} - (\nfun{\ax}{softmax} X)\inax). \label{eq:deriv_softmax}
 \end{align}
 
-\subsection{\LiftingNN}
+\subsection{Lifting}
 
-Recall that $f^\mathcal{S'}$ is the \liftNN{} of $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$ with $\mathcal{S'}$, and in most contexts we can simply write $f$ instead of $f^\mathcal{S'}$. However, derivatives are one place where some extra caution is in order.
+Recall that $f^\mathcal{S'}$ is the lift of $f \colon \reals^\mathcal{S} \rightarrow \reals^\mathcal{T}$ with $\mathcal{S'}$, and in most contexts we can simply write $f$ instead of $f^\mathcal{S'}$. However, derivatives are one place where some extra caution is in order.
 To lighten notation, let's write $g$ for the derivative of $f$:
 \begin{align*}
   g(X) &= \ddx{f(X)}. \\
@@ -154,8 +153,8 @@ But the contraction is only over $\mathcal{S}\inax$, so it would be incorrect to
   \frac{\partial f^{\mathcal{S'}} (X)}{\partial X\inax}
   &= g^{\mathcal{S'}}(X) \odot I_{\mathcal{S'}, \mathcal{S'}\inax}.
 \end{align*}
-In general, then, the derivative of a \liftNN{} is the \liftNN{} of the derivative, multiplied by the identity matrix for the new axes.
-Intuitively, this is because the derivative is a linear transformation---before \liftingNN{}, a transformation from $\mathcal{S}\inax$ to $\mathcal{T}$. When \liftingVBG{} to $\mathcal{S} \cup \mathcal{S}'$, this transformation must also be lifted, which is what multiplication by $I_{\mathcal{S}',\mathcal{S'}\inax}$ accomplishes.
+In general, then, the derivative of a lift is the lift of the derivative, multiplied by the identity matrix for the new axes.
+Intuitively, this is because the derivative is a linear transformation---before lifting, a transformation from $\mathcal{S}\inax$ to $\mathcal{T}$. When lifting to $\mathcal{S} \cup \mathcal{S}'$, this transformation must also be lifted, which is what multiplication by $I_{\mathcal{S}',\mathcal{S'}\inax}$ accomplishes.
 
 \subsection{Extended example}
 
