@@ -11,7 +11,7 @@ By \emph{(named) tensor function} or \emph{(named) tensor operation}, we mean no
 Let $f \colon F^{\mathcal{S}} \rightarrow G^{\mathcal{T}}$ be a function from tensors to tensors. For any shape $\mathcal{S'}$ orthogonal to both $\mathcal{S}$ and $\mathcal{T}$, we can define the \emph{lift} $f^{\mathcal{S'}}$ of $f$ with the shape $\mathcal{S'}$ to be the map
 \begin{align*}
 f^{\mathcal{S'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} &\rightarrow G^{\mathcal{T} \cup \mathcal{S'}} \\
-\left[f^{\mathcal{S'}}(X)\right]_{s'} &= f(X_s) \qquad \text{for all $A \in F^{\mathcal{S}\cup\mathcal{S'}}$ and  $s' \in \rec\mathcal{S'}$.}
+\left[f^{\mathcal{S'}}(X)\right]_{s'} &= f(X_{s'}) \qquad \text{for all $X \in F^{\mathcal{S}\cup\mathcal{S'}}$ and  $s' \in \rec\mathcal{S'}$.}
 \end{align*}
 Usually, we simply write $f$ instead of $f^{\mathcal{S'}}$. That is, for every tensor $X$ with shape  $\mathcal{R} \supseteq \mathcal{S}$, we let $f(X) = f^{\mathcal{R} \setminus \mathcal{S}}(X)$.
 \end{definition}
@@ -21,7 +21,7 @@ If $f$ is a multary function, we can lift each of its arguments to larger shapes
 Let $f \colon F^{\mathcal{S}} \times G^{\mathcal{T}} \rightarrow H^{\mathcal{U}}$ be a binary function from tensors to tensors. For any shapes $\mathcal{S'}$ and $\mathcal{T'}$ that are compatible with each other and orthogonal to $\mathcal{S}$ and $\mathcal{T}$, respectively, and such that $\mathcal{S'} \cup \mathcal{T'}$ is orthogonal to $\mathcal{U}$, we can lift $f$ to:
 \begin{align*}
 f^{\mathcal{S'} \cup \mathcal{T'}} \colon F^{\mathcal{S} \cup \mathcal{S'}} \times G^{\mathcal{T} \cup \mathcal{T'}} &\rightarrow H^{\mathcal{U} \cup \mathcal{S'} \cup \mathcal{T'}} \\
-  \left[f^{\mathcal{S'} \cup \mathcal{T'}}(X,Y)\right]_{s'} &= f\left(X_{\restrict{s}{\mathcal{S'}}},Y_{\restrict{s}{\mathcal{T'}}}\right) \qquad \text{for all $X \in F^{\mathcal{S} \cup \mathcal{S'}}$, $Y \in F^{\mathcal{T} \cup \mathcal{T'}}$, $s' \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
+  \left[f^{\mathcal{S'} \cup \mathcal{T'}}(X,Y)\right]_{s'} &= f\left(X_{\restrict{s'}{\mathcal{S'}}},Y_{\restrict{s'}{\mathcal{T'}}}\right) \qquad \text{for all $X \in F^{\mathcal{S} \cup \mathcal{S'}}$, $Y \in F^{\mathcal{T} \cup \mathcal{T'}}$, $s' \in \rec (\mathcal{S'} \cup \mathcal{T'})$.}
 \end{align*}
 Again, we usually write $f$ instead of $f^{\mathcal{S'} \cup \mathcal{T'}}$.
 \end{definition}
