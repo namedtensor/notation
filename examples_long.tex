@@ -16,11 +16,11 @@ The input is a sequence of one-hot vectors, from which we compute word embedding
 Then we use $L$ layers of self-attention and feed-forward neural networks:
 \begin{align*} 
 X^0 &= W+P \\
-T^1 &= \text{LayerNorm}^1(\text{SelfAtt}^1(X^0)) + X^0\\
-X^1 &= \text{LayerNorm}^{1'}(\text{FFN}^1(T^1)) + T^1\\
+T^1 &= \text{LayerNorm}^1(\text{SelfAtt}^1(X^0) + X^0)\\
+X^1 &= \text{LayerNorm}^{1'}(\text{FFN}^1(T^1) + T^1)\\
 &\vdotswithin{=} \\
-T^{L} &= \text{LayerNorm}^L(\text{SelfAtt}^L(X^{L-1})) + X^{L-1}\\
-X^{L} &= \text{LayerNorm}^{L'}(\text{FFN}^L(T^L)) + T^L\\
+T^{L} &= \text{LayerNorm}^L(\text{SelfAtt}^L(X^{L-1}) + X^{L-1})\\
+X^{L} &= \text{LayerNorm}^{L'}(\text{FFN}^L(T^L) + T^L)\\
 O &= \nfun{\vocab}{softmax}(E \ndot{\layer} X^L)
 \end{align*}
 where $\text{LayerNorm}$, $\text{SelfAtt}$ and $\text{FFN}$ are defined below.
